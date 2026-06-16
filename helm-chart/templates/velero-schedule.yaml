@@ -1,0 +1,33 @@
+{{- if .Values.velero.enabled }}
+{{- /* Velero should be installed cluster-wide via MicroK8s/k8s-managed setup */}}
+{{- /* This template only creates Schedule - BSL and credentials are handled by cluster setup */}}
+{{- /* Backup names will be: {clusterName}-backup-{timestamp} for easy identification */}}
+{{- $clusterName := .Values.velero.clusterName | default "lair" }}
+apiVersion: velero.io/v1
+kind: Schedule
+metadata:
+  name: {{ $clusterName }}-backup
+  namespace: {{ .Values.velero.namespace | default "velero" }}
+  labels:
+    lair.io/cluster: {{ $clusterName | quote }}
+spec:
+  schedule: {{ .Values.velero.backup.schedule | quote }}
+  template:
+    ttl: {{ .Values.velero.backup.ttl | quote }}
+    includedNamespaces:
+{{- range .Values.velero.backup.includeNamespaces }}
+    - {{ . | quote }}
+{{- end }}
+{{- if .Values.velero.backup.excludeNamespaces }}
+    excludedNamespaces:
+    {{- range .Values.velero.backup.excludeNamespaces }}
+    - {{ . | quote }}
+    {{- end }}
+{{- end }}
+    # Include cluster-scoped resources (StorageClass, ClusterRole, etc.)
+    includeClusterResources: true
+    # Volume backup configuration
+    snapshotVolumes: {{ .Values.velero.backup.snapshotVolumes | default true }}
+    defaultVolumesToFsBackup: {{ .Values.velero.backup.defaultVolumesToFsBackup | default true }}
+{{- end }}
+

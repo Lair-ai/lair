@@ -1,0 +1,88 @@
+# """
+# Serve aggiungere la configmap per il daemonset nvidia-device-plugin-daemonset.yaml per potere assegnare GPU a più pod contemporaneamente
+# """
+
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  annotations:
+    deprecated.daemonset.template.generation: "3"
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {"apiVersion":"apps/v1","kind":"DaemonSet","metadata":{"annotations":{"deprecated.daemonset.template.generation":"1"},"creationTimestamp":"2025-07-26T07:52:51Z","generation":1,"name":"nvidia-device-plugin-daemonset","namespace":"kube-system","resourceVersion":"970","uid":"7e03b273-44eb-451a-b877-def6c65f4300"},"spec":{"revisionHistoryLimit":10,"selector":{"matchLabels":{"name":"nvidia-device-plugin-ds"}},"template":{"metadata":{"creationTimestamp":null,"labels":{"name":"nvidia-device-plugin-ds"}},"spec":{"containers":[{"args":["--config=/etc/nvidia/time-slice/timeslice-jetson.yaml"],"env":[{"name":"PASS_DEVICE_SPECS","value":"true"},{"name":"FAIL_ON_INIT_ERROR","value":"false"}],"image":"nvcr.io/nvidia/k8s-device-plugin:v0.17.2","imagePullPolicy":"IfNotPresent","name":"nvidia-device-plugin-ctr","resources":{},"securityContext":{"privileged":true},"terminationMessagePath":"/dev/termination-log","terminationMessagePolicy":"File","volumeMounts":[{"mountPath":"/var/lib/kubelet/device-plugins","name":"device-plugin"},{"mountPath":"/dev","name":"dev"},{"mountPath":"/etc/nvidia/time-slice","name":"plugin-config","readOnly":true}]}],"dnsPolicy":"ClusterFirstWithHostNet","hostNetwork":true,"priorityClassName":"system-node-critical","restartPolicy":"Always","runtimeClassName":"nvidia","schedulerName":"default-scheduler","securityContext":{},"terminationGracePeriodSeconds":30,"tolerations":[{"effect":"NoSchedule","key":"nvidia.com/gpu","operator":"Exists"}],"volumes":[{"hostPath":{"path":"/var/snap/microk8s/common/var/lib/kubelet/device-plugins","type":""},"name":"device-plugin"},{"hostPath":{"path":"/dev","type":""},"name":"dev"},{"configMap":{"name":"nvidia-device-plugin-config"},"name":"plugin-config"}]}},"updateStrategy":{"rollingUpdate":{"maxSurge":0,"maxUnavailable":1},"type":"RollingUpdate"}},"status":{"currentNumberScheduled":1,"desiredNumberScheduled":1,"numberAvailable":1,"numberMisscheduled":0,"numberReady":1,"observedGeneration":1,"updatedNumberScheduled":1}}
+  creationTimestamp: "2025-07-26T07:52:51Z"
+  generation: 3
+  name: nvidia-device-plugin-daemonset
+  namespace: kube-system
+  resourceVersion: "87696"
+  uid: 7e03b273-44eb-451a-b877-def6c65f4300
+spec:
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      name: nvidia-device-plugin-ds
+  template:
+    metadata:
+      labels:
+        name: nvidia-device-plugin-ds
+    spec:
+      containers:
+      - name: nvidia-device-plugin-ctr
+        image: nvcr.io/nvidia/k8s-device-plugin:v0.17.2
+        imagePullPolicy: IfNotPresent
+        securityContext:
+          privileged: true
+        env:
+        - name: PASS_DEVICE_SPECS
+          value: "true"
+        - name: FAIL_ON_INIT_ERROR
+          value: "false"
+        args:
+        - "--config-file=/etc/nvidia/time-slice/timeslice-jetson.yaml" # <--- aggiungere questa riga
+        volumeMounts:
+        - mountPath: /var/lib/kubelet/device-plugins
+          name: device-plugin
+        - mountPath: /dev
+          name: dev
+        - mountPath: /etc/nvidia/time-slice
+          name: plugin-config
+          readOnly: true
+        resources: {}
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+      dnsPolicy: ClusterFirstWithHostNet
+      hostNetwork: true
+      priorityClassName: system-node-critical
+      restartPolicy: Always
+      runtimeClassName: nvidia # <--- aggiungere questa riga
+      schedulerName: default-scheduler
+      securityContext: {}
+      terminationGracePeriodSeconds: 30
+      tolerations:
+      - effect: NoSchedule
+        key: nvidia.com/gpu
+        operator: Exists
+      volumes:
+      - name: device-plugin
+        hostPath:
+          path: /var/snap/microk8s/common/var/lib/kubelet/device-plugins
+          type: ""
+      - name: dev
+        hostPath:
+          path: /dev
+          type: ""
+      - name: plugin-config # <--- aggiungere questa riga
+        configMap:
+          name: nvidia-device-plugin-config # <--- aggiungere questa riga
+  updateStrategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 0
+      maxUnavailable: 1
+status:
+  currentNumberScheduled: 1
+  desiredNumberScheduled: 1
+  numberReady: 1
+  numberAvailable: 1
+  numberMisscheduled: 0
+  observedGeneration: 1
+  updatedNumberScheduled: 1

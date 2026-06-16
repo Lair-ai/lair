@@ -1,0 +1,148 @@
+# Lair Configuration for Jetson Client
+# Usage: sudo ./setup.sh --config lair-config-template-jetson.yaml
+
+# Basic Configuration
+client_name: "nexid"
+config_name: "nexid-jetson"
+
+# System Detection
+detection_choice: 1 # Use local system detection for Jetson
+use_detected_resources: true
+
+# Manual Resource Override (not used since use_detected_resources: true)
+manual_resources:
+  cpu_cores: 6.0 # Total CPU cores available for Kubernetes - lscpu | grep "^CPU(s):" | awk '{print $2}'
+  memory_gb: 16 # Total RAM in GB available for Kubernetes - echo "scale=1; $(free -m | awk '/^Mem:/ {print $2}') / 1024" | bc
+  storage_gb: 256 # Total storage in GB available for Lair - df --output=avail / | tail -1 | awk '{print int($1/1024/1024)}'
+
+# Platform Configuration
+platform:
+  is_jetson: true # NVIDIA Jetson platform
+  has_gpu: true # GPU available (automatic for Jetson)
+  vram_percentage: 70 # Conservative VRAM allocation for Jetson
+  system_hostname: "jetson" # Hostname for LAN domains (subdomain.jetson.local)
+
+# Dual Access Configuration
+access:
+  lan:
+    enabled: true # Enable LAN access with .local domains
+    tls: false # HTTP only for .local domains (mkcert not typically used on Jetson)
+  public:
+    enabled: false # Disable public access for Jetson (typically local device)
+
+# Email and Domains
+email:
+  cert_email: "service@example.com"
+
+# Domain configuration
+domains:
+  # Legacy domains (for backward compatibility)
+  openwebui: "chat.jetson.local"
+  n8n: "n8n.jetson.local"
+  comfyui: "" # Internal-only access for Jetson: lair-comfyui.lair.svc.cluster.local:80
+  minio: "" # Internal-only access for Jetson: lair-minio.lair.svc.cluster.local
+  ollama: "" # Internal-only access (recommended for security)
+
+  # LAN domains (for dual access mode)
+  lan:
+    openwebui: "chat.jetson.local"
+    n8n: "n8n.jetson.local"
+    comfyui: "" # Internal-only access
+    minio: "" # Internal-only access
+    ollama: "" # Internal-only access
+
+  # Public domains (not used when access.public.enabled: false)
+  public:
+    openwebui: ""
+    n8n: ""
+    comfyui: ""
+    minio: ""
+    ollama: ""
+
+# Component Storage Configuration (in GB) - Smaller for Jetson
+storage:
+  openwebui: 5
+  ollama_models: 20
+  n8n_workflows: 5
+  postgresql: 3
+  redis: 2
+  minio: 10
+  comfyui: 10
+
+# OpenWebUI SSO Configuration (disabled by default)
+openwebui:
+  sso:
+    enabled: false
+    provider: "" # Options: google, microsoft, github, oidc, trusted-header
+
+# Component Enablement
+components:
+  ollama:
+    # Use Jetson-optimized Ollama image with compatible GLIBC
+    # image: "dustynv/ollama:r36.3.0" # funzionante ma non supporta gemma3
+    image: dustynv/ollama:0.6.8-r36.4 # Versione più recente (27 giorni fa)
+    # Alternative più recenti:
+    # image: dustynv/ollama:0.6.8-r36.4-cu126-22.04  # Con CUDA 12.6 e Ubuntu 22.04
+    # image: dustynv/ollama:r36.4.0-cu128-24.04      # Con CUDA 12.8 e Ubuntu 24.04
+    # Alternativa se hai JetPack 5:
+    # image: dustynv/ollama:r35.4.1 
+
+
+  comfyui:
+    enabled: true
+    gpuEnabled: true # Enable GPU for ComfyUI on Jetson
+    # Use Jetson-optimized ComfyUI image with compatible GLIBC
+    image: "dustynv/comfyui:r36.3.0"
+    # Alternative options:
+    # image: "ghcr.io/jemeyer/comfyui:latest"  # Multi-arch image supporting ARM64
+    # image: "mmartial/comfyui-nvidia-docker:ubuntu24_cuda12.6.3-latest"  # If supports ARM64
+
+    # NOTE: The low_vram and models_download options are specific to x86/x64 images
+    # and are not applicable to Jetson-optimized images
+    low_vram: "" # Not used for Jetson images
+    models_download: "" # Not used for Jetson images
+
+  minio:
+    enabled: true
+    root_user: "minioadmin" # Root/admin username (change for production!)
+    root_password: "minioadmin" # Root/admin password (change for production!)
+    access_key: "jetson"
+    secret_key: "jetson123"
+
+# N8N Configuration
+n8n:
+  encryption_key: "" # Leave empty for auto-generation
+  worker:
+    enabled: true
+    replicas: 1 # Single worker for Jetson
+    resources:
+      limits:
+        memory: "1Gi" # Conservative memory for Jetson
+        cpu: "500m" # Half core for Jetson
+      requests:
+        memory: "512Mi" # Minimal memory request
+        cpu: "250m" # Quarter core request
+  # SMTP configuration for user management
+  smtp:
+    enabled: false # Disabled by default - set to true and configure below to enable
+    host: "smtp.gmail.com"
+    port: 587
+    user: "your-email@gmail.com"
+    password: "your-smtp-password"
+    sender: "your-email@gmail.com"
+    ssl: true
+    starttls: true
+
+  # Admin user configuration (required for N8N access)
+  adminUser:
+    email: "admin@n8n.local" # Admin email - used for login and notifications
+    password: "n8n123" # Admin password - CHANGE FOR PRODUCTION!
+    firstName: "Admin" # Admin first name
+    lastName: "User" # Admin last name
+    # SECURITY WARNING: Change these credentials for production deployments!
+
+    # Auto-deployment
+deployment:
+  auto_deploy: false
+  release_name: "lair"
+  new_install: true

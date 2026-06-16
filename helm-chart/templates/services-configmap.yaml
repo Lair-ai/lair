@@ -1,0 +1,63 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: services-config
+  namespace: {{ .Values.namespace }}
+data:
+  # Redis
+  REDIS_HOST: "{{ .Values.namespace }}-redis.{{ .Values.namespace }}.svc.cluster.local"
+  REDIS_PORT: "6379"
+  
+  # MinIO 
+  {{- if .Values.minio.enabled }}
+  MINIO_HOST: "{{ .Values.namespace }}-minio.{{ .Values.namespace }}.svc.cluster.local"
+  MINIO_PORT: "{{ .Values.minio.port }}"
+  MINIO_CONSOLE_PORT: "{{ .Values.minio.consolePort }}"
+  MINIO_ACCESS_KEY: "{{ .Values.minio.rootUser }}"
+  MINIO_SECRET_KEY: "{{ .Values.minio.rootPassword }}"
+  MINIO_ENDPOINT: "http://{{ .Values.namespace }}-minio.{{ .Values.namespace }}.svc.cluster.local:{{ .Values.minio.port }}"
+  MINIO_CONSOLE_ENDPOINT: "http://{{ .Values.namespace }}-minio.{{ .Values.namespace }}.svc.cluster.local:9001"
+  {{- end }}
+  
+  # Ollama
+  OLLAMA_HOST: "{{ .Values.namespace }}-ollama.{{ .Values.namespace }}.svc.cluster.local"
+  OLLAMA_API_BASE_URL: "http://{{ .Values.namespace }}-ollama.{{ .Values.namespace }}.svc.cluster.local"
+  
+  
+  {{- if .Values.comfyUI.enabled }}
+  # ComfyUI
+  COMFYUI_HOST: "{{ .Values.namespace }}-comfyui.{{ .Values.namespace }}.svc.cluster.local"
+  COMFYUI_API_URL: "http://{{ .Values.namespace }}-comfyui.{{ .Values.namespace }}.svc.cluster.local/api"
+  COMFYUI_SERVER_URL: "http://{{ .Values.namespace }}-comfyui.{{ .Values.namespace }}.svc.cluster.local"
+  COMFYUI_AIDOCK_API_URL: "http://{{ .Values.namespace }}-comfyui.{{ .Values.namespace }}.svc.cluster.local:8000/ai-dock/api"
+  {{- end }}
+  
+  # OpenWebUI
+  OPENWEBUI_HOST: "{{ .Values.namespace }}-openwebui.{{ .Values.namespace }}.svc.cluster.local"
+  OPENWEBUI_URL: "http://{{ .Values.namespace }}-openwebui.{{ .Values.namespace }}.svc.cluster.local"
+  
+  # N8N
+  N8N_HOST: "{{ .Values.namespace }}-n8n.{{ .Values.namespace }}.svc.cluster.local"
+  N8N_URL: "http://{{ .Values.namespace }}-n8n.{{ .Values.namespace }}.svc.cluster.local"
+  N8N_ENCRYPTION_KEY: "{{ .Values.n8n.encryptionKey | default (randAlphaNum 32) }}"
+  
+  # PostgreSQL per N8N
+  N8N_POSTGRES_HOST: "n8n-postgres.{{ .Values.namespace }}.svc.cluster.local"
+  N8N_POSTGRES_PORT: "5432"
+  N8N_POSTGRES_DB: "{{ .Values.n8n.postgres.database }}"
+  N8N_POSTGRES_USER: "{{ .Values.n8n.postgres.user }}"
+  
+  # Tika
+  TIKA_HOST: "{{ .Values.namespace }}-tika.{{ .Values.namespace }}.svc.cluster.local"
+  TIKA_URL: "http://{{ .Values.namespace }}-tika.{{ .Values.namespace }}.svc.cluster.local"
+  
+  # Servizi esterni
+  {{- if .Values.ingress.hosts }}
+  {{- range .Values.ingress.hosts }}
+  {{- if eq .serviceName "openwebui" }}
+  OPENWEBUI_PUBLIC_URL: "https://{{ .host }}"
+  {{- else if eq .serviceName "n8n" }}
+  N8N_PUBLIC_URL: "https://{{ .host }}"
+  {{- end }}
+  {{- end }}
+  {{- end }}

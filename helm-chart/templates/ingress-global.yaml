@@ -1,0 +1,227 @@
+{{- if .Values.ingress.lan.enabled }}
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ .Values.namespace }}-ingress-local
+  namespace: {{ .Values.namespace }}
+  annotations:
+    # LAN Access - Use mkcert certificates for .local domains
+    {{- if .Values.ingress.lan.enableTLS }}
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    {{- else }}
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    {{- end }}
+    
+    # ============================================================================
+    # SECURE AND UNIVERSALLY SUPPORTED CONFIGURATIONS
+    # ============================================================================
+    
+    # File Size Limits - Generous for AI models and backups
+    nginx.ingress.kubernetes.io/proxy-body-size: "20g"
+    
+    # Timeout Configuration - Generous for long operations
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "7200"      # 2 hours
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "7200"      # 2 hours  
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: "600"    # 10 minutes
+    
+    # ============================================================================
+    # STREAMING REAL-TIME - Disable buffering (secure)
+    # ============================================================================
+    
+    nginx.ingress.kubernetes.io/proxy-request-buffering: "off"
+    nginx.ingress.kubernetes.io/proxy-buffering: "off"
+    
+    # ============================================================================
+    # WEBSOCKET SUPPORT - Standard and secure for all applications
+    # ============================================================================
+    
+    nginx.ingress.kubernetes.io/proxy-upgrade: "websocket"
+    nginx.ingress.kubernetes.io/proxy-connection: "upgrade"
+    
+    # ============================================================================
+    # S3/OBJECT STORAGE OPTIMIZATION (MinIO)
+    # ============================================================================
+    
+    # Range requests for partial S3 downloads
+    nginx.ingress.kubernetes.io/proxy-force-ranges: "true"
+    
+    # Chunked transfer for large uploads
+    nginx.ingress.kubernetes.io/proxy-request-chunked: "true"
+    
+    # ============================================================================
+    # PERFORMANCE & RELIABILITY
+    # ============================================================================
+    
+    # Keep-alive for persistent connections
+    nginx.ingress.kubernetes.io/upstream-keepalive-connections: "100"
+    nginx.ingress.kubernetes.io/upstream-keepalive-timeout: "300"
+    
+    # Retry policy for reliability
+    nginx.ingress.kubernetes.io/proxy-next-upstream: "error timeout invalid_header http_500 http_502 http_503"
+    nginx.ingress.kubernetes.io/proxy-next-upstream-tries: "3"
+    nginx.ingress.kubernetes.io/proxy-next-upstream-timeout: "30"
+    
+    # Headers preservation for API compatibility
+    nginx.ingress.kubernetes.io/proxy-pass-headers: "Date,Server,Content-Type,Content-Length,Connection"
+    
+    # ============================================================================
+    # SECURITY & HEADERS
+    # ============================================================================
+    
+    # CORS Headers for API cross-origin (Ollama, N8N)
+    nginx.ingress.kubernetes.io/enable-cors: "true"
+    nginx.ingress.kubernetes.io/cors-allow-methods: "GET,PUT,POST,DELETE,PATCH,OPTIONS"
+    nginx.ingress.kubernetes.io/cors-allow-headers: "DNT,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization"
+    nginx.ingress.kubernetes.io/cors-allow-credentials: "true"
+    
+    # Rate limiting for DDoS protection (generous)
+    nginx.ingress.kubernetes.io/rate-limit-rps: "100"
+    nginx.ingress.kubernetes.io/rate-limit-connections: "50"
+    
+    {{- with .Values.ingress.annotations }}
+    {{- range $key, $value := . }}
+    {{- if and (ne $key "cert-manager.io/cluster-issuer") (ne $key "kubernetes.io/ingress.class") }}
+    {{ $key }}: {{ $value | quote }}
+    {{- end }}
+    {{- end }}
+    {{- end }}
+spec:
+  ingressClassName: {{ .Values.ingress.className }}
+  {{- if .Values.ingress.lan.enableTLS }}
+  tls:
+    - hosts:
+        {{- range .Values.ingress.lan.hosts }}
+        - {{ .host }}
+        {{- end }}
+      secretName: {{ .Values.ingress.lan.tlsSecretName | default "lair-tls-local" }}
+  {{- end }}
+  rules:
+    {{- range .Values.ingress.lan.hosts }}
+    - host: {{ .host }}
+      http:
+        paths:
+          {{- $service := .serviceName }}
+          {{- $port := .servicePort }}
+          {{- range .paths }}
+          - path: {{ .path }}
+            pathType: {{ .pathType }}
+            backend:
+              service:
+                name: {{ $.Values.namespace }}-{{ $service }}
+                port:
+                  number: {{ $port }}
+          {{- end }}
+    {{- end }}
+{{- end }}
+
+{{- if .Values.ingress.public.enabled }}
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ .Values.namespace }}-ingress-public
+  namespace: {{ .Values.namespace }}
+  annotations:
+    # Cert-Manager Configuration for public domains
+    cert-manager.io/cluster-issuer: {{ .Values.certManager.clusterIssuer | quote }}
+    
+    # ============================================================================
+    # SECURE AND UNIVERSALLY SUPPORTED CONFIGURATIONS
+    # ============================================================================
+    
+    # File Size Limits - Generous for AI models and backups
+    nginx.ingress.kubernetes.io/proxy-body-size: "20g"
+    
+    # Timeout Configuration - Generous for long operations
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "7200"      # 2 hours
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "7200"      # 2 hours  
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: "600"    # 10 minutes
+    
+    # ============================================================================
+    # STREAMING REAL-TIME - Disable buffering (secure)
+    # ============================================================================
+    
+    nginx.ingress.kubernetes.io/proxy-request-buffering: "off"
+    nginx.ingress.kubernetes.io/proxy-buffering: "off"
+    
+    # ============================================================================
+    # WEBSOCKET SUPPORT - Standard and secure for all applications
+    # ============================================================================
+    
+    nginx.ingress.kubernetes.io/proxy-upgrade: "websocket"
+    nginx.ingress.kubernetes.io/proxy-connection: "upgrade"
+    
+    # ============================================================================
+    # S3/OBJECT STORAGE OPTIMIZATION (MinIO)
+    # ============================================================================
+    
+    # Range requests for partial S3 downloads
+    nginx.ingress.kubernetes.io/proxy-force-ranges: "true"
+    
+    # Chunked transfer for large uploads
+    nginx.ingress.kubernetes.io/proxy-request-chunked: "true"
+    
+    # ============================================================================
+    # PERFORMANCE & RELIABILITY
+    # ============================================================================
+    
+    # Keep-alive for persistent connections
+    nginx.ingress.kubernetes.io/upstream-keepalive-connections: "100"
+    nginx.ingress.kubernetes.io/upstream-keepalive-timeout: "300"
+    
+    # Retry policy for reliability
+    nginx.ingress.kubernetes.io/proxy-next-upstream: "error timeout invalid_header http_500 http_502 http_503"
+    nginx.ingress.kubernetes.io/proxy-next-upstream-tries: "3"
+    nginx.ingress.kubernetes.io/proxy-next-upstream-timeout: "30"
+    
+    # Headers preservation for API compatibility
+    nginx.ingress.kubernetes.io/proxy-pass-headers: "Date,Server,Content-Type,Content-Length,Connection"
+    
+    # ============================================================================
+    # SECURITY & HEADERS
+    # ============================================================================
+    
+    # CORS Headers for API cross-origin (Ollama, N8N)
+    nginx.ingress.kubernetes.io/enable-cors: "true"
+    nginx.ingress.kubernetes.io/cors-allow-methods: "GET,PUT,POST,DELETE,PATCH,OPTIONS"
+    nginx.ingress.kubernetes.io/cors-allow-headers: "DNT,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization"
+    nginx.ingress.kubernetes.io/cors-allow-credentials: "true"
+    
+    # Rate limiting for DDoS protection (generous)
+    nginx.ingress.kubernetes.io/rate-limit-rps: "100"
+    nginx.ingress.kubernetes.io/rate-limit-connections: "50"
+    
+    {{- with .Values.ingress.annotations }}
+    {{- range $key, $value := . }}
+    {{- if and (ne $key "cert-manager.io/cluster-issuer") (ne $key "kubernetes.io/ingress.class") }}
+    {{ $key }}: {{ $value | quote }}
+    {{- end }}
+    {{- end }}
+    {{- end }}
+spec:
+  ingressClassName: {{ .Values.ingress.className }}
+  tls:
+    - hosts:
+        {{- range .Values.ingress.public.hosts }}
+        - {{ .host }}
+        {{- end }}
+      secretName: lair-tls-public
+  rules:
+    {{- range .Values.ingress.public.hosts }}
+    - host: {{ .host }}
+      http:
+        paths:
+          {{- $service := .serviceName }}
+          {{- $port := .servicePort }}
+          {{- range .paths }}
+          - path: {{ .path }}
+            pathType: {{ .pathType }}
+            backend:
+              service:
+                name: {{ $.Values.namespace }}-{{ $service }}
+                port:
+                  number: {{ $port }}
+          {{- end }}
+    {{- end }}
+{{- end }}

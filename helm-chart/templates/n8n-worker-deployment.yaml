@@ -1,0 +1,114 @@
+{{- if .Values.n8n.worker.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: n8n-worker
+  namespace: {{ .Values.namespace }}
+spec:
+  revisionHistoryLimit: 2
+  replicas: {{ .Values.n8n.worker.replicas }}
+  selector:
+    matchLabels:
+      app: n8n-worker
+  template:
+    metadata:
+      labels:
+        app: n8n-worker
+    spec:
+      securityContext:
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+      containers:
+        - name: n8n-worker
+          image: "{{ .Values.n8n.image.repository }}:{{ .Values.n8n.image.tag }}"
+          command: ["n8n", "worker"]
+          envFrom:
+            - configMapRef:
+                name: services-config
+          env:
+            - name: NODE_ENV
+              value: "production"
+            - name: N8N_METRICS
+              value: "true"
+            - name: DB_TYPE
+              value: "{{ .Values.n8n.database.type }}"
+            {{- if eq .Values.n8n.database.type "postgresdb" }}
+            - name: DB_POSTGRESDB_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: services-config
+                  key: N8N_POSTGRES_HOST
+            - name: DB_POSTGRESDB_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: services-config
+                  key: N8N_POSTGRES_PORT
+            - name: DB_POSTGRESDB_DATABASE
+              valueFrom:
+                configMapKeyRef:
+                  name: services-config
+                  key: N8N_POSTGRES_DB
+            - name: DB_POSTGRESDB_USER
+              valueFrom:
+                configMapKeyRef:
+                  name: services-config
+                  key: N8N_POSTGRES_USER
+            - name: DB_POSTGRESDB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: n8n-postgres-secret
+                  key: postgres-password
+            {{- end }}
+            {{- if .Values.n8n.encryptionKey }}
+            - name: N8N_ENCRYPTION_KEY
+              value: "{{ .Values.n8n.encryptionKey }}"
+            {{- end }}
+            # Worker configuration to process the queue
+            - name: EXECUTIONS_MODE
+              value: "queue"
+            - name: QUEUE_BULL_REDIS_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: services-config
+                  key: REDIS_HOST
+            - name: QUEUE_WORKER_TIMEOUT
+              value: "300"
+            # Worker deve solo processare, non gestire webhook
+            - name: N8N_DISABLE_UI
+              value: "true"
+            {{- if .Values.minio.enabled }}
+            - name: N8N_FILESYSTEM_ALIAS_S3_ENDPOINT
+              valueFrom:
+                configMapKeyRef:
+                  name: services-config
+                  key: MINIO_ENDPOINT
+            - name: N8N_FILESYSTEM_ALIAS_S3_ACCESS_KEY_ID
+              valueFrom:
+                configMapKeyRef:
+                  name: services-config
+                  key: MINIO_ACCESS_KEY
+            - name: N8N_FILESYSTEM_ALIAS_S3_SECRET_ACCESS_KEY
+              valueFrom:
+                configMapKeyRef:
+                  name: services-config
+                  key: MINIO_SECRET_KEY
+            {{- end }}
+            {{- if .Values.n8n.extraEnv }}
+            {{- range .Values.n8n.extraEnv }}
+            - name: {{ .name }}
+              value: {{ .value | quote }}
+            {{- end }}
+            {{- end }}
+            # User management configuration
+            - name: N8N_USER_MANAGEMENT_DISABLED
+              value: "false"
+            # N8N_SECURE_COOKIE should be provided via values (n8n.extraEnv) to avoid duplicate definitions
+          resources:
+            limits:
+              memory: "{{ .Values.n8n.worker.resources.limits.memory }}"
+              cpu: "{{ .Values.n8n.worker.resources.limits.cpu }}"
+            requests:
+              memory: "{{ .Values.n8n.worker.resources.requests.memory }}"
+              cpu: "{{ .Values.n8n.worker.resources.requests.cpu }}"
+{{- end }}

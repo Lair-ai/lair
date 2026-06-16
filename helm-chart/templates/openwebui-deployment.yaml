@@ -1,0 +1,351 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: openwebui
+  namespace: {{ .Values.namespace }}
+spec:
+  revisionHistoryLimit: 2
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: openwebui
+  template:
+    metadata:
+      labels:
+        app: openwebui
+    spec:
+      securityContext:
+        runAsUser: 0
+        runAsGroup: 0
+        fsGroup: 0
+      # Init container che attende che PostgreSQL sia pronto
+      initContainers:
+        - name: wait-for-postgres
+          image: postgres:15
+          env:
+            - name: PGUSER
+              value: "{{ .Values.n8n.postgres.user }}"
+            - name: PGPASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: n8n-postgres-secret
+                  key: postgres-password
+          command: ["sh", "-c"]
+          args:
+            - |
+              until pg_isready -h n8n-postgres.{{ .Values.namespace }}.svc.cluster.local -U "$PGUSER"; do
+                echo "Waiting for Postgres...";
+                sleep 2;
+              done
+        {{- if .Values.minio.enabled }}
+        # Init container to create MinIO bucket for OpenWebUI
+        - name: minio-bucket-setup
+          image: minio/mc:latest
+          env:
+            - name: MINIO_ENDPOINT
+              value: "http://{{ .Values.namespace }}-minio.{{ .Values.namespace }}.svc.cluster.local:{{ .Values.minio.port }}"
+            - name: MINIO_ACCESS_KEY
+              valueFrom:
+                configMapKeyRef:
+                  name: services-config
+                  key: MINIO_ACCESS_KEY
+            - name: MINIO_SECRET_KEY
+              valueFrom:
+                configMapKeyRef:
+                  name: services-config
+                  key: MINIO_SECRET_KEY
+            - name: BUCKET_NAME
+              value: "{{ .Values.openWebUI.s3.bucketName | default "openwebui-storage" }}"
+          command: ["sh", "-c"]
+          args:
+            - |
+              echo "Waiting for MinIO to be ready..."
+              until mc alias set minio "$MINIO_ENDPOINT" "$MINIO_ACCESS_KEY" "$MINIO_SECRET_KEY" 2>/dev/null; do
+                echo "MinIO not ready, waiting..."
+                sleep 2
+              done
+              echo "MinIO is ready!"
+              
+              # Create bucket if it doesn't exist
+              if mc ls minio/"$BUCKET_NAME" 2>/dev/null; then
+                echo "Bucket $BUCKET_NAME already exists"
+              else
+                echo "Creating bucket $BUCKET_NAME"
+                mc mb minio/"$BUCKET_NAME"
+                echo "Bucket $BUCKET_NAME created successfully"
+              fi
+              
+              # Set public policy for the bucket (optional, adjust as needed)
+              # Uncomment the line below if you want public read access
+              # mc anonymous set download minio/"$BUCKET_NAME"
+              
+              echo "MinIO setup completed!"
+        {{- end }}
+      containers:
+        - name: openwebui
+          image: "{{ .Values.openWebUI.image.repository }}:{{ .Values.openWebUI.image.tag }}"
+          ports:
+            - containerPort: {{ .Values.openWebUI.port | default 3000 }}
+          env:
+            - name: OLLAMA_BASE_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: services-config
+                  key: OLLAMA_API_BASE_URL
+            # Persistenza configurazioni e dati OpenWebUI
+            - name: ENABLE_PERSISTENT_CONFIG
+              value: "{{ .Values.openWebUI.persistence.enablePersistentConfig | default true }}"
+            - name: DATA_DIR
+              value: "/app/backend/data"
+            - name: STATIC_DIR
+              value: "/app/backend/data/static"
+            - name: CACHE_DIR
+              value: "/app/backend/data/cache"
+            - name: UPLOAD_DIR
+              value: "/app/backend/data/uploads"
+            - name: CONFIG_DATA
+              value: "/app/backend/data/config.json"
+            - name: WEBUI_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.openWebUI.auth.secretName }}
+                  key: WEBUI_SECRET_KEY
+            # RAG Configuration - Persistent
+            - name: CONTENT_EXTRACTION_ENGINE
+              value: "{{ .Values.openWebUI.rag.contentExtractionEngine | default "tika" }}"
+            - name: TIKA_SERVER_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: services-config
+                  key: TIKA_URL
+            - name: ENABLE_RAG_HYBRID_SEARCH
+              value: "{{ .Values.openWebUI.rag.enableHybridSearch | default true }}"
+            - name: RAG_TEXT_SPLITTER
+              value: "{{ .Values.openWebUI.rag.textSplitter | default "token" }}"
+            - name: CHUNK_SIZE
+              value: "{{ .Values.openWebUI.rag.chunkSize | default 1000 }}"
+            - name: CHUNK_OVERLAP
+              value: "{{ .Values.openWebUI.rag.chunkOverlap | default 200 }}"
+            - name: RAG_TOP_K
+              value: "{{ .Values.openWebUI.rag.topK | default 5 }}"
+            - name: PDF_EXTRACT_IMAGES
+              value: "{{ .Values.openWebUI.rag.pdfExtractImages | default true }}"
+            # Document Processing Configuration
+            - name: DOCS_DIR
+              value: "/app/backend/data/docs"
+            - name: RAG_EMBEDDING_MODEL_DIR
+              value: "/app/backend/data/cache/embedding_models"
+            - name: RAG_EMBEDDING_ENGINE
+              value: "ollama"
+            - name: RESPONSE_WATERMARK
+              value: "Generato da Lair Nexid"
+            - name: ENABLE_WEB_SEARCH
+              value: "true"
+            - name: WEB_SEARCH_ENGINE
+              value: "duckduckgo"
+            # Audio/Whisper Configuration - Persistent
+            - name: WHISPER_MODEL
+              value: "{{ .Values.openWebUI.audio.whisperModel | default "turbo" }}"
+            - name: WHISPER_VAD_FILTER
+              value: "{{ .Values.openWebUI.audio.vadFilter | default true }}"
+            - name: WHISPER_MODEL_AUTO_UPDATE
+              value: "{{ .Values.openWebUI.audio.autoUpdate | default false }}"
+            - name: WHISPER_MODEL_DIR
+              value: "/app/backend/data/cache/whisper_models"
+            - name: AUDIO_STT_ENGINE
+              value: "{{ .Values.openWebUI.audio.sttEngine | default "whisper" }}"
+            - name: AUDIO_TTS_ENGINE
+              value: "{{ .Values.openWebUI.audio.ttsEngine | default "openai" }}"
+            # PostgreSQL Database Configuration
+            - name: DATABASE_URL
+              value: "postgresql://{{ .Values.n8n.postgres.user }}:{{ .Values.n8n.postgres.password }}@n8n-postgres.{{ .Values.namespace }}.svc.cluster.local:5432/openwebui"
+            - name: WEBUI_DB_URL
+              value: "postgresql://{{ .Values.n8n.postgres.user }}:{{ .Values.n8n.postgres.password }}@n8n-postgres.{{ .Values.namespace }}.svc.cluster.local:5432/openwebui"
+            - name: ENABLE_DB_MIGRATE
+              value: "true"
+            - name: RESET_CONFIG_ON_START
+              value: "false"
+            - name: N8N_POSTGRES_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: services-config
+                  key: N8N_POSTGRES_HOST
+            - name: N8N_POSTGRES_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: services-config
+                  key: N8N_POSTGRES_PORT
+            - name: VECTOR_DB
+              value: "pgvector"
+            # Redis Configuration for WebSocket Support
+            - name: ENABLE_WEBSOCKET_SUPPORT
+              value: "true"
+            - name: WEBSOCKET_MANAGER
+              value: "redis"
+            - name: WEBSOCKET_REDIS_URL
+              value: "redis://{{ .Values.namespace }}-redis.{{ .Values.namespace }}.svc.cluster.local:6379/1"
+            # Audio Upload Stability  
+            - name: ENABLE_REALTIME_CHAT_SAVE
+              value: "false"
+            - name: PING_INTERVAL
+              value: "25000"
+            - name: PING_TIMEOUT
+              value: "60000"
+            # User Configuration Persistence
+            - name: ENABLE_SIGNUP
+              value: "{{ .Values.openWebUI.auth.enableSignup | default true }}"
+            - name: DEFAULT_USER_ROLE
+              value: "{{ .Values.openWebUI.auth.defaultUserRole | default "pending" }}"
+            - name: USER_PERMISSIONS_CHAT_DELETION
+              value: "{{ .Values.openWebUI.auth.userPermissions.chatDeletion | default true }}"
+            - name: ENABLE_COMMUNITY_SHARING
+              value: "{{ .Values.openWebUI.features.enableCommunitySharing | default true }}"
+            - name: ENABLE_MESSAGE_RATING
+              value: "{{ .Values.openWebUI.features.enableMessageRating | default true }}"
+            # System Configuration Persistence
+            - name: WEBUI_NAME
+              value: "Lair Nexid AI"
+            - name: WEBUI_URL
+              value: "{{ .Values.openWebUI.baseUrl | default "" }}"
+            - name: ENABLE_ADMIN_EXPORT
+              value: "true"
+            - name: ENABLE_ADMIN_CHAT_ACCESS
+              value: "true"
+            - name: SHOW_ADMIN_DETAILS
+              value: "true"
+            - name: ADMIN_EMAIL
+              value: "{{ .Values.openWebUI.admin.email | default "" }}"
+            # Model Configuration Persistence
+            - name: ENABLE_MODEL_FILTER
+              value: "true"
+            - name: MODEL_FILTER_LIST
+              value: "{{ .Values.openWebUI.models.filterList | default "" }}"
+            - name: ENABLE_LITELLM_LOGGING
+              value: "false"
+            # S3 Storage Configuration (MinIO Integration)
+            {{- if .Values.minio.enabled }}
+            # When MinIO is enabled, OpenWebUI uses S3-compatible storage instead of local filesystem
+            - name: STORAGE_PROVIDER
+              value: "s3"
+            - name: S3_ENDPOINT_URL
+              value: "http://{{ .Values.namespace }}-minio.{{ .Values.namespace }}.svc.cluster.local:{{ .Values.minio.port }}"
+            - name: S3_BUCKET_NAME
+              value: "{{ .Values.openWebUI.s3.bucketName | default "openwebui-storage" }}"
+            - name: S3_REGION_NAME
+              value: "{{ .Values.openWebUI.s3.region | default "us-east-1" }}"
+            - name: S3_ADDRESSING_STYLE
+              value: "{{ .Values.openWebUI.s3.addressingStyle | default "path" }}"
+            - name: S3_USE_ACCELERATE_ENDPOINT
+              value: "{{ .Values.openWebUI.s3.useAccelerateEndpoint | default "false" }}"
+            - name: S3_ENABLE_TAGGING
+              value: "{{ .Values.openWebUI.s3.enableTagging | default "false" }}"
+            {{- if .Values.openWebUI.s3.keyPrefix }}
+            - name: S3_KEY_PREFIX
+              value: "{{ .Values.openWebUI.s3.keyPrefix }}"
+            {{- end }}
+            # S3 Credentials from MinIO configuration
+            - name: AWS_ACCESS_KEY_ID
+              valueFrom:
+                configMapKeyRef:
+                  name: services-config
+                  key: MINIO_ACCESS_KEY
+            - name: AWS_SECRET_ACCESS_KEY
+              valueFrom:
+                configMapKeyRef:
+                  name: services-config
+                  key: MINIO_SECRET_KEY
+            {{- end }}
+            # SSO Configuration
+            {{- if .Values.openWebUI.sso.enabled }}
+            # Hide local login forms when SSO is enabled
+            - name: ENABLE_LOGIN_FORM
+              value: "{{ .Values.openWebUI.sso.enableLoginForm | default "false" }}"
+            - name: ENABLE_SIGNUP
+              value: "{{ .Values.openWebUI.sso.enableLocalSignup | default "false" }}"
+            # OAuth settings
+            - name: ENABLE_OAUTH_SIGNUP
+              value: "{{ .Values.openWebUI.sso.oauth.enableSignup | default "true" }}"
+            - name: OAUTH_MERGE_ACCOUNTS_BY_EMAIL
+              value: "{{ .Values.openWebUI.sso.oauth.mergeAccountsByEmail | default "false" }}"
+            - name: OAUTH_UPDATE_PICTURE_ON_LOGIN
+              value: "{{ .Values.openWebUI.sso.oauth.updatePictureOnLogin | default "true" }}"
+            {{- if eq .Values.openWebUI.sso.provider "google" }}
+            # Google OAuth Configuration
+            - name: GOOGLE_CLIENT_ID
+              value: "{{ .Values.openWebUI.sso.google.clientId }}"
+            - name: GOOGLE_CLIENT_SECRET
+              value: "{{ .Values.openWebUI.sso.google.clientSecret }}"
+            - name: GOOGLE_REDIRECT_URI
+              value: "{{ .Values.openWebUI.sso.google.redirectUri }}"
+            {{- else if eq .Values.openWebUI.sso.provider "microsoft" }}
+            # Microsoft OAuth Configuration
+            - name: MICROSOFT_CLIENT_ID
+              value: "{{ .Values.openWebUI.sso.microsoft.clientId }}"
+            - name: MICROSOFT_CLIENT_SECRET
+              value: "{{ .Values.openWebUI.sso.microsoft.clientSecret }}"
+            - name: MICROSOFT_CLIENT_TENANT_ID
+              value: "{{ .Values.openWebUI.sso.microsoft.tenantId }}"
+            - name: MICROSOFT_REDIRECT_URI
+              value: "{{ .Values.openWebUI.sso.microsoft.redirectUri }}"
+            {{- else if eq .Values.openWebUI.sso.provider "github" }}
+            # GitHub OAuth Configuration
+            - name: GITHUB_CLIENT_ID
+              value: "{{ .Values.openWebUI.sso.github.clientId }}"
+            - name: GITHUB_CLIENT_SECRET
+              value: "{{ .Values.openWebUI.sso.github.clientSecret }}"
+            {{- else if eq .Values.openWebUI.sso.provider "oidc" }}
+            # Generic OIDC Configuration
+            - name: OAUTH_CLIENT_ID
+              value: "{{ .Values.openWebUI.sso.oauth.clientId }}"
+            - name: OAUTH_CLIENT_SECRET
+              value: "{{ .Values.openWebUI.sso.oauth.clientSecret }}"
+            - name: OPENID_PROVIDER_URL
+              value: "{{ .Values.openWebUI.sso.oauth.providerUrl }}"
+            - name: OAUTH_PROVIDER_NAME
+              value: "{{ .Values.openWebUI.sso.oauth.providerName | default "SSO" }}"
+            - name: OAUTH_SCOPES
+              value: "{{ .Values.openWebUI.sso.oauth.scopes | default "openid email profile" }}"
+            - name: OPENID_REDIRECT_URI
+              value: "{{ .Values.openWebUI.sso.oauth.redirectUri }}"
+            {{- else if eq .Values.openWebUI.sso.provider "trusted-header" }}
+            # Trusted Header Configuration
+            - name: WEBUI_AUTH_TRUSTED_EMAIL_HEADER
+              value: "{{ .Values.openWebUI.sso.trustedHeader.emailHeader }}"
+            {{- if .Values.openWebUI.sso.trustedHeader.nameHeader }}
+            - name: WEBUI_AUTH_TRUSTED_NAME_HEADER
+              value: "{{ .Values.openWebUI.sso.trustedHeader.nameHeader }}"
+            {{- end }}
+            {{- end }}
+            {{- end }}
+          {{- if .Values.openWebUI.persistence.enabled }}
+          volumeMounts:
+            - name: openwebui-storage
+              mountPath: /app/backend/data
+          {{- end }}
+          resources:
+            limits:
+              memory: "{{ .Values.openWebUI.resources.limits.memory }}"
+              cpu: "{{ .Values.openWebUI.resources.limits.cpu }}"
+            requests:
+              memory: "{{ .Values.openWebUI.resources.requests.memory }}"
+              cpu: "{{ .Values.openWebUI.resources.requests.cpu }}"
+          {{- if .Values.openWebUI.probes.liveness.enabled }}
+          livenessProbe:
+            tcpSocket:
+              port: {{ .Values.openWebUI.port | default 3000 }}
+            initialDelaySeconds: {{ .Values.openWebUI.probes.liveness.initialDelaySeconds }}
+            periodSeconds: {{ .Values.openWebUI.probes.liveness.periodSeconds }}
+          {{- end }}
+          {{- if .Values.openWebUI.probes.readiness.enabled }}
+          readinessProbe:
+            tcpSocket:
+              port: {{ .Values.openWebUI.port | default 3000 }}
+            initialDelaySeconds: {{ .Values.openWebUI.probes.readiness.initialDelaySeconds }}
+            periodSeconds: {{ .Values.openWebUI.probes.readiness.periodSeconds }}
+          {{- end }}
+      {{- if .Values.openWebUI.persistence.enabled }}
+      volumes:
+        - name: openwebui-storage
+          persistentVolumeClaim:
+            claimName: openwebui-pvc
+      {{- end }}

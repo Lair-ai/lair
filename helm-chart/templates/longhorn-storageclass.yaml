@@ -1,0 +1,70 @@
+{{- if and .Values.createStorageClass (eq .Values.global.platform "standard") }}
+allowVolumeExpansion: true
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: {{ .Values.global.storageClass }}-longhorn
+  labels:
+    app.kubernetes.io/managed-by: Helm
+    lair.io/platform: standard
+  annotations:
+    meta.helm.sh/release-name: {{ .Release.Name }}
+    meta.helm.sh/release-namespace: {{ .Values.namespace }}
+    longhorn.io/description: |
+      StorageClass optimized for Lair. Includes dynamic volume expansion, 
+      replica management and optimal configuration parameters.
+parameters:
+  numberOfReplicas: {{ .Values.longhorn.numberOfReplicas | quote }}  # Number of replicas for high availability (auto-calculated based on cluster nodes)
+  staleReplicaTimeout: "30"            # Timeout for removing stale replicas (seconds)
+  fsType: "ext4"                       # Filesystem type
+  dataLocality: "disabled"             # Disable data locality (no local copies)
+  disableRevisionCounter: "true"       # Improve performance by disabling revision counter
+  unmapMarkSnapChainRemoved: "ignored" # Ignore snapshot chain removal
+  fromBackup: ""                       # Preset for backup, empty for standard use
+  dataEngine: "v1"                     # Data management engine
+  kubeletRootDir: {{ .Values.longhorn.kubeletRootDir | default "/var/snap/microk8s/common/var/lib/kubelet" | quote }} # Correct path for microk8s
+provisioner: driver.longhorn.io        # Longhorn provisioner
+reclaimPolicy: Delete                  # Delete volume on PVC release
+volumeBindingMode: Immediate           # Immediate volume binding to PVC
+{{- end }}
+---
+{{- if and .Values.createStorageClass (eq .Values.global.platform "standard") }}
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: {{ .Values.global.storageClass }}-longhorn-rwx
+  labels:
+    app.kubernetes.io/managed-by: Helm
+    lair.io/platform: standard
+  annotations:
+    meta.helm.sh/release-name: {{ .Release.Name }}
+    meta.helm.sh/release-namespace: {{ .Values.namespace }}
+    longhorn.io/description: "Storage RWX con NFS Provisioner per Longhorn"
+parameters:
+  numberOfReplicas: {{ .Values.longhorn.numberOfReplicas | quote }}  # Auto-calculated based on cluster nodes
+  staleReplicaTimeout: "30"
+  fsType: "ext4"
+  nfsOptions: "vers=4.1"
+  fromBackup: ""
+  kubeletRootDir: {{ .Values.longhorn.kubeletRootDir | default "/var/snap/microk8s/common/var/lib/kubelet" | quote }} # Percorso corretto per microk8s
+provisioner: driver.longhorn.io
+reclaimPolicy: Delete
+volumeBindingMode: Immediate 
+{{- end }}
+---
+{{- if and .Values.createStorageClass (eq .Values.global.platform "standard") }}
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: {{ .Values.global.storageClass }}-hostpath
+  labels:
+    app.kubernetes.io/managed-by: Helm
+    lair.io/platform: standard
+  annotations:
+    meta.helm.sh/release-name: {{ .Release.Name }}
+    meta.helm.sh/release-namespace: {{ .Values.namespace }}
+    lair.io/description: "StorageClass based on microk8s hostpath provisioner for local storage on standard installations"
+provisioner: microk8s.io/hostpath
+reclaimPolicy: Delete
+volumeBindingMode: WaitForFirstConsumer
+{{- end }}

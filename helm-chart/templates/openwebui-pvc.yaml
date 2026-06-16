@@ -1,0 +1,14 @@
+{{- if .Values.openWebUI.persistence.enabled }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: openwebui-pvc
+  namespace: {{ .Values.namespace }}
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: {{ include "lair.storageClassName" . }}
+  resources:
+    requests:
+      storage: {{ .Values.openWebUI.persistence.size }}
+{{- end }} 

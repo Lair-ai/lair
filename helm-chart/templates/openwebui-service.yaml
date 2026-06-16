@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.namespace }}-openwebui
+  namespace: {{ .Values.namespace }}
+spec:
+  selector:
+    app: openwebui
+  ports:
+    - port: 80
+      targetPort: {{ .Values.openWebUI.port | default 8080 }}
+      # targetPort: 3000
+  type: ClusterIP

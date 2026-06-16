@@ -1,0 +1,296 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: n8n
+  namespace: {{ .Values.namespace }}
+spec:
+  revisionHistoryLimit: 2
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: n8n
+  template:
+    metadata:
+      labels:
+        app: n8n
+    spec:
+      securityContext:
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+      # initContainers:
+      #   - name: init-owner
+      #     image: postgres:15
+      #     securityContext:
+      #       runAsUser: 0
+      #       runAsGroup: 0
+      #     command:
+      #       - /bin/bash
+      #       - -c
+      #       - |
+      #         set -e
+      #         echo "=== N8N Owner Setup Init Container ==="
+              
+      #         # Install required packages
+      #         echo "Installing required packages..."
+      #         apt-get update -qq && apt-get install -y -qq python3 python3-pip openssl
+      #         pip3 install --break-system-packages bcrypt
+              
+      #         # Wait for PostgreSQL to be ready
+      #         echo "Waiting for PostgreSQL to be ready..."
+      #         until pg_isready -h n8n-postgres -p 5432 -U n8n; do
+      #           echo "PostgreSQL not ready, waiting 2 seconds..."
+      #           sleep 2
+      #         done
+      #         echo "PostgreSQL is ready!"
+              
+      #         # Check if owner is already set up
+      #         echo "Checking if owner is already configured..."
+      #         OWNER_EXISTS=$(psql -h n8n-postgres -U n8n -d n8n -t -c "SELECT value FROM public.settings WHERE key = 'userManagement.isInstanceOwnerSetUp';" 2>/dev/null || echo "false")
+              
+      #         if [[ "$OWNER_EXISTS" == *"true"* ]]; then
+      #           echo "Owner is already configured, skipping setup"
+      #           exit 0
+      #         fi
+              
+      #         echo "Owner not configured, creating owner user..."
+              
+      #         # Generate UUID for user
+      #         USER_ID=$(cat /proc/sys/kernel/random/uuid)
+      #         PROJECT_ID=$(openssl rand -hex 8)
+              
+      #         # Generate bcrypt hash for password using Python
+      #         PASSWORD_HASH=$(python3 -c "import bcrypt; password = '{{ .Values.n8n.adminUser.password }}'.encode('utf-8'); salt = bcrypt.gensalt(rounds=10); hashed = bcrypt.hashpw(password, salt); print(hashed.decode('utf-8'))" 2>/dev/null || echo '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi')
+              
+      #         # Create the owner user
+      #         echo "Creating owner user..."
+      #         psql -h n8n-postgres -U n8n -d n8n -c "
+      #           INSERT INTO public.user (
+      #             id, email, \"firstName\", \"lastName\", password, role, 
+      #             disabled, \"mfaEnabled\", \"createdAt\", \"updatedAt\", 
+      #             settings, \"personalizationAnswers\"
+      #           ) VALUES (
+      #             '$USER_ID',
+      #             '{{ .Values.n8n.adminUser.email }}',
+      #             '{{ .Values.n8n.adminUser.firstName }}',
+      #             '{{ .Values.n8n.adminUser.lastName }}',
+      #             '$PASSWORD_HASH',
+      #             'global:owner',
+      #             false,
+      #             false,
+      #             NOW(),
+      #             NOW(),
+      #             '{\"userActivated\": true}',
+      #             '{\"version\":\"v4\",\"companyType\":\"personal\",\"reportedSource\":\"helm\"}'
+      #           )
+      #         " || { echo "Failed to create user"; exit 1; }
+              
+      #         # Create personal project
+      #         echo "Creating personal project..."
+      #         psql -h n8n-postgres -U n8n -d n8n -c "
+      #           INSERT INTO public.project (
+      #             id, name, type, \"createdAt\", \"updatedAt\"
+      #           ) VALUES (
+      #             '$PROJECT_ID',
+      #             '{{ .Values.n8n.adminUser.firstName }} {{ .Values.n8n.adminUser.lastName }} <{{ .Values.n8n.adminUser.email }}>',
+      #             'personal',
+      #             NOW(),
+      #             NOW()
+      #           )
+      #         " || { echo "Failed to create project"; exit 1; }
+              
+      #         # Create project relation
+      #         echo "Creating project relation..."
+      #         psql -h n8n-postgres -U n8n -d n8n -c "
+      #           INSERT INTO public.project_relation (
+      #             \"userId\", \"projectId\", role
+      #           ) VALUES (
+      #             '$USER_ID',
+      #             '$PROJECT_ID',
+      #             'project:personalOwner'
+      #           )
+      #         " || { echo "Failed to create project relation"; exit 1; }
+              
+      #         # Set global settings
+      #         echo "Setting global settings..."
+      #         psql -h n8n-postgres -U n8n -d n8n -c "
+      #           INSERT INTO public.settings (key, value) VALUES 
+      #             ('userManagement.isInstanceOwnerSetUp', 'true'),
+      #             ('ui.banners.dismissed', '[\"V1\"]')
+      #           ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value
+      #         " || { echo "Failed to set global settings"; exit 1; }
+              
+      #         echo "Owner user created successfully!"
+      #         echo "User ID: $USER_ID"
+      #         echo "Project ID: $PROJECT_ID"
+      #         echo "Email: {{ .Values.n8n.adminUser.email }}"
+      #         echo "Name: {{ .Values.n8n.adminUser.firstName }} {{ .Values.n8n.adminUser.lastName }}"
+      #     env:
+      #       - name: PGPASSWORD
+      #         valueFrom:
+      #           secretKeyRef:
+      #             name: n8n-postgres-secret
+      #             key: postgres-password
+      
+      containers:
+        - name: n8n
+          image: "{{ .Values.n8n.image.repository }}:{{ .Values.n8n.image.tag }}"
+          ports:
+            - containerPort: 5678
+            - containerPort: 5679 # Health check port per la queue
+          envFrom:
+            - configMapRef:
+                name: services-config
+          env:
+            - name: N8N_PORT
+              value: "5678"
+
+            {{- $n8nPublicHost := "" }}
+            {{- $n8nPublicUrl := "" }}
+            {{- range .Values.ingress.hosts }}
+              {{- if eq .serviceName "n8n" }}
+                {{- $n8nPublicHost = .host }}
+                {{- $n8nPublicUrl = printf "https://%s" .host }}
+              {{- end }}
+            {{- end }}
+
+            {{- if $n8nPublicUrl }}
+            - name: WEBHOOK_URL
+              value: {{ $n8nPublicUrl | quote }}
+            - name: N8N_PROTOCOL
+              value: "https"
+            - name: N8N_HOST
+              value: {{ $n8nPublicHost | quote }}
+            {{- else }}
+            - name: N8N_PROTOCOL
+              value: "http"
+            # If no public URL, N8N_HOST will be sourced from services-config (internal name),
+            # and WEBHOOK_URL will not be set, leading to n8n using PROTOCOL/HOST/PORT.
+            {{- end }}
+
+            - name: NODE_ENV
+              value: "production"
+            - name: N8N_METRICS
+              value: "true"
+            - name: DB_TYPE
+              value: "{{ .Values.n8n.database.type }}"
+            - name: N8N_HOST_WHITELIST
+              value: {{ include "n8n.hostWhitelist" . | quote }}
+            {{- if eq .Values.n8n.database.type "postgresdb" }}
+            - name: DB_POSTGRESDB_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: services-config
+                  key: N8N_POSTGRES_HOST
+            - name: DB_POSTGRESDB_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: services-config
+                  key: N8N_POSTGRES_PORT
+            - name: DB_POSTGRESDB_DATABASE
+              valueFrom:
+                configMapKeyRef:
+                  name: services-config
+                  key: N8N_POSTGRES_DB
+            - name: DB_POSTGRESDB_USER
+              valueFrom:
+                configMapKeyRef:
+                  name: services-config
+                  key: N8N_POSTGRES_USER
+            - name: DB_POSTGRESDB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: n8n-postgres-secret
+                  key: postgres-password
+            {{- end }}
+            {{- if .Values.n8n.encryptionKey }}
+            - name: N8N_ENCRYPTION_KEY
+              value: "{{ .Values.n8n.encryptionKey }}"
+            {{- else }}
+            # IMPORTANT: N8N_ENCRYPTION_KEY not defined in values.
+            # n8n will generate a random key. This can cause "Mismatching encryption keys" problems
+            # after pod recreations if this generated key is not persisted or provided consistently.
+            # It is STRONGLY RECOMMENDED to define .Values.n8n.encryptionKey explicitly.
+            # For now, we let n8n handle generation if not provided, but this is a potential issue.
+            {{- end }}
+            # Redis for execution queue, not as database
+            - name: EXECUTIONS_MODE
+              value: "queue"
+            - name: QUEUE_BULL_REDIS_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: services-config
+                  key: REDIS_HOST
+            # Configurazioni aggiuntive per la queue
+            - name: QUEUE_HEALTH_CHECK_ACTIVE
+              value: "true"
+            - name: QUEUE_HEALTH_CHECK_PORT
+              value: "5679"
+            # Timeout per le esecuzioni webhook
+            - name: EXECUTIONS_TIMEOUT
+              value: "3600"
+            - name: EXECUTIONS_TIMEOUT_MAX
+              value: "7200"
+            {{- if .Values.minio.enabled }}
+            - name: N8N_FILESYSTEM_ALIAS_S3_ENDPOINT
+              valueFrom:
+                configMapKeyRef:
+                  name: services-config
+                  key: MINIO_ENDPOINT
+            - name: N8N_FILESYSTEM_ALIAS_S3_ACCESS_KEY_ID
+              valueFrom:
+                configMapKeyRef:
+                  name: services-config
+                  key: MINIO_ACCESS_KEY
+            - name: N8N_FILESYSTEM_ALIAS_S3_SECRET_ACCESS_KEY
+              valueFrom:
+                configMapKeyRef:
+                  name: services-config
+                  key: MINIO_SECRET_KEY
+            {{- end }}
+            {{- if .Values.n8n.extraEnv }}
+            {{- range .Values.n8n.extraEnv }}
+            - name: {{ .name }}
+              value: {{ .value | quote }}
+            {{- end }}
+            {{- end }}
+            # User management configuration
+            - name: N8N_USER_MANAGEMENT_DISABLED
+              value: "false"
+            # Addition to manage configuration file permissions
+            - name: N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS
+              value: "true"
+            # N8N_SECURE_COOKIE should be provided via values (n8n.extraEnv) to avoid duplicate definitions
+          resources:
+            limits:
+              memory: "{{ .Values.n8n.resources.limits.memory | default "1Gi" }}"
+              cpu: "{{ .Values.n8n.resources.limits.cpu | default "1000m" }}"
+            requests:
+              memory: "{{ .Values.n8n.resources.requests.memory | default "512Mi" }}"
+              cpu: "{{ .Values.n8n.resources.requests.cpu | default "300m" }}"
+          {{- if .Values.n8n.persistence.enabled }}
+          volumeMounts:
+            - name: n8n-data
+              mountPath: /home/node/.n8n
+          {{- end }}
+      {{- if .Values.n8n.persistence.enabled }}
+      volumes:
+        - name: n8n-data
+          persistentVolumeClaim:
+            claimName: n8n-pvc
+      {{- end }}
+---
+{{- if .Values.n8n.persistence.enabled }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: n8n-pvc
+  namespace: {{ .Values.namespace }}
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: {{ include "lair.storageClassName" . }}
+  resources:
+    requests:
+      storage: {{ .Values.n8n.persistence.size }}
+{{- end }}

@@ -1,0 +1,262 @@
+{{- if .Values.comfyUI.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: comfyui
+  namespace: {{ .Values.namespace }}
+spec:
+  revisionHistoryLimit: 2
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: comfyui
+  template:
+    metadata:
+      labels:
+        app: comfyui
+    spec:
+      {{- if .Values.comfyUI.gpuEnabled }}
+      runtimeClassName: nvidia
+      {{- end }}
+      securityContext:
+        fsGroup: 1000
+      initContainers:
+        - name: init-permissions
+          image: busybox:1.35
+          command: ['sh', '-c']
+          args:
+            - |
+              {{- if contains "dustynv/comfyui" .Values.comfyUI.image.repository }}
+              # Dustynv: Create data directories
+              mkdir -p /data/models /data/input /data/output /data/custom_nodes /data/cache /data/logs /data/user /data/HF
+
+              # Create ComfyUI user directory structure in cache
+              mkdir -p /data/cache/comfyui-user/default/ComfyUI-Manager/cache
+              mkdir -p /data/cache/comfyui-user/default/ComfyUI-Manager/config
+
+              # Create custom nodes directory structure
+              mkdir -p /data/custom_nodes/comfyui-custom-nodes
+              {{- else }}
+              # mmartial: Create basedir structure for BASE_DIRECTORY
+              mkdir -p /basedir/models /basedir/input /basedir/output /basedir/custom_nodes /basedir/user
+              
+              # Create run directory for mmartial (virtual env, ComfyUI code, HF cache)
+              mkdir -p /comfy/mnt
+              
+              # Ensure basedir subdirectories exist
+              for d in models input output custom_nodes user; do
+                mkdir -p "/basedir/$d"
+              done
+              {{- end }}
+
+              {{- if contains "dustynv/comfyui" .Values.comfyUI.image.repository }}
+              # Dustynv/ComfyUI: Create complete symlinks for persistence
+              # Models
+              rm -rf /opt/ComfyUI/models 2>/dev/null || true
+              ln -s /data/models /opt/ComfyUI/models 2>/dev/null || true
+              
+              # Input/Output
+              rm -rf /opt/ComfyUI/input 2>/dev/null || true
+              ln -s /data/input /opt/ComfyUI/input 2>/dev/null || true
+              rm -rf /opt/ComfyUI/output 2>/dev/null || true
+              ln -s /data/output /opt/ComfyUI/output 2>/dev/null || true
+              
+              # Custom nodes
+              rm -rf /opt/ComfyUI/custom_nodes 2>/dev/null || true
+              ln -s /data/custom_nodes/comfyui-custom-nodes /opt/ComfyUI/custom_nodes 2>/dev/null || true
+              
+              # User directory (profiles, ComfyUI-Manager config)
+              rm -rf /opt/ComfyUI/user 2>/dev/null || true
+              ln -s /data/user /opt/ComfyUI/user 2>/dev/null || true
+
+              # Also link the package's internal models directory to the PVC
+              PKG_MODELS_DIR="/opt/venv/lib/python3.12/site-packages/comfyui/models"
+              if [ -d "$(dirname "$PKG_MODELS_DIR")" ]; then
+                rm -rf "$PKG_MODELS_DIR" 2>/dev/null || true
+                ln -s /data/models "$PKG_MODELS_DIR" 2>/dev/null || true
+              fi
+              {{- end }}
+
+              {{- if contains "dustynv/comfyui" .Values.comfyUI.image.repository }}
+              # Set permissions for dustynv directories
+              for d in /data/models /data/input /data/output /data/custom_nodes /data/cache /data/logs /data/user /data/HF; do
+                chown -R 1000:1000 "$d" 2>/dev/null || true
+                chmod -R 775 "$d" 2>/dev/null || true
+                chmod g+s "$d" 2>/dev/null || true
+              done
+
+              # Ensure ComfyUI user directory is writable
+              chown -R 1000:1000 /data/cache/comfyui-user 2>/dev/null || true
+              chmod -R 775 /data/cache/comfyui-user 2>/dev/null || true
+
+              # Ensure custom nodes directory is writable
+              chown -R 1000:1000 /data/custom_nodes/comfyui-custom-nodes 2>/dev/null || true
+              chmod -R 775 /data/custom_nodes/comfyui-custom-nodes 2>/dev/null || true
+              {{- else }}
+              # Set permissions for mmartial directories
+              chown -R 1000:1000 /basedir 2>/dev/null || true
+              chmod -R 775 /basedir 2>/dev/null || true
+              chmod g+s /basedir 2>/dev/null || true
+              
+              chown -R 1000:1000 /comfy/mnt 2>/dev/null || true
+              chmod -R 775 /comfy/mnt 2>/dev/null || true
+              chmod g+s /comfy/mnt 2>/dev/null || true
+              {{- end }}
+
+              {{- if contains "dustynv/comfyui" .Values.comfyUI.image.repository }}
+              # Fix 3D input directory permissions to silence Load3D errors
+              mkdir -p /opt/ComfyUI/input/3d 2>/dev/null || true
+              chown -R 1000:1000 /opt/ComfyUI/input 2>/dev/null || true
+              chmod -R 775 /opt/ComfyUI/input 2>/dev/null || true
+              {{- end }}
+          volumeMounts:
+            {{- if contains "dustynv/comfyui" .Values.comfyUI.image.repository }}
+            - name: comfyui-data
+              mountPath: /data
+            {{- else }}
+            # mmartial needs two mounts: /comfy/mnt for run data and /basedir for user data
+            - name: comfyui-data
+              mountPath: /basedir
+              subPath: basedir
+            - name: comfyui-data
+              mountPath: /comfy/mnt
+              subPath: run
+            {{- end }}
+      containers:
+        - name: comfyui
+          image: "{{ .Values.comfyUI.image.repository }}:{{ .Values.comfyUI.image.tag }}"
+          # Note: Both dustynv/comfyui and mmartial/comfyui-nvidia-docker images
+          # start ComfyUI automatically with the correct configuration
+          env:
+            - name: MACHINE_MODE
+              value: "gpu"
+            - name: AUTO_UPDATE
+              value: "false"
+            - name: COMFYUI_PORT_HOST
+              value: "8188"
+            - name: COMFYUI_ARGS
+              value: "--listen 0.0.0.0 --port 8188"
+            - name: DISABLE_CLOUDFLARE_TUNNEL
+              value: "true"
+            - name: WEB_ENABLE_AUTH
+              value: "false"
+            - name: DIRECT_ADDRESS
+              value: "0.0.0.0"
+            {{- if contains "mmartial/comfyui-nvidia-docker" .Values.comfyUI.image.repository }}
+            # mmartial-specific environment variables
+            - name: BASE_DIRECTORY
+              value: "/basedir"
+            - name: WANTED_UID
+              value: "1000"
+            - name: WANTED_GID
+              value: "1000"
+            - name: SECURITY_LEVEL
+              value: "normal"
+            {{- end }}
+            {{- if .Values.comfyUI.gpuEnabled }}
+            # GPU environment variables
+            - name: NVIDIA_VISIBLE_DEVICES
+              value: "all"
+            - name: NVIDIA_DRIVER_CAPABILITIES
+              value: "compute,utility"
+            {{- if contains "dustynv/comfyui" .Values.comfyUI.image.repository }}
+            # Jetson-specific GPU library path
+            - name: LD_LIBRARY_PATH
+              value: "/usr/lib/aarch64-linux-gnu/nvidia:/usr/local/cuda/lib:/usr/local/cuda/lib64:/usr/local/cuda/compat:${LD_LIBRARY_PATH:-}"
+            {{- end }}
+            {{- end }}
+          ports:
+            - containerPort: 8188
+              name: web
+            - containerPort: 8000
+              name: api
+          resources:
+            limits:
+              memory: "{{ .Values.comfyUI.resources.limits.memory | default "4Gi" }}"
+              cpu: "{{ .Values.comfyUI.resources.limits.cpu | default "2000m" }}"
+              # Note: NO nvidia.com/gpu limit to allow GPU sharing
+            requests:
+              memory: "{{ .Values.comfyUI.resources.requests.memory | default "2Gi" }}"
+              cpu: "{{ .Values.comfyUI.resources.requests.cpu | default "1000m" }}"
+          volumeMounts:
+            {{- if .Values.comfyUI.persistence.enabled }}
+            {{- if contains "dustynv/comfyui" .Values.comfyUI.image.repository }}
+            - name: comfyui-data
+              mountPath: /data
+            {{- else }}
+            # mmartial needs two mounts: /comfy/mnt for run data and /basedir for user data
+            - name: comfyui-data
+              mountPath: /basedir
+              subPath: basedir
+            - name: comfyui-data
+              mountPath: /comfy/mnt
+              subPath: run
+            {{- end }}
+            {{- end }}
+            {{- if and .Values.comfyUI.gpuEnabled (contains "dustynv/comfyui" .Values.comfyUI.image.repository) }}
+            # Jetson GPU device mounts (for dustynv/comfyui on Jetson)
+            - name: nvhost-gpu
+              mountPath: /dev/nvhost-gpu
+            - name: nvhost-ctrl
+              mountPath: /dev/nvhost-ctrl-gpu
+            - name: nvhost-as
+              mountPath: /dev/nvhost-as-gpu
+            - name: nvhost-sched
+              mountPath: /dev/nvhost-sched-gpu
+            {{- end }}
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 8188
+            initialDelaySeconds: 120          # inizia a verificare dopo 2 minuti
+            periodSeconds: 20                 # verifica ogni 20 secondi
+            timeoutSeconds: 10                # aspetta 10s per la risposta
+            failureThreshold: 15              # tollera **15 fallimenti** → 15 × 20s = **5 minuti** di tolleranza
+            successThreshold: 1               # un successo basta
+
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 8188
+            initialDelaySeconds: 60           # inizia a verificare dopo 1 minuto
+            periodSeconds: 10                 # verifica ogni 10 secondi
+            timeoutSeconds: 5                 # timeout breve: è solo per routing
+            failureThreshold: 10              # tollera 10 fallimenti → 10 × 10s = 100s di tolleranza
+            successThreshold: 1
+      volumes:
+        {{- if .Values.comfyUI.persistence.enabled }}
+        - name: comfyui-data
+          persistentVolumeClaim:
+            claimName: comfyui-pvc
+        {{- end }}
+        {{- if and .Values.comfyUI.gpuEnabled (contains "dustynv/comfyui" .Values.comfyUI.image.repository) }}
+        # Jetson GPU devices (for dustynv/comfyui on Jetson)
+        - name: nvhost-gpu
+          hostPath:
+            path: /dev/nvhost-gpu
+        - name: nvhost-ctrl
+          hostPath:
+            path: /dev/nvhost-ctrl-gpu
+        - name: nvhost-as
+          hostPath:
+            path: /dev/nvhost-as-gpu
+        - name: nvhost-sched
+          hostPath:
+            path: /dev/nvhost-sched-gpu
+        {{- end }}
+---
+{{- if .Values.comfyUI.persistence.enabled }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: comfyui-pvc
+  namespace: {{ .Values.namespace }}
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: {{ include "lair.storageClassName" . }}
+  resources:
+    requests:
+      storage: {{ .Values.comfyUI.persistence.size }}
+{{- end }}
+{{- end }}

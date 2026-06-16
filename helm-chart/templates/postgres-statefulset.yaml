@@ -1,0 +1,127 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: n8n-postgres
+  namespace: {{ .Values.namespace }}
+spec:
+  revisionHistoryLimit: 2
+  serviceName: "n8n-postgres"
+  replicas: 1
+  selector:
+    matchLabels:
+      app: n8n-postgres
+  template:
+    metadata:
+      labels:
+        app: n8n-postgres
+    spec:
+      initContainers:
+      - name: postgres-init-scripts
+        image: busybox:1.35
+        command:
+        - /bin/sh
+        - -c
+        - |
+          cat > /init-scripts/01-create-openwebui-db.sql <<EOF
+          -- Create openwebui database if it doesn't exist
+          SELECT 'CREATE DATABASE openwebui' WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = 'openwebui')\gexec
+          EOF
+          
+          cat > /init-scripts/02-enable-pgvector.sh <<EOF
+          #!/bin/bash
+          set -e
+          
+          # Enable pgvector extension in openwebui database
+          psql -v ON_ERROR_STOP=1 --username "\$POSTGRES_USER" --dbname "openwebui" <<-EOSQL
+            CREATE EXTENSION IF NOT EXISTS vector;
+          EOSQL
+          
+          echo "pgvector extension enabled in openwebui database"
+          EOF
+          
+          chmod +x /init-scripts/02-enable-pgvector.sh
+          echo "Initialization scripts created"
+        volumeMounts:
+        - name: init-scripts
+          mountPath: /init-scripts
+      containers:
+      - name: postgres
+        image: "{{ .Values.n8n.postgres.image.repository }}:{{ .Values.n8n.postgres.image.tag }}"
+        ports:
+        - containerPort: 5432
+          name: postgres
+        env:
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: n8n-postgres-secret
+              key: postgres-password
+        - name: POSTGRES_USER
+          value: "{{ .Values.n8n.postgres.user }}"
+        - name: POSTGRES_DB
+          value: "{{ .Values.n8n.postgres.database }}"
+        - name: PGDATA
+          value: /var/lib/postgresql/data/pgdata
+        # Initialize additional databases and extensions
+        - name: POSTGRES_MULTIPLE_DATABASES
+          value: "{{ .Values.n8n.postgres.database }},openwebui"
+        - name: POSTGRES_INITDB_ARGS
+          value: "--encoding=UTF-8 --lc-collate=C --lc-ctype=C"
+        resources:
+          limits:
+            memory: "{{ .Values.n8n.postgres.resources.limits.memory | default "1Gi" }}"
+            cpu: "{{ .Values.n8n.postgres.resources.limits.cpu | default "1000m" }}"
+          requests:
+            memory: "{{ .Values.n8n.postgres.resources.requests.memory | default "512Mi" }}"
+            cpu: "{{ .Values.n8n.postgres.resources.requests.cpu | default "100m" }}"
+        volumeMounts:
+        - name: postgres-data
+          mountPath: /var/lib/postgresql/data
+        - name: init-scripts
+          mountPath: /docker-entrypoint-initdb.d
+        readinessProbe:
+          exec:
+            command: ["pg_isready", "-U", "{{ .Values.n8n.postgres.user }}"]
+          initialDelaySeconds: 5
+          periodSeconds: 10
+          timeoutSeconds: 5
+        livenessProbe:
+          exec:
+            command: ["pg_isready", "-U", "{{ .Values.n8n.postgres.user }}"]
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+      volumes:
+      - name: init-scripts
+        emptyDir: {}
+  volumeClaimTemplates:
+  - metadata:
+      name: postgres-data
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      storageClassName: {{ include "lair.storageClassName" . }}
+      resources:
+        requests:
+          storage: {{ .Values.n8n.postgres.persistence.size }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: n8n-postgres
+  namespace: {{ .Values.namespace }}
+spec:
+  ports:
+  - port: 5432
+    targetPort: 5432
+    name: postgres
+  selector:
+    app: n8n-postgres
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: n8n-postgres-secret
+  namespace: {{ .Values.namespace }}
+type: Opaque
+data:
+  postgres-password: {{ .Values.n8n.postgres.password | b64enc }}

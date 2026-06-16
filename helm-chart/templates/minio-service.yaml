@@ -1,0 +1,18 @@
+{{- if .Values.minio.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.namespace }}-minio
+  namespace: {{ .Values.namespace }}
+spec:
+  selector:
+    app: minio
+  ports:
+    - name: console
+      port: 80
+      targetPort: 9001
+    - name: api
+      port: 9000
+      targetPort: {{ .Values.minio.port }}
+  type: ClusterIP
+{{- end }} 

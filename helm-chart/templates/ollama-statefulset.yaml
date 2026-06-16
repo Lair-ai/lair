@@ -1,0 +1,175 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: ollama
+  namespace: {{ .Values.namespace }}
+spec:
+  revisionHistoryLimit: 2
+  serviceName: "ollama"
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: ollama
+  template:
+    metadata:
+      labels:
+        app: ollama
+    spec:
+      {{- if .Values.ollama.gpuEnabled }}
+      runtimeClassName: nvidia
+      {{- end }}
+      securityContext:
+        runAsUser: 0
+        fsGroup: 0
+        {{- if .Values.ollama.gpuEnabled }}
+        supplementalGroups: [44, 104]  # video and render groups for GPU access
+        {{- end }}
+      initContainers:
+        - name: model-preloader
+          image: "{{ .Values.ollama.image.repository }}:{{ .Values.ollama.image.tag }}"
+          {{- if contains "dustynv" .Values.ollama.image.repository }}
+          command: ["/bin/sh"]
+          args: ["-c", "ollama serve & sleep 30 && ollama pull gemma3:1b-it-qat && pkill ollama"]
+          {{- else }}
+          command: ["/bin/sh"]
+          args: ["-c", "ollama serve & sleep 30 && ollama pull gemma3:1b-it-qat && pkill ollama"]
+          {{- end }}
+          env:
+            - name: OLLAMA_LOGS
+              value: "/dev/stdout"
+            {{- if .Values.ollama.gpuEnabled }}
+            - name: NVIDIA_VISIBLE_DEVICES
+              value: "all"
+            - name: NVIDIA_DRIVER_CAPABILITIES
+              value: "compute,utility"
+            {{- else }}
+            - name: OLLAMA_GPU_LAYERS
+              value: "0"
+            {{- end }}
+          volumeMounts:
+            {{- if contains "dustynv" .Values.ollama.image.repository }}
+            - name: ollama-data
+              mountPath: /data
+            {{- else }}
+            - name: ollama-data
+              mountPath: /root/.ollama
+            {{- end }}
+      containers:
+        - name: ollama
+          image: "{{ .Values.ollama.image.repository }}:{{ .Values.ollama.image.tag }}"
+          {{- if contains "dustynv" .Values.ollama.image.repository }}
+          # Override command for dustynv image to run in foreground
+          command: ["/bin/ollama"]
+          args: ["serve"]
+          {{- end }}
+          {{- if .Values.ollama.gpuEnabled }}
+          securityContext:
+            privileged: true  # Required for GPU access
+          {{- end }}
+          resources:
+            {{- if .Values.ollama.gpuEnabled }}
+            # Note: NO nvidia.com/gpu limit to allow GPU sharing
+            {{- end }}
+            requests:
+              memory: "{{ .Values.ollama.memoryRequest }}Mi"
+            limits:
+              memory: "{{ .Values.ollama.memoryLimit }}Mi"
+          ports:
+            - containerPort: 11434
+          readinessProbe:
+            httpGet:
+              path: /api/tags
+              port: 11434
+            initialDelaySeconds: 360
+            periodSeconds: 60
+            timeoutSeconds: 60
+            failureThreshold: 10
+          livenessProbe:
+            httpGet:
+              path: /api/tags
+              port: 11434
+            initialDelaySeconds: 600
+            periodSeconds: 120
+            timeoutSeconds: 60
+            failureThreshold: 3
+          env:
+            # Add for better performance
+            - name: OLLAMA_NUM_PARALLEL
+              value: "{{ .Values.ollama.performances.numParallel | default 4 }}"
+            - name: OLLAMA_MAX_QUEUE
+              value: "{{ .Values.ollama.performances.maxQueue | default 512 }}"
+            - name: OLLAMA_KEEP_ALIVE
+              value: "{{ .Values.ollama.performances.keepAlive | default 300 }}"
+            - name: OLLAMA_KV_CACHE_TYPE
+              value: "{{ .Values.ollama.performances.kvCacheType | default "q8_0" }}"
+            # — logging sullo stdout del container —
+            - name: OLLAMA_LOGS
+              value: "/dev/stdout"
+            {{- if .Values.ollama.gpuEnabled }}
+            # GPU environment variables
+            - name: NVIDIA_VISIBLE_DEVICES
+              value: "all"
+            - name: NVIDIA_DRIVER_CAPABILITIES
+              value: "compute,utility"
+            - name: OLLAMA_DEBUG
+              value: "0"
+            - name: LD_LIBRARY_PATH
+              value: "/usr/lib/aarch64-linux-gnu/nvidia:/usr/local/cuda/lib:/usr/local/cuda/lib64:/usr/local/cuda/compat:${LD_LIBRARY_PATH:-}"
+            - name: OLLAMA_MAX_LOADED_MODELS
+              value: "3"
+           {{- else }}
+            # CPU-only environment variables
+            - name: OLLAMA_GPU_LAYERS
+              value: "0"
+            - name: OLLAMA_DEBUG
+              value: "0"
+            - name: OLLAMA_MAX_LOADED_MODELS
+              value: "{{ .Values.ollama.performances.maxLoadedModels | default 1 }}"
+            {{- end }}
+          volumeMounts:
+            {{- if contains "dustynv" .Values.ollama.image.repository }}
+            # Mount points for dustynv/ollama image
+            - name: ollama-data
+              mountPath: /data
+            {{- else }}
+            # Standard mount points for official ollama image
+            - name: ollama-data
+              mountPath: /root/.ollama
+            {{- end }}
+            # Mount essential GPU devices only if GPU is enabled
+            {{- if .Values.ollama.gpuEnabled }}
+            # Jetson-specific GPU devices (required for GPU access)
+            - name: nvhost-gpu
+              mountPath: /dev/nvhost-gpu
+            - name: nvhost-ctrl
+              mountPath: /dev/nvhost-ctrl-gpu
+            - name: nvhost-as
+              mountPath: /dev/nvhost-as-gpu
+            - name: nvhost-sched
+              mountPath: /dev/nvhost-sched-gpu
+            {{- end }}
+      volumes:
+        {{- if .Values.ollama.gpuEnabled }}
+        # Jetson GPU devices
+        - name: nvhost-gpu
+          hostPath:
+            path: /dev/nvhost-gpu
+        - name: nvhost-ctrl
+          hostPath:
+            path: /dev/nvhost-ctrl-gpu
+        - name: nvhost-as
+          hostPath:
+            path: /dev/nvhost-as-gpu
+        - name: nvhost-sched
+          hostPath:
+            path: /dev/nvhost-sched-gpu
+        {{- end }}
+  volumeClaimTemplates:
+    - metadata:
+        name: ollama-data
+      spec:
+        accessModes: [ "ReadWriteOnce" ]
+        storageClassName: {{ include "lair.storageClassName" . }}
+        resources:
+          requests:
+            storage: {{ .Values.ollama.persistence.size | default "20Gi" }}

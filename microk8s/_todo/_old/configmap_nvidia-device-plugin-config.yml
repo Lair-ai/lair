@@ -1,0 +1,18 @@
+# """
+# Serve aggiungere questa configmap per il daemonset nvidia-device-plugin-daemonset.yaml per potere assegnare GPU a più pod contemporaneamente
+# """
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nvidia-device-plugin-config
+  namespace: kube-system
+data:
+  timeslice-jetson.yaml: |
+    version: v1
+    sharing:
+      timeSlicing:
+        renameByDefault: false      # mantiene la resource nvidia.com/gpu
+        resources:
+          - name: nvidia.com/gpu
+            replicas: 5             # fino a 5 pod contemporanei

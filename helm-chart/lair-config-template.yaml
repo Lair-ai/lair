@@ -1,0 +1,509 @@
+# ============================================================================
+# LAIR CONFIGURATION TEMPLATE
+# ============================================================================
+# This template allows you to create fully automated configurations for 
+# different clients and environments, eliminating manual input during deployment.
+#
+# USAGE:
+#   1. Copy this file: cp lair-config-template.yaml my-client-config.yaml
+#   2. Customize the values below for your specific client
+#   3. Run: sudo ./setup.sh --config my-client-config.yaml
+#   4. The script will generate values-{config_name}.yaml automatically
+#
+# EXAMPLES:
+#   sudo ./setup.sh --config production-config.yaml    # Production environment
+#   sudo ./setup.sh --config staging-config.yaml       # Staging environment
+#   sudo ./setup.sh --config jetson-config.yaml        # Jetson deployment
+#   sudo ./setup.sh --config dual-access-config.yaml   # Both LAN and public access
+# ============================================================================
+
+# ============================================================================
+# SERVICE ACCESS & PORT CONFIGURATION
+# ============================================================================
+# Lair services are automatically configured with proper port mappings
+# All services are accessible via HTTPS with automatic TLS certificates
+
+# SERVICE PORTS (automatically configured):
+# - OpenWebUI:     External 80/443 → Internal 8080  (main chat interface)
+# - N8N:           External 80/443 → Internal 5678  (workflow automation)  
+# - Ollama:        External 80/443 → Internal 11434 (LLM API server)
+# - MinIO Console: External 80/443 → Internal 9001  (storage web interface)
+# - ComfyUI:       External 80/443 → Internal 8188  (AI image generation)
+#
+# IMPORTANT: MinIO uses port 9001 for web console, port 9000 for S3 API
+# ComfyUI automatically disables Cloudflare tunnels for direct access
+# TLS certificates are automatically managed by cert-manager with Let's Encrypt
+
+# DEPLOYMENT MONITORING:
+# After deployment, monitor startup with: watch -n 10 kubectl get all -n lair
+# Expected startup time: 2-5 minutes for all services to be ready
+# Services should show 'Running' status before being accessible
+
+# ============================================================================
+# BASIC CONFIGURATION
+# ============================================================================
+
+# Client identification - used for documentation and logging
+# This helps you identify which client this configuration belongs to
+# Examples: "acme-corp", "startup-xyz", "enterprise-client"
+client_name: "example-client"
+
+# Configuration name - determines the output filename
+# The script will generate: values-{config_name}.yaml
+# Use descriptive names for different environments or setups
+# Examples: "production", "staging", "gpu-server", "jetson-edge", "dual-access"
+config_name: "example-config"
+
+# ============================================================================
+# SYSTEM DETECTION & RESOURCES
+# ============================================================================
+
+# How to detect system resources (1 = local system, 2 = kubernetes cluster)
+# - Choice 1: Detect from the machine running this script (good for Jetson/edge)
+# - Choice 2: Detect from Kubernetes cluster (good for cloud/server deployments)
+detection_choice: 2
+
+# Whether to use auto-detected resources or manual override
+# - true: Use automatically detected CPU/RAM/Storage (recommended)
+# - false: Use the manual values specified below
+use_detected_resources: true
+
+# Manual resource override (only used if use_detected_resources: false)
+# Specify exact resources if auto-detection doesn't work for your environment
+manual_resources:
+  cpu_cores: 8.0 # Total CPU cores available for Kubernetes
+  memory_gb: 32 # Total RAM in GB available for Kubernetes
+  storage_gb: 1000 # Total storage in GB available for Lair
+
+# ============================================================================
+# PLATFORM CONFIGURATION
+# ============================================================================
+
+platform:
+  # Is this an NVIDIA Jetson device? (true = Jetson, false = standard server/cloud)
+  # Jetson platforms automatically:
+  # - Enable GPU support
+  # - Use hostpath storage (instead of Longhorn)
+  # - Apply Jetson-specific optimizations
+  is_jetson: false
+
+  # GPU availability for AI workloads (ignored if is_jetson: true)
+  # - true: Enable GPU acceleration for Ollama
+  # - false: CPU-only configuration
+  has_gpu: false
+
+  # VRAM allocation percentage (only used if GPU is available)
+  # Percentage of total GPU VRAM to allocate to AI models
+  # Conservative values: 60-70%, Aggressive: 80-90%
+  vram_percentage: 80
+
+  # System hostname for LAN domain generation
+  # Used to generate .local domains like: subdomain.hostname.local
+  # Examples: "lair" → chat.lair.local, "myserver" → chat.myserver.local
+  # Leave empty to auto-detect hostname or be prompted during setup
+  system_hostname: ""
+
+# ============================================================================
+# DUAL ACCESS MODE CONFIGURATION
+# ============================================================================
+# The system asks for BOTH LAN and public domains for each component when enabled
+# This allows simultaneous access via both local network and internet
+
+access:
+  # LAN (local network) access configuration
+  lan:
+    # Enable LAN access with .local domains
+    # - true: System will ask for LAN domain for each component
+    # - false: No LAN access configuration
+    # When enabled, the system asks for domains like:
+    # - "OpenWebUI LAN domain [default: openwebui.lair.local]"
+    # - "N8N LAN domain [default: n8n.lair.local]"
+    enabled: true
+    # Enable HTTPS for .local domains using mkcert certificates
+    # - true: Enable browser-trusted SSL certificates for .local domains
+    # - false: Use HTTP only for .local domains
+    # When enabled, requires mkcert setup:
+    # 1. Install mkcert: https://github.com/FiloSottile/mkcert
+    # 2. Run: mkcert -install
+    # 3. Generate certificates: ./generate-lan-certificates.sh --wildcard lair.local
+    # 4. Deploy with tls: true
+    tls: false
+    # LAN access is suitable for:
+    # - Local development/testing environments
+    # - Corporate internal networks with .local domains
+    # - Jetson devices with local DNS configuration
+    # - HTTP by default, HTTPS with mkcert if tls: true
+
+    # Public (internet) access configuration
+  public:
+    # Enable public access with internet domains
+    # - true: System will ask for public domain for each component
+    # - false: No public access configuration
+    # When enabled, the system asks for domains like:
+    # - "OpenWebUI public domain [default: openwebui.example.com]"
+    # - "N8N public domain [default: n8n.example.com]"
+    enabled: true
+    # Public access is suitable for:
+    # - Production deployments accessible from internet
+    # - Public domains that can be validated by Let's Encrypt
+    # - Cloud deployments with proper DNS configuration
+    # - Automatic TLS certificates with Let's Encrypt
+
+    # DUAL ACCESS MODE BEHAVIOR:
+    # When both LAN and public access are enabled, the system will:
+    # 1. Ask if you want to enable LAN access
+    # 2. Ask if you want to enable public access
+    # 3. For EACH component, ask for BOTH domains:
+    #    - LAN domain (if LAN access enabled)
+    #    - Public domain (if public access enabled)
+    # 4. Create separate ingress resources for each access type
+    # 5. Apply TLS certificates only to public domains
+
+    # ============================================================================
+    # DOMAINS & CERTIFICATES  
+    # ============================================================================
+
+email:
+  # Email address for Let's Encrypt certificate generation
+  # This email will receive notifications about certificate renewals
+  # Only used when public access is enabled
+  cert_email: "admin@example.com"
+
+# Domain configuration for different access modes
+# The system asks for domains interactively, these are the defaults used
+domains:
+  # LAN (Local Network) domains - used when access.lan.enabled: true
+  # These domains should be accessible on your local network
+  # Format: subdomain.hostname.local (hostname is auto-detected)
+  # During setup, you only specify the subdomain (e.g., "ai", "n8n", etc.)
+  lan:
+    openwebui: "ai.lair.local" # OpenWebUI - Main chat interface (subdomain: ai)
+    n8n: "n8n.lair.local" # N8N - Workflow automation (subdomain: n8n)
+    comfyui: "images.lair.local" # ComfyUI - AI image generation (subdomain: images)
+    minio: "storage.lair.local" # MinIO - S3-compatible storage (subdomain: storage)
+    ollama: "" # Ollama - Leave empty for internal-only access
+
+  # Public (Internet) domains - used when access.public.enabled: true
+  # These domains must be publicly accessible and point to your cluster
+  # Make sure these domains point to your Kubernetes cluster's ingress
+  public:
+    openwebui: "openwebui.example.com" # OpenWebUI - Main chat interface
+    n8n: "n8n.example.com" # N8N - Workflow automation
+    comfyui: "comfyui.example.com" # ComfyUI - AI image generation
+    minio: "storage.example.com" # MinIO - S3-compatible storage
+    ollama: "" # Ollama - Leave empty for internal-only access
+
+# DOMAIN CONFIGURATION BEHAVIOR:
+# During interactive setup, the system auto-detects hostname and asks for subdomains:
+#
+# IF LAN ACCESS IS ENABLED:
+# - "🌐 Sottodominio OpenWebUI LAN [default: ai]: " → ai.hostname.local
+# - "🌐 Sottodominio N8N LAN [default: n8n]: " → n8n.hostname.local
+# - "🌐 Sottodominio ComfyUI LAN [default: images] (lascia vuoto per accesso solo interno): "
+# - etc.
+#
+# IF PUBLIC ACCESS IS ENABLED:
+# - "🌐 OpenWebUI public domain [default: openwebui.example.com]: "
+# - "🌐 N8N public domain [default: n8n.example.com]: "
+# - "🌐 ComfyUI public domain (leave empty for internal-only): "
+# - etc.
+
+# DOMAIN CONFIGURATION NOTES:
+# - Leave any domain empty ("") to disable external access for that service
+# - Internal services remain accessible via Kubernetes DNS regardless:
+#   * OpenWebUI: lair-openwebui.lair.svc.cluster.local:8080
+#   * N8N: lair-n8n.lair.svc.cluster.local:5678
+#   * Ollama: lair-ollama.lair.svc.cluster.local:11434
+#   * MinIO Console: lair-minio.lair.svc.cluster.local:9001
+#   * MinIO S3 API: lair-minio.lair.svc.cluster.local:9000
+#   * ComfyUI: lair-comfyui.lair.svc.cluster.local:8188
+#
+# SECURITY RECOMMENDATIONS:
+# - Keep Ollama internal-only (empty domain) for security
+# - Use strong MinIO credentials for production
+# - Enable HTTPS-only access for public domains
+
+# ============================================================================
+# STORAGE CONFIGURATION
+# ============================================================================
+# Storage allocation for each component (in GB)
+# Adjust based on your expected usage and available storage
+
+storage:
+  openwebui: 10 # User data, chat history, uploaded files
+  ollama_models: 30 # AI models (7B models ~4GB, 13B ~8GB, 70B ~40GB)
+  n8n_workflows: 10 # Workflow definitions, execution history
+  postgresql: 5 # N8N database, user accounts, metadata
+  redis: 5 # Cache, session data, temporary storage
+  minio: 20 # Object storage (only used if MinIO enabled)
+  comfyui: 15 # ComfyUI models and generated images
+
+# ============================================================================
+# OPENWEBUI SSO CONFIGURATION
+# ============================================================================
+
+openwebui:
+  # SSO Configuration for federated authentication
+  sso:
+    enabled: false # Set to true to enable SSO authentication
+    provider: "" # Options: google, microsoft, github, oidc, trusted-header
+
+    # Local login form control (when SSO is enabled)
+    enable_login_form: false # Hide email/password login form when SSO is active
+    enable_local_signup: false # Disable local account creation when SSO is active
+
+    # General OAuth settings (applies to all OAuth providers)
+    oauth:
+      enable_signup: true # Allow account creation via OAuth
+      merge_accounts_by_email: false # Merge accounts with same email (security risk)
+      update_picture_on_login: true # Update profile picture from OAuth provider
+
+      # Generic OIDC configuration (when provider: oidc)
+      client_id: ""
+      client_secret: ""
+      provider_name: "SSO"
+      scopes: "openid email profile"
+      provider_url: "https://accounts.google.com/.well-known/openid-configuration"
+      redirect_uri: "https://your-domain/oauth/oidc/callback"
+
+    # Provider-specific configurations
+    google:
+      client_id: ""
+      client_secret: ""
+      # Redirect URI: https://your-domain/oauth/google/callback
+
+    microsoft:
+      client_id: ""
+      client_secret: ""
+      tenant_id: "9188040d-6c67-4c5b-b112-36a304b66dad" # For personal accounts
+      redirect_uri: "https://your-domain/oauth/microsoft/callback"
+
+    github:
+      client_id: ""
+      client_secret: ""
+      # Redirect URI: https://your-domain/oauth/github/callback
+
+      # Trusted header authentication (for reverse proxy setups)
+    trusted_header:
+      email_header: "" # e.g., "X-Forwarded-Email", "Tailscale-User-Login"
+      name_header: "" # e.g., "X-Forwarded-User", "Tailscale-User-Name"
+      # WARNING: Only use with properly configured reverse proxies!
+      # Set HOST=127.0.0.1 to restrict access to localhost only
+
+      # EXAMPLE SSO CONFIGURATIONS:
+      #
+      # Google OAuth:
+      # openwebui:
+      #   sso:
+      #     enabled: true
+      #     provider: "google"
+      #     google:
+      #       client_id: "123456789.apps.googleusercontent.com"
+      #       client_secret: "your-google-client-secret"
+      #
+      # Microsoft OAuth:
+      # openwebui:
+      #   sso:
+      #     enabled: true
+      #     provider: "microsoft"
+      #     microsoft:
+      #       client_id: "12345678-1234-1234-1234-123456789abc"
+      #       client_secret: "your-microsoft-client-secret"
+      #       tenant_id: "87654321-4321-4321-4321-cba987654321"
+      #       redirect_uri: "https://chat.example.com/oauth/microsoft/callback"
+      #
+      # GitHub OAuth:
+      # openwebui:
+      #   sso:
+      #     enabled: true
+      #     provider: "github"
+      #     github:
+      #       client_id: "Iv1.1234567890abcdef"
+      #       client_secret: "your-github-client-secret"
+      #
+      # Generic OIDC (e.g., Keycloak, Authentik):
+      # openwebui:
+      #   sso:
+      #     enabled: true
+      #     provider: "oidc"
+      #     oauth:
+      #       client_id: "openwebui"
+      #       client_secret: "your-oidc-client-secret"
+      #       provider_name: "Keycloak"
+      #       provider_url: "https://keycloak.example.com/realms/master/.well-known/openid-configuration"
+      #       redirect_uri: "https://chat.example.com/oauth/oidc/callback"
+      #
+      # Trusted Header (for Tailscale, Cloudflare Access, oauth2-proxy):
+      # openwebui:
+      #   sso:
+      #     enabled: true
+      #     provider: "trusted-header"
+      #     trusted_header:
+      #       email_header: "Tailscale-User-Login"
+      #       name_header: "Tailscale-User-Name"
+
+      # ============================================================================
+      # COMPONENT ENABLEMENT
+      # ============================================================================
+
+components:
+  # MinIO - S3-compatible object storage
+  minio:
+    enabled: true # Recommended for file storage and backups
+    root_user: "minioadmin" # Root username (provides both admin AND S3 API access)
+    root_password: "minioadmin" # Root password (change for production!)
+    # SECURITY WARNING: Change these credentials for production deployments!
+    # Root credentials provide full access to MinIO (console + S3 API)
+
+    # ComfyUI - AI image generation interface
+  comfyui:
+    enabled: true # Enable ComfyUI for Stable Diffusion and AI image generation
+    # gpuEnabled will be set automatically based on platform.has_gpu setting
+
+    # AUTOMATIC IMAGE SELECTION:
+    # ComfyUI images are automatically selected based on platform detection:
+    #
+    # ┌─────────────────────────────────────────────────────────────────────────────┐
+    # │                          ComfyUI Image Selection                            │
+    # ├─────────────────────────────────────────────────────────────────────────────┤
+    # │  Jetson Platform:                                                           │
+    # │  • dustynv/comfyui:r36.4.3                 - Auto-selected for Jetson      │
+    # │                                                                             │
+    # │  Standard Platform with GPU:                                                │
+    # │  • mmartial/comfyui-nvidia-docker:ubuntu22_cuda12.3.2-latest              │
+    # │  • mmartial/comfyui-nvidia-docker:ubuntu22_cuda12.4.1-latest              │
+    # │  • mmartial/comfyui-nvidia-docker:ubuntu24_cuda12.5.1-latest              │
+    # │  • mmartial/comfyui-nvidia-docker:ubuntu24_cuda12.6.3-latest (default)    │
+    # │  • mmartial/comfyui-nvidia-docker:ubuntu24_cuda12.8-latest                │
+    # │  • mmartial/comfyui-nvidia-docker:ubuntu24_cuda12.9-latest                │
+    # │  • mmartial/comfyui-nvidia-docker:ubuntu24_cuda13.0-latest                │
+    # │                                                                             │
+    # │  Standard Platform without GPU: ComfyUI disabled automatically             │
+    # └─────────────────────────────────────────────────────────────────────────────┘
+
+    # Override automatic selection (optional):
+    image: "" # Format: registry/repository:tag
+
+    # RESERVED CONFIGURATION OPTIONS:
+    # These options are reserved for future use
+    low_vram: "" # Reserved for future use
+    models_download: "" # Reserved for future use
+    # ============================================================================
+    # N8N WORKFLOW AUTOMATION
+    # ============================================================================
+
+n8n:
+  # Encryption key for N8N credentials and sensitive data
+  # Leave empty ("") for auto-generation, or specify existing key for migration
+  # IMPORTANT: Save this key! You'll need it to decrypt your workflows
+  encryption_key: "" # Leave empty for auto-generation
+
+  # Worker configuration for processing the execution queue
+  # N8N in production should use queue mode with separate workers
+  # Worker resources are automatically calculated based on system resources
+  worker:
+    enabled: true # Always enable workers for production-ready setup
+    # replicas: auto-calculated based on available memory:
+    # - 1 worker if total memory < 16GB
+    # - 2 workers if total memory >= 16GB
+    # Worker resource allocation is dynamically calculated:
+    # - Each worker gets 50% of main N8N instance allocation
+    # - CPU and memory requests/limits are set automatically
+    # - Resources scale with your cluster capacity
+
+    # SMTP configuration for user management (optional)
+  smtp:
+    enabled: false # Set to true to enable SMTP for user invitations and password resets
+    host: "smtp.gmail.com" # SMTP server hostname
+    port: 587 # SMTP server port (587 for STARTTLS, 465 for SSL)
+    user: "your-email@gmail.com" # SMTP username/email
+    password: "your-app-password" # SMTP password or app-specific password
+    sender: "your-email@gmail.com" # Email address used as sender (defaults to user if not specified)
+    ssl: true # Use SSL/TLS encryption
+    starttls: true # Use STARTTLS for secure connection
+
+  # Admin user configuration (required for N8N access)
+  adminUser:
+    email: "admin@n8n.local" # Admin email - used for login and notifications
+    password: "n8n123" # Admin password - CHANGE FOR PRODUCTION!
+    firstName: "Admin" # Admin first name
+    lastName: "User" # Admin last name
+    # SECURITY WARNING: Change these credentials for production deployments!
+    # The admin user has full access to all N8N workflows and settings
+
+    # ============================================================================
+    # DEPLOYMENT OPTIONS
+    # ============================================================================
+
+deployment:
+  # Automatically deploy after generating configuration? 
+  # - true: Run helm install/upgrade automatically
+  # - false: Just generate the config file (recommended for review)
+  auto_deploy: false
+
+  # Helm release name (will appear in: helm list)
+  # Use descriptive names for multiple deployments
+  release_name: "lair"
+
+  # Installation type
+  # - true: New installation (helm install)
+  # - false: Upgrade existing (helm upgrade)  
+  new_install: true
+
+# ============================================================================
+# CONFIGURATION EXAMPLES FOR DIFFERENT SCENARIOS
+# ============================================================================
+#
+# PRODUCTION SETUP:
+# - detection_choice: 2 (cluster detection)
+# - use_detected_resources: true
+# - is_jetson: false, has_gpu: true (if available)
+# - access.lan.enabled: false, access.public.enabled: true
+# - Strong passwords for minio credentials
+# - auto_deploy: false (review before deploy)
+#
+# DEVELOPMENT/STAGING:
+# - Smaller storage values (5-10GB each)
+# - access.lan.enabled: true, access.public.enabled: false
+# - auto_deploy: true (for rapid iteration)
+#
+# JETSON EDGE DEVICE:
+# - detection_choice: 1 (local system)
+# - is_jetson: true (enables hostpath storage)
+# - Smaller storage values (limited SD card space)
+# - access.lan.enabled: true, access.public.enabled: false
+#
+# HIGH-PERFORMANCE AI SERVER:
+# - has_gpu: true, vram_percentage: 85
+# - Large ollama_models storage (50-100GB)
+# - Use Ollama with multiple large models for best performance
+#
+# DUAL ACCESS MODE:
+# - access.lan.enabled: true, access.public.enabled: true
+# - Configure both LAN (.local) and public domains FOR EACH COMPONENT
+# - Suitable for hybrid environments requiring both access methods
+# - LAN access for internal users, public access for external users
+# - The system will ask for BOTH domains for each component:
+#   * OpenWebUI LAN domain AND OpenWebUI public domain
+#   * N8N LAN domain AND N8N public domain
+#   * ComfyUI LAN domain AND ComfyUI public domain
+#   * MinIO LAN domain AND MinIO public domain
+#   * Ollama LAN domain AND Ollama public domain
+#
+# RESOURCE ALLOCATION NOTES:
+# - N8N workers automatically scale based on available memory
+# - GPU allocation is automatically handled when has_gpu: true
+# - Storage allocation should account for model sizes and expected usage
+# - CPU/Memory allocation is calculated automatically from cluster resources
+#
+# INTERACTIVE FLOW EXAMPLE:
+# When you run the setup with dual access enabled, you'll see:
+# 1. "Enable LAN access with .local domains? (y/n) [default: y]:"
+# 2. "Enable public access with internet domains? (y/n) [default: n]:"
+# 3. For each component:
+#    - "🌐 OpenWebUI LAN domain [default: openwebui.lair.local]:"
+#    - "🌐 OpenWebUI public domain [default: openwebui.example.com]:"
+#    - "🌐 N8N LAN domain [default: n8n.lair.local]:"
+#    - "🌐 N8N public domain [default: n8n.example.com]:"
+#    - And so on for each component...
+# ============================================================================

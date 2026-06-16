@@ -1,0 +1,18 @@
+{{- if and .Values.createStorageClass (eq .Values.global.platform "jetson") }}
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: {{ .Values.global.storageClass }}
+  labels:
+    app.kubernetes.io/managed-by: Helm
+    lair.io/platform: jetson
+  annotations:
+    meta.helm.sh/release-name: {{ .Release.Name }}
+    meta.helm.sh/release-namespace: {{ .Values.namespace }}
+    storageclass.kubernetes.io/is-default-class: "false"
+    lair.io/description: "StorageClass ottimizzata per NVIDIA Jetson - usa microk8s hostpath provisioner per compatibilità e performance"
+provisioner: microk8s.io/hostpath
+reclaimPolicy: Delete
+volumeBindingMode: WaitForFirstConsumer
+allowVolumeExpansion: false
+{{- end }} 

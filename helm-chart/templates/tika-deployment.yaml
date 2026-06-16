@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tika
+  namespace: {{ .Values.namespace }}
+spec:
+  revisionHistoryLimit: 2
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: tika
+  template:
+    metadata:
+      labels:
+        app: tika
+    spec:
+      containers:
+        - name: tika
+          image: "{{ .Values.tika.image.repository }}:{{ .Values.tika.image.tag }}"
+          ports:
+            - containerPort: 9998
+          resources:
+            limits:
+              memory: "{{ .Values.tika.resources.limits.memory }}"
+              cpu: "{{ .Values.tika.resources.limits.cpu }}"
+            requests:
+              memory: "{{ .Values.tika.resources.requests.memory }}"
+              cpu: "{{ .Values.tika.resources.requests.cpu }}"

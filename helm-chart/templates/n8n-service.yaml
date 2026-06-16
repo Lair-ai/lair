@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.namespace }}-n8n
+  namespace: {{ .Values.namespace }}
+spec:
+  selector:
+    app: n8n
+  ports:
+    - name: http
+      port: 80
+      targetPort: 5678  # n8n default port
+    - name: queue-health
+      port: 5679
+      targetPort: 5679  # n8n queue health check port
+  type: ClusterIP

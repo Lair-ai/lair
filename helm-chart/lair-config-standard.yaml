@@ -1,0 +1,133 @@
+# Lair Configuration for Standard
+# Usage: sudo ./setup.sh --config lair-config-standard.yaml
+
+# Basic Configuration
+client_name: "nexid"
+config_name: "nexid"
+
+# System Detection
+detection_choice: 1 # Use local system detection
+use_detected_resources: true # Use auto-detected resources
+
+# Manual Resource Override (not used since use_detected_resources: true)
+manual_resources:
+  cpu_cores: 8.0
+  memory_gb: 32
+  storage_gb: 1420
+
+# Platform Configuration
+platform:
+  is_jetson: false # Standard platform
+  has_gpu: false # CPU-only configuration
+  vram_percentage: 80
+  system_hostname: "lair" # Hostname for LAN domains (subdomain.lair.local)
+
+# Dual Access Configuration
+access:
+  lan:
+    enabled: false # Disable LAN access for this standard configuration
+    tls: false # Not used when LAN access is disabled
+  public:
+    enabled: true # Enable public access with real domains
+
+# Email and Domains
+email:
+  cert_email: "hello@lair-ai.it"
+
+# Domain configuration
+domains:
+  # Legacy domains (for backward compatibility)
+  openwebui: "chat.lair-ai.com"
+  n8n: "n8n.lair-ai.com"
+  comfyui: "" # Internal-only access: lair-comfyui.lair.svc.cluster.local:80
+  minio: "minio.lair-ai.com" # External access enabled
+  ollama: "ollama.lair-ai.com" # External API access enabled (use with caution)
+
+  # Public domains (for dual access mode)
+  public:
+    openwebui: "chat.lair-ai.com"
+    n8n: "n8n.lair-ai.com"
+    comfyui: "" # Internal-only access
+    minio: "minio.lair-ai.com"
+    ollama: "ollama.lair-ai.com"
+
+  # LAN domains (not used when access.lan.enabled: false)
+  lan:
+    openwebui: ""
+    n8n: ""
+    comfyui: ""
+    minio: ""
+    ollama: ""
+
+# Component Storage Configuration (in GB)
+storage:
+  openwebui: 10
+  ollama_models: 30
+  n8n_workflows: 10
+  postgresql: 5
+  redis: 5
+  minio: 20
+  comfyui: 15
+
+# OpenWebUI SSO Configuration (disabled by default)
+openwebui:
+  sso:
+    enabled: false
+    provider: "" # Options: google, microsoft, github, oidc, trusted-header
+
+# Component Enablement
+components:
+
+  minio:
+    enabled: true
+    root_user: "admin" # Root/admin username (change for production!)
+    root_password: "password123" # Root/admin password (change for production!)
+    access_key: "minio"
+    secret_key: "secret123"
+
+  comfyui:
+    enabled: true
+    gpuEnabled: false # CPU-only for standard config
+    image: "" # Default image
+
+  ollama:
+    image: "" # Default image
+
+# N8N Configuration
+n8n:
+  encryption_key: "a3832088e769d2dcb9226832e06dced" # Use existing key
+  # Worker configuration for production setup
+  worker:
+    enabled: true
+    replicas: 2 # Multiple workers for production
+    resources:
+      limits:
+        memory: "2Gi" # Full memory allocation
+        cpu: "1000m" # Full core allocation
+      requests:
+        memory: "1Gi" # Production memory request
+        cpu: "500m" # Half core request
+  # SMTP configuration for user management
+  smtp:
+    enabled: false # Disabled by default - set to true and configure below to enable
+    host: "smtp.gmail.com"
+    port: 587
+    user: "hello@lair-ai.it"
+    password: "your-smtp-password"
+    sender: "hello@lair-ai.it"
+    ssl: true
+    starttls: true
+
+  # Admin user configuration (required for N8N access)
+  adminUser:
+    email: "admin@n8n.local" # Admin email - used for login and notifications
+    password: "password456" # Admin password - CHANGE FOR PRODUCTION!
+    firstName: "Admin" # Admin first name
+    lastName: "User" # Admin last name
+    # SECURITY WARNING: Change these credentials for production deployments!
+
+    # Auto-deployment
+deployment:
+  auto_deploy: false
+  release_name: "lair"
+  new_install: true

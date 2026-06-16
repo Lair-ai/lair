@@ -4,7 +4,7 @@ We take security seriously. **Please do not report security vulnerabilities thro
 
 If you discover a security vulnerability, please send a responsible disclosure email to:
 
-** [security@lair-ai.it](mailto:security@lair-ai.it)**
+**[security@lair-ai.it](mailto:security@lair-ai.it)**
 
 Include:
 - A description of the vulnerability

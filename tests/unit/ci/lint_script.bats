@@ -6,7 +6,6 @@ setup() {
   FAKEBIN="$TMPDIR_TEST/bin"
   mkdir -p "$FAKEBIN"
 
-  # Linkiamo solo i comandi di sistema fissi (escluso git)
   for cmd in bash printf wc tr xargs find; do
     real_cmd="$(command -v "$cmd")"
     if [ -n "$real_cmd" ]; then

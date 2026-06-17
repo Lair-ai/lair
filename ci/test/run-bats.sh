@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
 
-# Use -u to catch unset variables, but handle errors explicitly
 set -euo pipefail
 
 ROOT="$(git rev-parse --show-toplevel)"

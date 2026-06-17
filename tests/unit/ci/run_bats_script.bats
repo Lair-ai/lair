@@ -22,7 +22,7 @@ exit 1
 EOF
   chmod +x "$FAKEBIN/git"
 
-  run env PATH="$FAKEBIN:/usr/bin:/bin" /bin/bash "$ROOT/ci/test/run-bats.sh"
+  run env PATH="$FAKEBIN:/usr/bin:/bin" /bin/bash "$ROOT/ci/test/run-bats.sh" 2>&1
   [ "$status" -eq 1 ]
   [[ "$output" == *"bats is not installed"* ]]
 }
@@ -44,7 +44,7 @@ EOF
 
   chmod +x "$FAKEBIN/git" "$FAKEBIN/bats"
 
-  run env PATH="$FAKEBIN:/usr/bin:/bin" /bin/bash "$ROOT/ci/test/run-bats.sh"
+  run env PATH="$FAKEBIN:/usr/bin:/bin" /bin/bash "$ROOT/ci/test/run-bats.sh" 2>&1
   [ "$status" -eq 1 ]
   [[ "$output" == *"tests directory not found"* ]]
 }
@@ -69,7 +69,7 @@ EOF
 
   chmod +x "$FAKEBIN/git" "$FAKEBIN/bats"
 
-  run env PATH="$FAKEBIN:/usr/bin:/bin" /bin/bash "$ROOT/ci/test/run-bats.sh"
+  run env PATH="$FAKEBIN:/usr/bin:/bin" /bin/bash "$ROOT/ci/test/run-bats.sh" 2>&1
   [ "$status" -eq 0 ]
   run cat "$TMPDIR_TEST/bats_args.txt"
   [ "$status" -eq 0 ]

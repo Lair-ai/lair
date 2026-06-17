@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # Use -u to catch unset variables, but handle errors explicitly
-set -uo pipefail
+set -euo pipefail
 
 ROOT="$(git rev-parse --show-toplevel)"
 cd "$ROOT"
@@ -18,6 +18,6 @@ if [ ! -d "tests" ]; then
   exit 1
 fi
 
-# 3. Execute tests
+# 3. Execute tests# 3. Execute tests
 # Ensure the exit code of the final command is propagated
 exec bats -r tests/unit tests/integration

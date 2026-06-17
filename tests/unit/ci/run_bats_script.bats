@@ -5,9 +5,6 @@ setup() {
   TMPDIR_TEST="$(mktemp -d)"
   FAKEBIN="$TMPDIR_TEST/bin"
   mkdir -p "$FAKEBIN"
-
-  # Forniamo al FAKEBIN solo i comandi di sistema essenziali per interpretare lo script
-  # Questo previene l'errore 127 senza esporre il "bats" reale di sistema
   ln -s "$(command -v bash)" "$FAKEBIN/bash"
   ln -s "$(command -v dirname)" "$FAKEBIN/dirname"
 }
@@ -27,7 +24,6 @@ exit 1
 EOF
   chmod +x "$FAKEBIN/git"
 
-  # Esecuzione in puro isolamento: vede solo bash, dirname e il finto git
   run bash -c "PATH=\"$FAKEBIN\" $ROOT/ci/test/run-bats.sh 2>&1"
   
   [ "$status" -eq 1 ]
@@ -79,7 +75,6 @@ EOF
   
   [ "$status" -eq 0 ]
   
-  # run cat qui userà il PATH nativo di BATS per leggere il file temporaneo
   run cat "$TMPDIR_TEST/bats_args.txt"
   [ "$status" -eq 0 ]
   [[ "$output" == *"tests/unit tests/integration"* ]]

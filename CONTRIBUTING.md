@@ -14,7 +14,7 @@ Contributions are what make the open-source community such an amazing place. **A
 ### Development Workflow
 
 1. **Fork** the repository
-2. **Create** a feature branch from `main`
+2. **Create** a feature branch from `dev`
  ```bash
  git checkout -b feature/my-amazing-feature
  ```
@@ -29,7 +29,7 @@ Contributions are what make the open-source community such an amazing place. **A
  ```bash
  git push origin feature/my-amazing-feature
  ```
-8. **Open** a Pull Request against the `main` branch
+8. **Open** a Pull Request against the `dev` branch
 
 ### Commit Message Convention
 

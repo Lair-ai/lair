@@ -549,10 +549,4 @@ Lair also thanks the open-source communities and maintainers behind the software
 
 ---
 
-** Ready to deploy your private AI infrastructure?**
-
-```bash
-sudo ./setup.sh
-```
-
-**Made in Italy by [LAiR](https://dev.lair-ai.it/)**
+**Made in Italy by [LAiR](https://dev.lair-ai.it/)** 

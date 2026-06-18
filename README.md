@@ -298,7 +298,7 @@ sudo ./setup.sh
 | Multi-node clustering | ❌ | ✅ *(via ConnectX)* |
 
 ### Why This Matters
-- **Technical scope**: Production AI stack on ARM64 — from <10W Jetson devices to a 240W desktop system
+- **Technical scope**: Production AI stack on ARM64 — from <60W Jetson devices to a 240W desktop system
 - **Data locality**: Run enterprise-grade AI directly where your data resides
 - **Privacy**: Process sensitive data locally with zero required cloud dependency
 - **Cost considerations**: DGX Spark can be cost-competitive with cloud A100 workloads for sustained, full-time use
@@ -491,7 +491,7 @@ We take security seriously. **Please do not report security vulnerabilities thro
 
 If you discover a security vulnerability, please send a responsible disclosure email to:
 
-** [security@lair-ai.it](mailto:security@lair-ai.it)**
+**[security@lair-ai.it](mailto:security@lair-ai.it)**
 
 Include:
 - A description of the vulnerability
@@ -545,7 +545,8 @@ Thank you to **[OVHcloud](https://www.ovhcloud.com/)** for cloud infrastructure,
 
 Thank you to **[IANUSTEC s.r.l.](https://ianustec.com)** for development support, technical guidance, and hands-on contributions to the Lair project.
 
-Lair also thanks the open-source communities and maintainers behind the software used by the package: Kubernetes, Helm, OpenWebUI, N8N, Ollama, Apache Tika, ComfyUI, MinIO, PostgreSQL, pgvector, Redis, ingress-nginx, cert-manager, Let's Encrypt, Longhorn, Velero, CoreDNS, MetalLB, Calico, Flannel, Hostpath provisioner, dnsmasq, and mkcert.
+### Open-Source Projects
+Lair also thanks the open-source communities and maintainers behind the software used by the package: [Kubernetes](https://github.com/kubernetes/kubernetes), [Helm](https://github.com/helm/helm), [PostgreSQL](https://github.com/postgres/postgres), [Redis](https://github.com/redis/redis), [N8N](https://github.com/n8n-io/n8n), [OpenWebUI](https://github.com/openwebui/openwebui), [Longhorn](https://github.com/longhorn/longhorn), [cert-manager](https://github.com/cert-manager/cert-manager), [ingress-nginx](https://github.com/kubernetes/ingress-nginx), [Velero](https://github.com/vmware-tanzu/velero), [CoreDNS](https://github.com/coredns/coredns), [MetalLB](https://github.com/metallb/metallb), [Let's Encrypt](https://github.com/letsencrypt/boulder), [MinIO](https://github.com/minio/minio), [Apache Tika](https://github.com/apache/tika), [ComfyUI](https://github.com/comfyanonymous/ComfyUI), [Ollama](https://github.com/ollama/ollama), [pgvector](https://github.com/pgvector/pgvector), [Calico](https://github.com/projectcalico/calico), [Flannel](https://github.com/flannel-io/flannel), [hostpath provisioner](https://github.com/kubernetes-sigs/sig-storage-local-static-provisioner), [dnsmasq](https://github.com/thekelleys/dnsmasq), and [mkcert](https://github.com/FiloSottile/mkcert).
 
 ---
 

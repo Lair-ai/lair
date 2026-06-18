@@ -91,23 +91,23 @@ spec:
 #### **DNS Configuration**
 ```bash
 # Required: DNS A records pointing to your cluster
-chat.example.com        A    203.0.113.10
-automation.example.com  A    203.0.113.10
+ai.example.com        A    203.0.113.10
+n8n.example.com  A    203.0.113.10
 images.example.com      A    203.0.113.10
 storage.example.com     A    203.0.113.10
 
 # Verify DNS propagation
-nslookup chat.example.com
-dig chat.example.com
+nslookup ai.example.com
+dig ai.example.com
 ```
 
 #### **Network Requirements**
 ```bash
 # Required: Port 80 accessible from internet (for HTTP-01 challenge)
-curl -I http://chat.example.com/.well-known/acme-challenge/test
+curl -I http://ai.example.com/.well-known/acme-challenge/test
 
 # Required: Port 443 for HTTPS traffic
-curl -I https://chat.example.com
+curl -I https://ai.example.com
 ```
 
 #### **Firewall Configuration**
@@ -150,10 +150,10 @@ kubectl logs -n cert-manager deployment/cert-manager -f
 ```bash
 # Issue: HTTP-01 challenge cannot be completed
 # Check: DNS points to correct IP
-nslookup chat.example.com
+nslookup ai.example.com
 
 # Check: Port 80 accessible
-curl -I http://chat.example.com/.well-known/acme-challenge/test
+curl -I http://ai.example.com/.well-known/acme-challenge/test
 
 # Check: Ingress controller responding
 kubectl get services -n ingress-nginx
@@ -178,9 +178,9 @@ spec:
 ```bash
 # Issue: DNS not propagated globally
 # Check: Multiple DNS servers
-dig @8.8.8.8 chat.example.com
-dig @1.1.1.1 chat.example.com
-dig @208.67.222.222 chat.example.com
+dig @8.8.8.8 ai.example.com
+dig @1.1.1.1 ai.example.com
+dig @208.67.222.222 ai.example.com
 
 # Wait: DNS propagation can take up to 48 hours
 ```
@@ -385,7 +385,7 @@ ingress:
   public:
     enabled: true
     hosts:
-      - host: chat.example.com
+      - host: ai.example.com
         serviceName: openwebui
 
 certManager:
@@ -407,7 +407,7 @@ helm upgrade --install lair . -n lair -f values-config.yaml
 
 # 4. Verify both access methods
 curl -I https://ai.hostname.local      # LAN access
-curl -I https://chat.example.com         # Public access
+curl -I https://ai.example.com         # Public access
 ```
 
 ---
@@ -438,7 +438,7 @@ ingress:
     cert-manager.io/cluster-issuer: "enterprise-ca-issuer"
   tls:
     - hosts:
-        - chat.internal.company.com
+        - ai.internal.company.com
       secretName: enterprise-tls-secret
 ```
 
@@ -455,8 +455,8 @@ spec:
     name: enterprise-ca-issuer
     kind: ClusterIssuer
   dnsNames:
-  - chat.internal.company.com
-  - automation.internal.company.com
+  - ai.internal.company.com
+  - n8n.internal.company.com
   duration: 8760h  # 1 year
   renewBefore: 720h  # 30 days
 ```
@@ -554,7 +554,7 @@ kubectl get ingress -n lair -o yaml
 kubectl logs -n ingress-nginx deployment/ingress-nginx-controller -f
 
 # Test TLS handshake
-openssl s_client -connect chat.example.com:443 -servername chat.example.com
+openssl s_client -connect ai.example.com:443 -servername ai.example.com
 ```
 
 ### 🛠️ **Common Solutions**
@@ -582,7 +582,7 @@ kubectl delete certificate lair-tls -n lair
 kubectl get secret dns-provider-secret -n cert-manager
 
 # Check DNS propagation
-dig _acme-challenge.chat.example.com TXT
+dig _acme-challenge.ai.example.com TXT
 ```
 
 #### **Webhook Issues**

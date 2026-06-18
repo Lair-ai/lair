@@ -61,7 +61,7 @@ Lair deploys a comprehensive suite of applications that work together to provide
 
 **Default Access**:
 - **LAN**: `https://ai.hostname.local`
-- **Public**: `https://openwebui.example.com`
+- **Public**: `https://ai.example.com`
 - **Internal**: `lair-openwebui.lair.svc.cluster.local:8080`
 
 **Configuration Highlights**:
@@ -110,7 +110,7 @@ openWebUI:
 
 **Default Access**:
 - **LAN**: `https://n8n.hostname.local`
-- **Public**: `https://automation.example.com`
+- **Public**: `https://n8n.example.com`
 - **Internal**: `lair-n8n.lair.svc.cluster.local:5678`
 
 **Architecture**:

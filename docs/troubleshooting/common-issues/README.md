@@ -213,8 +213,8 @@ sudo systemd-resolve --status
 # Error: "NXDOMAIN" or wrong IP
 
 # Diagnosis:
-nslookup chat.example.com
-dig chat.example.com @8.8.8.8
+nslookup ai.example.com
+dig ai.example.com @8.8.8.8
 
 # Solutions:
 # 1. Check DNS records at registrar
@@ -224,8 +224,8 @@ dig chat.example.com @8.8.8.8
 # Can take up to 48 hours
 
 # 3. Test from multiple locations
-dig @1.1.1.1 chat.example.com
-dig @8.8.8.8 chat.example.com
+dig @1.1.1.1 ai.example.com
+dig @8.8.8.8 ai.example.com
 ```
 
 ### 🚨 **Ingress Controller Issues**
@@ -589,11 +589,11 @@ kubectl get challenges -n lair
 
 # Solutions:
 # 1. Check DNS propagation
-nslookup chat.example.com
-dig chat.example.com
+nslookup ai.example.com
+dig ai.example.com
 
 # 2. Verify HTTP-01 challenge accessibility
-curl -I http://chat.example.com/.well-known/acme-challenge/test
+curl -I http://ai.example.com/.well-known/acme-challenge/test
 
 # 3. Check cert-manager logs
 kubectl logs -n cert-manager deployment/cert-manager

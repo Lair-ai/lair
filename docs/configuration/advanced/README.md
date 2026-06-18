@@ -67,7 +67,7 @@ platform:
   has_gpu: true
   vram_percentage: 70
   access_mode: "dual"  # lan, public, or dual
-  system_hostname: "ai-platform"
+  system_hostname: "aiplatform"
 
 # Email configuration
 email:
@@ -85,16 +85,16 @@ access:
     enabled: true
     tls_enabled: true
     domains:
-      openwebui: "chat.ai-platform.local"
-      n8n: "automation.ai-platform.local"
-      comfyui: "images.ai-platform.local"
-      minio: "storage.ai-platform.local"
+      openwebui: "ai.aiplatform.local"
+      n8n: "n8n.aiplatform.local"
+      comfyui: "images.aiplatform.local"
+      minio: "storage.aiplatform.local"
   
   public:
     enabled: true
     domains:
-      openwebui: "chat.company.com"
-      n8n: "automation.company.com"
+      openwebui: "ai.company.com"
+      n8n: "n8n.company.com"
       comfyui: "images.company.com"
       minio: "storage.company.com"
 
@@ -434,7 +434,7 @@ openWebUI:
       providerName: "Company SSO"
       scopes: "openid email profile groups"
       providerUrl: "https://auth.company.com"
-      redirectUri: "https://chat.company.com/oauth/oidc/callback"
+      redirectUri: "https://ai.company.com/oauth/oidc/callback"
       # Additional OIDC configuration
       extraParams:
         prompt: "select_account"
@@ -578,12 +578,12 @@ ingress:
   
   # Multiple hosts configuration
   hosts:
-    - host: chat.company.com
+    - host: ai.company.com
       paths:
         - path: /
           pathType: Prefix
           service: openwebui
-    - host: automation.company.com
+    - host: n8n.company.com
       paths:
         - path: /
           pathType: Prefix
@@ -603,8 +603,8 @@ ingress:
   tls:
     - secretName: company-tls-cert
       hosts:
-        - chat.company.com
-        - automation.company.com
+        - ai.company.com
+        - n8n.company.com
         - images.company.com
         - storage.company.com
 ```

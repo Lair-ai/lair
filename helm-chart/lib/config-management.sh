@@ -296,7 +296,7 @@ load_configuration_from_file() {
   fi
   
   # Load public domain configurations
-  OPENWEBUI_DOMAIN_PUBLIC=$(read_yaml_value "$config_file" ".domains.public.openwebui" "openwebui.example.com")
+  OPENWEBUI_DOMAIN_PUBLIC=$(read_yaml_value "$config_file" ".domains.public.openwebui" "ai.example.com")
   N8N_DOMAIN_PUBLIC=$(read_yaml_value "$config_file" ".domains.public.n8n" "n8n.example.com")
   COMFYUI_DOMAIN_PUBLIC=$(read_yaml_value "$config_file" ".domains.public.comfyui" "")
   MINIO_DOMAIN_PUBLIC=$(read_yaml_value "$config_file" ".domains.public.minio" "")
@@ -304,7 +304,7 @@ load_configuration_from_file() {
   OLLAMA_DOMAIN_PUBLIC=""  # Always internal-only for security
   
   # Load legacy domain configurations (for backward compatibility)
-  OPENWEBUI_DOMAIN=$(read_yaml_value "$config_file" ".domains.openwebui" "chat.example.com")
+  OPENWEBUI_DOMAIN=$(read_yaml_value "$config_file" ".domains.openwebui" "ai.example.com")
   N8N_DOMAIN=$(read_yaml_value "$config_file" ".domains.n8n" "n8n.example.com")
   COMFYUI_DOMAIN=$(read_yaml_value "$config_file" ".domains.comfyui" "comfyui.example.com")
   MINIO_DOMAIN=$(read_yaml_value "$config_file" ".domains.minio" "")

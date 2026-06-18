@@ -18,7 +18,7 @@ Lair supports two mutually exclusive access configurations:
 
 ### 🌍 **Public Access Mode**  
 - **Target**: Internet access via public domains
-- **Domains**: Public domains (e.g., `chat.example.com`)
+- **Domains**: Public domains (e.g., `ai.example.com`)
 - **Security**: Automatic HTTPS with Let's Encrypt
 - **Use Case**: Cloud deployments, remote access
 
@@ -165,10 +165,10 @@ ingress:
   public:
     enabled: true
     hosts:
-      - host: chat.example.com
+      - host: ai.example.com
         serviceName: openwebui
         servicePort: 80
-      - host: automation.example.com
+      - host: n8n.example.com
         serviceName: n8n
         servicePort: 80
       - host: images.example.com
@@ -189,8 +189,8 @@ Create DNS A records pointing to your cluster's external IP:
 
 ```bash
 # DNS Records Required:
-chat.example.com        A    203.0.113.10
-automation.example.com  A    203.0.113.10
+ai.example.com        A    203.0.113.10
+n8n.example.com  A    203.0.113.10
 images.example.com      A    203.0.113.10
 storage.example.com     A    203.0.113.10
 api.example.com         A    203.0.113.10  # Optional: Ollama API
@@ -294,13 +294,13 @@ kubectl get challenges -n lair
 ### ✅ **Verification**
 ```bash
 # Test external access
-curl -I https://chat.example.com
+curl -I https://ai.example.com
 
 # Check certificate validity
-openssl s_client -connect chat.example.com:443 -servername chat.example.com
+openssl s_client -connect ai.example.com:443 -servername ai.example.com
 
 # Browser access
-# Open: https://chat.example.com
+# Open: https://ai.example.com
 ```
 
 ---
@@ -402,8 +402,8 @@ ingress:
 ingress:
   tls:
     - hosts:
-        - chat.example.com
-        - automation.example.com
+        - ai.example.com
+        - n8n.example.com
       secretName: custom-tls-secret
 ```
 
@@ -417,12 +417,12 @@ ingress:
 ```bash
 # Test DNS resolution
 nslookup ai.hostname.local
-nslookup chat.example.com
+nslookup ai.example.com
 
 # Common solutions:
 # 1. Check DNS configuration
 # 2. Clear DNS cache: sudo systemctl flush-dns
-# 3. Try different DNS server: dig @8.8.8.8 chat.example.com
+# 3. Try different DNS server: dig @8.8.8.8 ai.example.com
 ```
 
 #### **Certificate Issues**
@@ -432,7 +432,7 @@ kubectl get certificates -n lair
 kubectl describe certificate lair-tls -n lair
 
 # Common solutions:
-# 1. Check DNS propagation: dig chat.example.com
+# 1. Check DNS propagation: dig ai.example.com
 # 2. Verify port 80 accessibility for HTTP-01 challenge
 # 3. Check Let's Encrypt rate limits
 ```
@@ -462,7 +462,7 @@ kubectl get services -n ingress
 kubectl run test-pod --image=busybox --rm -it -- wget -qO- http://lair-openwebui:8080
 
 # Test external connectivity
-kubectl run test-pod --image=busybox --rm -it -- wget -qO- https://chat.example.com
+kubectl run test-pod --image=busybox --rm -it -- wget -qO- https://ai.example.com
 
 # Check ingress logs
 kubectl logs -n ingress deployment/ingress-nginx-controller
@@ -471,7 +471,7 @@ kubectl logs -n ingress deployment/ingress-nginx-controller
 #### **Certificate Debugging**
 ```bash
 # Check certificate details
-openssl s_client -connect chat.example.com:443 -servername chat.example.com
+openssl s_client -connect ai.example.com:443 -servername ai.example.com
 
 # Check cert-manager logs
 kubectl logs -n cert-manager deployment/cert-manager

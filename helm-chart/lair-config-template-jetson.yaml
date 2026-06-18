@@ -37,7 +37,7 @@ email:
 # Domain configuration
 domains:
   # Legacy domains (for backward compatibility)
-  openwebui: "chat.jetson.local"
+  openwebui: "ai.jetson.local"
   n8n: "n8n.jetson.local"
   comfyui: "" # Internal-only access for Jetson: lair-comfyui.lair.svc.cluster.local:80
   minio: "" # Internal-only access for Jetson: lair-minio.lair.svc.cluster.local
@@ -45,7 +45,7 @@ domains:
 
   # LAN domains (for dual access mode)
   lan:
-    openwebui: "chat.jetson.local"
+    openwebui: "ai.jetson.local"
     n8n: "n8n.jetson.local"
     comfyui: "" # Internal-only access
     minio: "" # Internal-only access

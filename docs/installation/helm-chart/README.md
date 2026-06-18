@@ -166,8 +166,8 @@ Is this installation for NVIDIA Jetson? (y/n) [default: y]:
    - Optional HTTPS with mkcert
 
 2) 🌍 Public Access Only (internet domains)  
-   - chat.example.com
-   - automation.example.com
+   - ai.example.com
+   - n8n.example.com
    - Automatic HTTPS with Let's Encrypt
 
 3) 🔄 Both LAN and Public Access
@@ -273,8 +273,8 @@ If cluster is accessible, automatic deployment:
    • N8N: https://n8n.hostname.local
 
 🌍 Public Access:  
-   • OpenWebUI: https://chat.example.com
-   • N8N: https://automation.example.com
+   • OpenWebUI: https://ai.example.com
+   • N8N: https://n8n.example.com
 ```
 
 ---
@@ -388,9 +388,9 @@ ingress:
   public:
     enabled: true
     hosts:
-      - host: chat.example.com
+      - host: ai.example.com
         serviceName: openwebui
-      - host: automation.example.com
+      - host: n8n.example.com
         serviceName: n8n
 
 certManager:
@@ -401,8 +401,8 @@ certManager:
 #### **DNS Requirements**
 ```bash
 # DNS A records required:
-chat.example.com        A    203.0.113.10
-automation.example.com  A    203.0.113.10
+ai.example.com        A    203.0.113.10
+n8n.example.com  A    203.0.113.10
 images.example.com      A    203.0.113.10
 storage.example.com     A    203.0.113.10
 ```
@@ -452,7 +452,7 @@ kubectl get ingress -n lair
 
 # Test external access
 curl -k https://ai.hostname.local  # LAN mode
-curl -k https://chat.example.com     # Public mode
+curl -k https://ai.example.com     # Public mode
 ```
 
 #### **Storage Verification**

@@ -305,11 +305,11 @@ metadata:
 spec:
   tls:
   - hosts:
-    - chat.example.com
-    - automation.example.com
+    - ai.example.com
+    - n8n.example.com
     secretName: lair-tls
   rules:
-  - host: chat.example.com
+  - host: ai.example.com
     http:
       paths:
       - path: /
@@ -319,7 +319,7 @@ spec:
             name: lair-openwebui
             port:
               number: 80
-  - host: automation.example.com
+  - host: n8n.example.com
     http:
       paths:
       - path: /
@@ -489,7 +489,7 @@ metadata:
     alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:region:account:certificate/cert-id
 spec:
   rules:
-  - host: chat.example.com
+  - host: ai.example.com
     http:
       paths:
       - path: /
@@ -514,7 +514,7 @@ metadata:
     ingress.gcp.kubernetes.io/managed-certificates: lair-ssl-cert
 spec:
   rules:
-  - host: chat.example.com
+  - host: ai.example.com
     http:
       paths:
       - path: /*
@@ -539,10 +539,10 @@ metadata:
 spec:
   tls:
   - hosts:
-    - chat.example.com
+    - ai.example.com
     secretName: lair-tls
   rules:
-  - host: chat.example.com
+  - host: ai.example.com
     http:
       paths:
       - path: /
@@ -652,23 +652,23 @@ sudo systemctl enable dnsmasq
 #### **DNS Records for Public Access**
 ```bash
 # Required DNS A records for public domains
-chat.example.com        A    203.0.113.10
-automation.example.com  A    203.0.113.10
+ai.example.com        A    203.0.113.10
+n8n.example.com  A    203.0.113.10
 images.example.com      A    203.0.113.10
 storage.example.com     A    203.0.113.10
 api.example.com         A    203.0.113.10
 
 # Optional CNAME records
-www.example.com         CNAME chat.example.com
-lair.example.com        CNAME chat.example.com
+www.example.com         CNAME ai.example.com
+lair.example.com        CNAME ai.example.com
 ```
 
 #### **DNS Propagation Verification**
 ```bash
 # Check DNS propagation from multiple locations
-dig chat.example.com @8.8.8.8
-dig chat.example.com @1.1.1.1
-dig chat.example.com @208.67.222.222
+dig ai.example.com @8.8.8.8
+dig ai.example.com @1.1.1.1
+dig ai.example.com @208.67.222.222
 
 # Check DNS propagation tools
 # https://dnschecker.org/
@@ -757,11 +757,11 @@ spec:
 spec:
   tls:
   - hosts:
-    - chat.example.com
-    - automation.example.com
+    - ai.example.com
+    - n8n.example.com
     secretName: lair-tls
   rules:
-  - host: chat.example.com
+  - host: ai.example.com
     # ... routing rules
 ```
 

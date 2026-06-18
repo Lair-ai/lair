@@ -539,7 +539,7 @@ Thank you to **Canonical** for Ubuntu and MicroK8s, which provide the operating 
 
 ### OVHcloud
 
-Thank you to **OVHcloud** for cloud infrastructure, Managed Kubernetes, S3-compatible object storage, and AI endpoint services that help make sovereign AI deployments practical.
+Thank you to **[OVHcloud](https://www.ovhcloud.com/)** for cloud infrastructure, Managed Kubernetes, S3-compatible object storage, and AI endpoint services that help make sovereign AI deployments practical.
 
 ### Ianustec
 

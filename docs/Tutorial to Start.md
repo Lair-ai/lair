@@ -64,8 +64,8 @@ sudo apt upgrade -y
 git clone https://github.com/Lair-ai/lair.git
 ```
 
-### (Optional) Fix Netplan (Dual Network Issue)
-On some cloud providers, two networks might be active by default, which can cause routing conflicts.
+### (Optional) Fix Netplan (Dual Network Issue & DNS)
+On some cloud providers, two networks might be active by default, which can cause routing and internal DNS resolution conflicts (especially on OVHCloud private networks).
 
 For example, if you check the current configuration you can find:
 
@@ -89,9 +89,9 @@ network:
       set-name: "ens4"
 ```
 
-In OVHCloud, ens3 is the public network and ens4 is the private network.
+In OVHCloud, `ens3` is the public network and `ens4` is the private network. If the private network broadcasts its own internal DNS servers, it might break external DNS resolution inside your Lair pods (preventing connection to external APIs like AI Endpoints).
 
- Let's fix the netplan configuration lowering the priority of private network.
+Let's fix the netplan configuration by lowering the priority of the private network and explicitly ignoring its DNS servers.
 
 ```bash
 sudo nano /etc/netplan/99-ens4-metric.yaml
@@ -107,9 +107,16 @@ network:
       dhcp4: true
       dhcp4-overrides:
         route-metric: 200
+        use-dns: false
 ```
 
-After saving, apply the network changes:
+Next, ensure the permissions on this file are strictly locked down (Ubuntu requires this for Netplan):
+
+```bash
+sudo chmod 600 /etc/netplan/99-ens4-metric.yaml
+```
+
+After saving and fixing permissions, apply the network changes:
 
 ```bash
 sudo netplan try
@@ -118,7 +125,7 @@ sudo netplan apply
 
 ---
 
-## 🏗️ Step 5: Install Single-Node Cluster
+## 🏗️ Step 5: Install Single-Node Cluster (about 8 minutes)
 
 Navigate to the Lair directory and run the main setup script to install the Kubernetes cluster.
 
@@ -131,6 +138,7 @@ Follow the interactive wizard and answer the prompts as follows (press **Enter**
 
 - **WHAT WOULD YOU LIKE TO DO:** `1` *(Setup Kubernetes cluster - Step 1)*
 - **CLUSTER SETUP OPTIONS:** `2` *(I want to install MicroK8s on this machine)*
+- **Do you want to continue? (y/N):** `y`
 - **Is this the PRIMARY node or a SECONDARY node? [primary/secondary]:** `primary`
 - **Enter cluster name [microk8s-cluster]:** `demo-k8s` *(or your preferred name)*
 - **Enable Velero backups? (y/n) [default: y]:** `n`
@@ -144,7 +152,7 @@ At the end of the script:
 
 ---
 
-## 🚀 Step 6: Install Lair Application
+## 🚀 Step 6: Install Lair Application (about 5 minutes)
 
 After the reboot, reconnect to your server via SSH:
 
@@ -163,6 +171,7 @@ Answer the wizard prompts to configure Lair:
 
 - **WHAT WOULD YOU LIKE TO DO:** `2` *(Deploy Lair application - Step 2)*
 - **Select configuration file to import [0-2] (default: 0):** `<Press Enter>`
+- **Do you want to continue? (y/N):** `y`
 - **How do you prefer to detect available resources?:** `1` *(From local operating system)*
 - **Do you want to continue with this resource allocation? (y/n) [default: y]:** `<Press Enter>`
 - **Use these detected resources? (y/n) [default: y]:** `<Press Enter>`
@@ -200,7 +209,7 @@ Once finished, exit the setup wizard.
 
 ---
 
-## ⏳ Step 7: Monitor Deployment
+## ⏳ Step 7: Monitor Deployment (about 23:09)
 
 Wait until all services and pods are successfully running. You can watch the pods spinning up in real-time with the following command:
 

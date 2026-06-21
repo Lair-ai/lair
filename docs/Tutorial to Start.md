@@ -209,7 +209,7 @@ Once finished, exit the setup wizard.
 
 ---
 
-## ⏳ Step 7: Monitor Deployment (about 23:09)
+## ⏳ Step 7: Monitor Deployment (about 15 minutes)
 
 Wait until all services and pods are successfully running. You can watch the pods spinning up in real-time with the following command:
 
@@ -217,7 +217,7 @@ Wait until all services and pods are successfully running. You can watch the pod
 watch -n 10 kubectl get all -n lair
 ```
 
-> ⚠️ **Note**: The system will take a couple of minutes to start. Pods may start, crash, and restart automatically until all dependencies are met and stable. It takes roughly **5 minutes** for Ollama to download the lightweight model usable on the CPU.
+> ⚠️ **Note**: The system will take a couple of minutes to start. Pods may start, crash, and restart automatically until all dependencies are met and stable. It takes roughly **10-15 minutes** for Ollama to download the lightweight model usable on the CPU.
 
 ---
 

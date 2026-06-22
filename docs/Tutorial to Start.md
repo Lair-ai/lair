@@ -1,10 +1,10 @@
-# 🚀 Practical Tutorial: Installing Lair (Single-Node in cloud)
+# 🚀 Practical Tutorial: Installing Lair on Single-Node in Cloud
 
 This tutorial provides a step-by-step practical example for installing the Lair infrastructure on a single machine (Single-Node) on a cloud VPS. We will set up Lair, the AI environment, and workflow automation across two different subdomains:
 - `https://demo.<your-domain>`
 - `https://n8ndemo.<your-domain>`
 
-> **Note**: By default, the platform will download a lightweight model to use on CPU. Withou a GPU, we recommend configuring a remote AI provider (like OVH AI Endpoint) that allows you to use open-source models with GDPR-compliant services, ensuring your data is not used for training.
+> **Note**: By default, the platform will download a lightweight model to use on CPU. Without a GPU, we recommend configuring a remote AI provider (like OVH AI Endpoint) that allows you to use open-source models with GDPR-compliant services, ensuring your data is not used for training.
 
 ---
 
@@ -13,7 +13,7 @@ This tutorial provides a step-by-step practical example for installing the Lair 
 Before starting, make sure you have:
 - A **domain name** (e.g., `lair-ai.it`). We will use two second-level domains, for example: `demo.lair-ai.it` for the chat interface and `n8ndemo.lair-ai.it` for the workflow interface.
 - An **email address** like `reply@<your-domain>` configured as a sender.
-- If you used Ovh as dns register you can create an email address in Web Cloud -> MX Plan -> Email Addresses -> Add an email address.
+- If you used OVH as your DNS registrar you can create an email address in Web Cloud -> MX Plan -> Email Addresses -> Add an email address.
 - (Optional) An **S3 bucket** ready if you want to enable cloud backups. In this tutorial, we will skip the Velero backup activation.
 
 ---
@@ -56,12 +56,11 @@ ssh ubuntu@demo.<your-domain>
 
 ## 🛠️ Step 4: First Steps and Server Preparation
 
-Update the system packages and clone the Lair repository:
+Update the system packages:
 
 ```bash
 sudo apt update
 sudo apt upgrade -y
-git clone https://github.com/Lair-ai/lair.git
 ```
 
 ### (Optional) Fix Netplan (Dual Network Issue & DNS)
@@ -70,27 +69,16 @@ On some cloud providers, two networks might be active by default, which can caus
 For example, if you check the current configuration you can find:
 
 ```bash
-sudo cat /etc/netplan/50-cloud-init.yaml
+ip route show
 ```
-```yaml
-network:
-  version: 2
-  ethernets:
-    ens3:
-      match:
-        macaddress: "fa:16:3e:cf:ba:7d"
-      dhcp4: true
-      set-name: "ens3"
-      mtu: 1500
-    ens4:
-      match:
-        macaddress: "fa:16:3e:ae:66:d0"
-      dhcp4: true
-      set-name: "ens4"
+```bash
+default via X.X.X.1 dev ens3 proto dhcp src X.X.X.254 metric 100
+default via 10.1.0.1 dev ens4 proto dhcp src 10.1.1.117 metric 100
+...
 ```
+As you can see, both networks have the same metric.
 
-In OVHCloud, `ens3` is the public network and `ens4` is the private network. If the private network broadcasts its own internal DNS servers, it might break external DNS resolution inside your Lair pods (preventing connection to external APIs like AI Endpoints).
-
+In OVHCloud, `ens3` is the public network and `ens4` is the private network.
 Let's fix the netplan configuration by lowering the priority of the private network and explicitly ignoring its DNS servers.
 
 ```bash
@@ -125,11 +113,12 @@ sudo netplan apply
 
 ---
 
-## 🏗️ Step 5: Install Single-Node Cluster (about 8 minutes)
+## 🏗️ Step 5: Install Single-Node Cluster (8-10 minutes)
 
 Navigate to the Lair directory and run the main setup script to install the Kubernetes cluster.
 
 ```bash
+git clone https://github.com/Lair-ai/lair.git
 cd lair
 sudo ./setup.sh
 ```
@@ -152,7 +141,7 @@ At the end of the script:
 
 ---
 
-## 🚀 Step 6: Install Lair Application (about 5 minutes)
+## 🚀 Step 6: Install Lair Application (5-10 minutes)
 
 After the reboot, reconnect to your server via SSH:
 
@@ -170,12 +159,12 @@ sudo ./setup.sh
 Answer the wizard prompts to configure Lair:
 
 - **WHAT WOULD YOU LIKE TO DO:** `2` *(Deploy Lair application - Step 2)*
-- **Select configuration file to import [0-2] (default: 0):** `<Press Enter>`
 - **Do you want to continue? (y/N):** `y`
+- **Select configuration file to import [0-2] (default: 0):** `<Press Enter>`
 - **How do you prefer to detect available resources?:** `1` *(From local operating system)*
 - **Do you want to continue with this resource allocation? (y/n) [default: y]:** `<Press Enter>`
 - **Use these detected resources? (y/n) [default: y]:** `<Press Enter>`
-- **Configuration name (for filename):** `\<a name to identify yaml, as "demo">`
+- **Configuration name (for filename):** `<a name to identify yaml, such as "demo">`
 - **Is this installation for NVIDIA Jetson? (y/n) [default: y]:** `n`
 - **Enable LAN access with .local domains? (y/n) [default: y]:** `n`
 - **Email for Let's Encrypt certificates:** `hello@<your-domain>`
@@ -227,15 +216,15 @@ Once all pods show the `Running` status, you must immediately secure your instan
 
 1. **Chat interface**: Visit `https://demo.<your-domain>` in your browser and create your admin account
 
-   **Add an AI provider **
+   **Add an AI provider**
    In OVH Cloud:
-   choose Public Cloud 
-   choose AI Endpoints -> Create a new Api Key
+   - Choose **Public Cloud**
+   - Choose **AI Endpoints** -> **Create a new API Key**
 
-   In new site:
-   - Go to Admin Settings → Connections → API OpenAI
-   - Choose Add Connection
-   - Write in the url field: "https://oai.endpoints.kepler.ai.cloud.ovh.net/v1"
+   In your Lair site:
+   - Go to **Admin Settings** → **Connections** → **API OpenAI**
+   - Choose **Add Connection**
+   - Write in the URL field: `https://oai.endpoints.kepler.ai.cloud.ovh.net/v1`
    - Write the API Key you just created in the API Key field
 
    [More information on OpenWebUI](https://docs.openwebui.com/getting-started/quick-start)

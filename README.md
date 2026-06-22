@@ -165,72 +165,17 @@ sudo ./setup.sh
 
 ## Installation Paths
 
-Choose the installation path that best fits your infrastructure:
+The unified setup wizard (`sudo ./setup.sh`) automatically detects your environment and guides you through the appropriate installation path. It supports the following main deployment scenarios:
 
-Before choosing, here are the main deployment scenarios (aligned with the paths below):
+1. **Local MicroK8s (Recommended)**
+   - **Single-node**: Perfect for development, cloud VMs, edge computing (Jetson), and DGX Spark.
+   - **Multi-node**: Setup a primary node and secondary workers for production/high availability.
+2. **Managed Kubernetes (Enterprise)**
+   - Deploy on existing clusters like OVH MKS, EKS, GKE, or AKS.
+3. **Helm-Only (Advanced)**
+   - Direct deployment to any pre-configured Kubernetes cluster.
 
-1. **Single machine in local environment (for example DGX Spark or Jetson)** → **Path 1 (Local MicroK8s)**
-2. **Single machine in cloud (one VM/node)** → **Path 1 (Local MicroK8s)**
-3. **On-prem or LAN multi-node setup (primary + workers)** → **Path 1 (Local MicroK8s)**
-4. **Managed multi-node Kubernetes in cloud (OVH MKS, EKS, GKE, AKS)** → **Path 2 (Managed Kubernetes)**
-5. **Already prepared Kubernetes cluster (advanced direct deploy)** → **Path 3 (Helm-Only)**
-
-### Path 1: Local MicroK8s (Recommended for most users)
-
-Perfect for development, edge computing, and production deployments. **Supports multi-node clusters and DGX Spark.**
-
-#### Single-Node Setup (Development / Edge / DGX Spark)
-```bash
-sudo ./microk8s/setup.sh
-# Select: Node type: single (default)
-```
-
-#### Multi-Node Setup (Production/High Availability)
-```bash
-# 1. Setup primary node (master)
-sudo ./microk8s/setup.sh
-# Select: Node type: primary
-
-# 2. Setup secondary nodes (workers) — on each additional machine
-sudo ./microk8s/utils/setup-secondary.sh <PRIMARY_IP> <JOIN_TOKEN>
-
-# 3. Deploy Lair applications
-cd helm-chart
-sudo ./setup.sh
-```
-
- **Best for**: Development, testing, edge computing, NVIDIA Jetson, DGX Spark, single-node production
-
-> **Jetson Note**: On NVIDIA Jetson devices, MicroK8s automatically configures Flannel CNI (instead of Calico) and Hostpath storage (instead of Longhorn), and supports single-node only.
-
-> **DGX Spark Note**: DGX Spark is treated as a standard Ubuntu 24.04 ARM64 host. Use the same setup flow and scripts as any other supported Ubuntu machine.
-
-### Path 2: Managed Kubernetes (Enterprise)
-
-Deploy on existing Kubernetes clusters such as [OVH MKS](https://www.ovhcloud.com/en/public-cloud/kubernetes/).
-
-```bash
-# 1. Setup cluster components (Longhorn, Ingress, Cert-Manager)
-sudo ./k8s-managed/setup.sh
-
-# 2. Deploy Lair applications
-cd helm-chart
-sudo ./setup.sh
-```
-
- **Best for**: Enterprise environments, multi-node clusters, existing K8s infrastructure
-
-### Path 3: Helm-Only (Advanced)
-
-Deploy directly to any Kubernetes cluster with existing infrastructure.
-
-```bash
-cd helm-chart
-sudo ./setup.sh
-```
-
- **Best for**: Advanced users with pre-configured Kubernetes clusters
-
+For advanced users who prefer manual execution or need granular control over each step, detailed guides and scripts are available in the [Installation Documentation](docs/installation/).
 ---
 
 ## Edge AI & Desktop Supercomputing: NVIDIA Jetson & DGX Spark
@@ -264,25 +209,13 @@ The DGX Spark is powered by the **NVIDIA GB10 Grace Blackwell Superchip** and br
 
 ### DGX Spark Quick Start
 
-```bash
-# On DGX Spark (DGX OS / Ubuntu 24.04 ARM64)
-git clone https://github.com/Lair-ai/lair.git
-cd lair
-sudo ./setup.sh
-# Choose your preferred access mode (LAN or Public)
-# Same installation flow as any other supported Ubuntu host
-```
+Run the unified setup wizard (`sudo ./setup.sh`) directly on your DGX Spark (running DGX OS / Ubuntu 24.04 ARM64). The wizard will guide you through the same installation flow as any other supported Ubuntu host.
 
 ### NVIDIA Jetson — Edge AI
 
 For deployments at the network edge, Lair runs on all NVIDIA Jetson devices with automatic ARM64 optimizations.
 
-```bash
-git clone https://github.com/Lair-ai/lair.git
-cd lair
-sudo ./setup.sh
-# Choose "lan" when prompted — Jetson is detected automatically
-```
+Run the unified setup wizard (`sudo ./setup.sh`) and choose "lan" when prompted. The hardware optimizations will be applied automatically.
 
 ### What Runs on Both Platforms
 
@@ -307,55 +240,27 @@ sudo ./setup.sh
 
 ## Use Case Examples
 
+When running the unified setup wizard (`sudo ./setup.sh`), it will prompt you for configuration choices. Here are some common scenarios:
+
 ### Private AI Development Lab (LAN Mode)
-```bash
-sudo ./microk8s/setup.sh
-# Choose "lan" when prompted for access mode
-cd helm-chart
-./setup.sh --config lair-config-standard.yaml
-```
-**Perfect for**: Office environments, internal development, secure networks, DGX Spark workstations
+- **Environment**: Office environments, internal development, secure networks, DGX Spark workstations.
+- **Wizard Choices**: Choose **Cluster Setup (MicroK8s)** -> **Single-node**, and select **LAN access** when prompted.
 
 ### Edge AI Deployment (NVIDIA Jetson)
-```bash
-sudo ./microk8s/setup.sh
-# Choose "lan" when prompted
-cd helm-chart
-./setup.sh --config lair-config-template-jetson.yaml
-```
-
-**Enterprise Edge Use Cases:**
-- **Manufacturing**: AI quality control with real-time defect detection and automated responses
-- **Retail**: Local customer behavior analysis with privacy-compliant workflow automation
-- **Agriculture**: Autonomous crop monitoring with local AI processing and decision workflows
-- **Security**: Real-time threat detection with automated response protocols — fully air-gapped
+- **Environment**: Manufacturing, Retail, Agriculture, Security (air-gapped or restricted networks).
+- **Wizard Choices**: The platform automatically detects the Jetson hardware. Choose **Cluster Setup (MicroK8s)** -> **Single-node**, and select **LAN access**.
 
 ### Cloud Public Deployment (OVHCloud or AWS, GCP, Azure)
-```bash
-sudo ./microk8s/setup.sh
-# Choose "public" — optimized for cloud environments
-cd helm-chart
-./setup.sh --config lair-config-standard.yaml
-```
-**Perfect for**: OVH MKS, AWS EC2, GCP Compute Engine, Azure VMs where public IP is assigned directly to the instance
+- **Environment**: Cloud VMs where a public IP is assigned directly to the instance.
+- **Wizard Choices**: Choose **Cluster Setup (MicroK8s)** -> **Single-node**, and select **Public access** to automatically configure internet routing and Let's Encrypt certificates.
 
 ### On-Premises Public Access (Router/NAT Setup)
-```bash
-sudo ./microk8s/setup.sh
-# Choose "public" and enter your router's public IP when prompted
-cd helm-chart
-./setup.sh --config lair-config-standard.yaml
-```
-**Perfect for**: Home servers, office setups with router port forwarding, VPS with NAT
+- **Environment**: Home servers, office setups with router port forwarding, VPS with NAT.
+- **Wizard Choices**: Choose **Cluster Setup (MicroK8s)** -> **Single-node**, select **Public access**, and provide your router's public IP when prompted for the external IP.
 
 ### Enterprise Managed Kubernetes (OVH MKS / EKS / GKE / AKS)
-```bash
-sudo ./k8s-managed/setup.sh
-cd helm-chart
-./setup.sh --config lair-config-standard.yaml
-```
-**Perfect for**: OVH MKS, AWS EKS, Google GKE, Azure AKS, OpenShift, Rancher
-
+- **Environment**: Existing enterprise K8s infrastructure.
+- **Wizard Choices**: Choose **Cluster Setup (Managed K8s)** to install required infrastructure components, then proceed to the **Deploy Lair application** step.
 ---
 
 ## Platform Support & Smart Features
@@ -449,6 +354,9 @@ helm upgrade lair . -n lair -f values.yaml -f values-yourname.yaml
 
 > **[Complete Documentation](docs/INTRO.md)** — Comprehensive guides for installation, configuration, and maintenance
 
+### Getting Started
+- **[🚀 Practical Tutorial: Single-Node in Cloud](docs/Tutorial%20to%20Start.md)** — Step-by-step example of a real-world cloud installation
+
 ### Installation & Setup
 - [Prerequisites & Requirements](docs/installation/requirements.md)
 - [MicroK8s Setup](docs/installation/microk8s-setup.md)
@@ -535,7 +443,7 @@ Created by **[NEXiD s.r.l.](https://www.nexid.it)**
 
 ### Canonical
 
-Thank you to **Canonical** for Ubuntu and MicroK8s, which provide the operating system and lightweight Kubernetes foundation used by Lair.
+Thank you to **[Canonical](https://canonical.com)** for Ubuntu and MicroK8s, which provide the operating system and lightweight Kubernetes foundation used by Lair.
 
 ### OVHcloud
 

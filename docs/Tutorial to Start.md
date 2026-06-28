@@ -227,7 +227,19 @@ Once all pods show the `Running` status, you must immediately secure your instan
    - Write in the URL field: `https://oai.endpoints.kepler.ai.cloud.ovh.net/v1`
    - Write the API Key you just created in the API Key field
 
-   [More information on OpenWebUI](https://docs.openwebui.com/getting-started/quick-start)
+   For image generation you can try this free service:
+   - Go to **Admin Settings** → **Images** → **Create Image**
+   - Write in Model field: `stable-diffusion-xl-1024-v1-0`
+   - Write in Image Size: `1024x1024`
+   - Write in Image Generation Engine: `OpenAI`
+   - Write in URL field: `https://oai.endpoints.kepler.ai.cloud.ovh.net/v1`
+   - Write the API Key you just created in the API Key field
+
+   For embeddings:
+   - Go to **Admin Settings** → **Documents** → **Embeddings**
+   - Without a GPU you can choose:
+   -  a) SentenceTransformers (default) for internal process
+   -  b) Openai settings, and previous OVH Url and API Key for external process for more heavy work
 
 2. **N8N Workflow**: Visit `https://n8ndemo.<your-domain>`.
    - *During the first steps, you may be required to request a free activation key to set up your local N8N instance.*

@@ -117,9 +117,13 @@ kubectl delete secrets --all -n lair
 
 #### **Container Image Cleanup**
 ```bash
-# For MicroK8s
-sudo microk8s ctr images list | grep lair
-sudo microk8s ctr images rm <image-name>
+# For MicroK8s environments (safe cleanup script)
+# This script intelligently removes unused images to reclaim space without breaking running pods
+misc/clean_unused_image_to_recover_space.sh
+
+# For manual removal in MicroK8s
+sudo microk8s ctr --namespace k8s.io images ls | grep lair
+sudo microk8s ctr --namespace k8s.io images rm <image-name>
 
 # For managed K8s (with crictl)
 sudo crictl images | grep lair
@@ -194,7 +198,8 @@ find /var/log/pods -name "*.log" -mtime +7 -delete 2>/dev/null || true
 # Clean up unused container images
 echo "Cleaning up unused container images..."
 if command -v microk8s &>/dev/null; then
-    microk8s ctr images prune
+    # Use the Lair safe image cleanup script
+    /path/to/project/misc/clean_unused_image_to_recover_space.sh
 elif command -v crictl &>/dev/null; then
     crictl rmi --prune
 elif command -v docker &>/dev/null; then

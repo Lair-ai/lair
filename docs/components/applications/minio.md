@@ -850,4 +850,4 @@ async function generatePresignedUrl(bucketName, objectName) {
 
 ---
 
-**🎯 Ready to manage your object storage?** Continue with [PostgreSQL Database](README.md) or explore [Redis Cache](README.md)!
+**🎯 Ready to manage your object storage?** Continue with [PostgreSQL Database](../services-overview.md) or explore [Redis Cache](../services-overview.md)!

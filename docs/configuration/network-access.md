@@ -564,12 +564,12 @@ Choose one access mode based on your primary use case:
 
 ### 📚 **Related Documentation**
 - **[Certificate Management](security-certificates.md)** - Detailed TLS certificate configuration
-- **[Network Configuration](../components/networking/README.md)** - Advanced networking setup
+- **[Network Configuration](../components/networking.md)** - Advanced networking setup
 - **[Security Configuration](advanced-configuration.md)** - Advanced security features
 
 ### 🔧 **Advanced Topics**
-- **[Custom Ingress Controllers](../components/networking/README.md)** - Alternative ingress solutions
-- **[Load Balancer Configuration](../components/networking/README.md)** - MetalLB advanced configuration
+- **[Custom Ingress Controllers](../components/networking.md)** - Alternative ingress solutions
+- **[Load Balancer Configuration](../components/networking.md)** - MetalLB advanced configuration
 - **[Multi-Environment Setup](advanced-configuration.md)** - Multiple environment management
 
 ---

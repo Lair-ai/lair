@@ -629,4 +629,4 @@ After successful deployment:
 
 ---
 
-**🎯 Ready to use your AI infrastructure?** Check the [Components Documentation](../components/applications/README.md) to learn about each application!
+**🎯 Ready to use your AI infrastructure?** Check the [Components Documentation](../components/services-overview.md) to learn about each application!

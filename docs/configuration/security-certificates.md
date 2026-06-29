@@ -671,4 +671,4 @@ kubectl get certificates -n lair -w
 
 ---
 
-**🎯 Ready to secure your deployment?** Continue with [Storage Configuration](../components/storage/README.md) or explore [Advanced Security](advanced-configuration.md)!
+**🎯 Ready to secure your deployment?** Continue with [Storage Configuration](../components/storage.md) or explore [Advanced Security](advanced-configuration.md)!

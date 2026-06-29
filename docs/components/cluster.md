@@ -408,4 +408,4 @@ spec:
 
 ---
 
-**🎯 Ready to optimize your cluster?** Continue with [Backup Configuration](../backup/README.md) or explore [Network Configuration](../networking/README.md)!
+**🎯 Ready to optimize your cluster?** Continue with [Backup Configuration](backup.md) or explore [Network Configuration](networking.md)!

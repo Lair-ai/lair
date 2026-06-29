@@ -943,4 +943,4 @@ kubectl logs -n ingress-nginx deployment/ingress-nginx-controller
 
 ---
 
-**🎯 Ready to optimize your network?** Continue with [Cluster Configuration](../cluster/README.md) or explore [Backup Components](../backup/README.md)!
+**🎯 Ready to optimize your network?** Continue with [Cluster Configuration](cluster.md) or explore [Backup Components](backup.md)!

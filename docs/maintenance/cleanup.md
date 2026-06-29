@@ -531,4 +531,4 @@ chmod +x /tmp/lair-cleanup-verification.sh
 
 ---
 
-**🎯 Ready to clean up your system?** Continue with [Updates & Upgrades](../updates/README.md) or explore [Backup Procedures](../backup-restore/README.md)!
+**🎯 Ready to clean up your system?** Continue with [Updates & Upgrades](updates.md) or explore [Backup Procedures](backup-restore.md)!

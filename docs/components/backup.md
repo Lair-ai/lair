@@ -543,4 +543,4 @@ kubectl get backupstoragelocations -n velero -o yaml
 
 ---
 
-**🎯 Ready to protect your data?** Continue with [Disaster Recovery Procedures](../../maintenance/backup-restore/README.md) or explore [Storage Configuration](../storage/README.md)!
+**🎯 Ready to protect your data?** Continue with [Disaster Recovery Procedures](../maintenance/backup-restore.md) or explore [Storage Configuration](storage.md)!

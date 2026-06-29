@@ -870,4 +870,4 @@ kubectl describe nodes | grep -A 10 "Conditions"
 
 ---
 
-**🎯 Ready to optimize your resources?** Continue with [Advanced Configuration](../advanced/README.md) or explore [Cluster Configuration](../../components/cluster/README.md)!
+**🎯 Ready to optimize your resources?** Continue with [Advanced Configuration](advanced-configuration.md) or explore [Cluster Configuration](../components/cluster.md)!

@@ -53,38 +53,38 @@ Step-by-step guides for different deployment scenarios.
 Detailed documentation for each system component.
 
 #### Cluster Components
-- **[Kubernetes Cluster](components/cluster/README.md)** - Core cluster functionality
-  - [MicroK8s Configuration](components/cluster/README.md)
-  - [Addon Management](components/cluster/README.md)
-  - [Remote Access](components/cluster/README.md)
+- **[Kubernetes Cluster](components/cluster.md)** - Core cluster functionality
+  - [MicroK8s Configuration](components/cluster.md)
+  - [Addon Management](components/cluster.md)
+  - [Remote Access](components/cluster.md)
 
-- **[Networking](components/networking/README.md)** - Network configuration and management
-  - [CNI Configuration](components/networking/README.md)
-  - [Ingress Controllers](components/networking/README.md)
-  - [MetalLB Load Balancer](components/networking/README.md)
-  - [DNS Configuration](components/networking/README.md)
+- **[Networking](components/networking.md)** - Network configuration and management
+  - [CNI Configuration](components/networking.md)
+  - [Ingress Controllers](components/networking.md)
+  - [MetalLB Load Balancer](components/networking.md)
+  - [DNS Configuration](components/networking.md)
 
-- **[Storage](components/storage/README.md)** - Storage solutions and management
-  - [Longhorn Distributed Storage](components/storage/README.md)
-  - [Hostpath Storage (Jetson)](components/storage/README.md)
-  - [Storage Classes](components/storage/README.md)
-  - [Persistent Volumes](components/storage/README.md)
+- **[Storage](components/storage.md)** - Storage solutions and management
+  - [Longhorn Distributed Storage](components/storage.md)
+  - [Hostpath Storage (Jetson)](components/storage.md)
+  - [Storage Classes](components/storage.md)
+  - [Persistent Volumes](components/storage.md)
 
-- **[Backup & Disaster Recovery](components/backup/README.md)** - Data protection with Velero
-  - [Velero Configuration](components/backup/README.md)
-  - [Backup Strategies](components/backup/README.md)
-  - [Restore Procedures](components/backup/README.md)
+- **[Backup & Disaster Recovery](components/backup.md)** - Data protection with Velero
+  - [Velero Configuration](components/backup.md)
+  - [Backup Strategies](components/backup.md)
+  - [Restore Procedures](components/backup.md)
 
 #### Application Components
-- **[Applications Overview](components/applications/README.md)** - All Lair applications
+- **[Applications Overview](components/services-overview.md)** - All Lair applications
   - [OpenWebUI](components/applications/openwebui.md) - AI Chat Interface
   - [N8N](components/applications/n8n.md) - Workflow Automation
   - [Ollama](components/applications/ollama.md) - LLM Serving Platform
   - [ComfyUI](components/applications/comfyui.md) - AI Image Generation
   - [MinIO](components/applications/minio.md) - Object Storage
-  - [Tika](components/applications/README.md) - Document Processing
-  - [PostgreSQL](components/applications/README.md) - Database
-  - [Redis](components/applications/README.md) - Cache & Queue
+  - [Tika](components/services-overview.md) - Document Processing
+  - [PostgreSQL](components/services-overview.md) - Database
+  - [Redis](components/services-overview.md) - Cache & Queue
 
 ### ⚙️ **Configuration**
 Configuration guides for different aspects of the system.
@@ -115,10 +115,10 @@ Ongoing maintenance, updates, and operational procedures.
   - [Performance Monitoring](maintenance/monitoring.md)
   - [Log Management](maintenance/monitoring.md)
 
-- **[Cleanup & Maintenance](maintenance/cleanup/README.md)** - System cleanup and maintenance
-  - [Regular Maintenance](maintenance/cleanup/README.md)
-  - [Storage Cleanup](maintenance/cleanup/README.md)
-  - [Complete Removal](maintenance/cleanup/README.md)
+- **[Cleanup & Maintenance](maintenance/cleanup.md)** - System cleanup and maintenance
+  - [Regular Maintenance](maintenance/cleanup.md)
+  - [Storage Cleanup](maintenance/cleanup.md)
+  - [Complete Removal](maintenance/cleanup.md)
 
 ### 🔍 **Troubleshooting**
 Problem diagnosis and resolution guides.
@@ -142,8 +142,8 @@ Problem diagnosis and resolution guides.
 ### 🔧 **System Administrators**
 1. **[Multi-Node Setup](installation/microk8s-setup.md#multi-node-cluster-setup)** - Scale to production
 2. **[Resource Planning](installation/helm-chart-setup.md)** - Plan your deployment
-3. **[Network Configuration](components/networking/README.md)** - Configure networking
-4. **[Backup Setup](components/backup/README.md)** - Configure backups
+3. **[Network Configuration](components/networking.md)** - Configure networking
+4. **[Backup Setup](components/backup.md)** - Configure backups
 5. **[Monitoring Setup](maintenance/monitoring.md)** - Monitor your system
 
 ### 🏢 **Enterprise Users**

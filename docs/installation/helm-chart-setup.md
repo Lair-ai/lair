@@ -623,10 +623,10 @@ After successful deployment:
 1. **✅ Verify Deployment**: Run all verification checks above
 2. **🔐 Setup Admin Accounts**: Create admin users in OpenWebUI and N8N
 3. **📚 Configure Applications**: Set up your AI models and workflows
-4. **🔒 Setup Certificates**: Configure [TLS Certificates](../../configuration/certificates/README.md) for HTTPS
-5. **📊 Monitor System**: Set up [Monitoring](../../maintenance/monitoring/README.md)
-6. **💾 Configure Backups**: Set up [Backup Procedures](../../maintenance/backup-restore/README.md)
+4. **🔒 Setup Certificates**: Configure [TLS Certificates](../configuration/security-certificates.md) for HTTPS
+5. **📊 Monitor System**: Set up [Monitoring](../maintenance/monitoring.md)
+6. **💾 Configure Backups**: Set up [Backup Procedures](../maintenance/backup-restore.md)
 
 ---
 
-**🎯 Ready to use your AI infrastructure?** Check the [Components Documentation](../../components/applications/README.md) to learn about each application!
+**🎯 Ready to use your AI infrastructure?** Check the [Components Documentation](../components/applications/README.md) to learn about each application!

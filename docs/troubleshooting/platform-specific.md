@@ -961,4 +961,4 @@ sudo chroot /mnt
 
 ---
 
-**🎯 Need more specific help?** Continue with [Debugging Tools](../debugging/README.md) or explore [Component-Specific Issues](../../components/README.md)!
+**🎯 Need more specific help?** Continue with [Debugging Tools](debugging.md) or explore [Component-Specific Issues](../components/services-overview.md)!

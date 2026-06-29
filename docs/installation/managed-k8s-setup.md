@@ -664,12 +664,12 @@ ingress:
 After successful managed K8s setup:
 
 1. **✅ Verify Installation**: Run all verification checks above
-2. **📦 Deploy Applications**: Proceed to [Helm Chart Deployment](../helm-chart/README.md)
-3. **🔧 Configure Access**: Set up [Access Modes](../../configuration/access-modes/README.md)
-4. **🔐 Setup Certificates**: Configure [TLS Certificates](../../configuration/certificates/README.md)
-5. **📊 Monitor System**: Set up [Monitoring](../../maintenance/monitoring/README.md)
-6. **💾 Configure Backups**: Set up [Backup Procedures](../../maintenance/backup-restore/README.md)
+2. **📦 Deploy Applications**: Proceed to [Helm Chart Deployment](helm-chart-setup.md)
+3. **🔧 Configure Access**: Set up [Access Modes](../configuration/network-access.md)
+4. **🔐 Setup Certificates**: Configure [TLS Certificates](../configuration/security-certificates.md)
+5. **📊 Monitor System**: Set up [Monitoring](../maintenance/monitoring.md)
+6. **💾 Configure Backups**: Set up [Backup Procedures](../maintenance/backup-restore.md)
 
 ---
 
-**🎯 Ready for applications?** Continue with [Helm Chart Deployment Guide](../helm-chart/README.md) or explore [Cloud-Specific Optimizations](../../configuration/advanced/README.md)!
+**🎯 Ready for applications?** Continue with [Helm Chart Deployment Guide](helm-chart-setup.md) or explore [Cloud-Specific Optimizations](../configuration/advanced-configuration.md)!

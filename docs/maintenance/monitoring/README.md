@@ -782,4 +782,4 @@ kubectl patch deployment <deployment-name> -n lair -p '{"spec":{"template":{"spe
 
 ---
 
-**🎯 Ready to optimize your monitoring?** Continue with [Update Procedures](../updates/README.md) or explore [Platform-Specific Troubleshooting](../../troubleshooting/platform-specific/README.md)!
+**🎯 Ready to optimize your monitoring?** Continue with [Update Procedures](../updates/README.md) or explore [Platform-Specific Troubleshooting](../../troubleshooting/platform-specific.md)!

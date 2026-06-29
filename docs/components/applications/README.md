@@ -566,14 +566,14 @@ df -h  # On cluster nodes
 - **[ComfyUI Setup](comfyui.md)** - AI image generation workflows
 
 ### 🔧 **Configuration & Management**
-- **[Resource Management](../../configuration/resources/README.md)** - Optimize resource allocation
-- **[Access Configuration](../../configuration/access-modes/README.md)** - Set up LAN and public access
-- **[Certificate Management](../../configuration/certificates/README.md)** - Configure HTTPS
+- **[Resource Management](../../configuration/storage-resources.md)** - Optimize resource allocation
+- **[Access Configuration](../../configuration/network-access.md)** - Set up LAN and public access
+- **[Certificate Management](../../configuration/security-certificates.md)** - Configure HTTPS
 
 ### 🔍 **Troubleshooting**
-- **[Application Issues](../../troubleshooting/common-issues/applications.md)** - Common application problems
-- **[Performance Tuning](../../troubleshooting/debugging/resource-debugging.md)** - Optimize performance
+- **[Application Issues](../../troubleshooting/common-issues.md)** - Common application problems
+- **[Performance Tuning](../../troubleshooting/debugging.md)** - Optimize performance
 
 ---
 
-**🎯 Ready to dive deeper?** Explore individual application guides or check the [Configuration Documentation](../../configuration/README.md)!
+**🎯 Ready to dive deeper?** Explore individual application guides or check the [Configuration Documentation](../../configuration/advanced-configuration.md)!

@@ -1087,4 +1087,4 @@ tracing:
 
 ---
 
-**🎯 Ready to implement advanced configurations?** Continue with [Multi-Environment Setup](multi-environment.md) or explore [Custom Configurations](custom-configs.md)!
+**🎯 Ready to implement advanced configurations?** Continue with [Multi-Environment Setup](advanced-configuration.md) or explore [Custom Configurations](advanced-configuration.md)!

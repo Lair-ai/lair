@@ -188,13 +188,10 @@ kubectl exec -n lair deployment/lair-openwebui -- curl -v lair-ollama:11434/api/
 ### 📝 **Centralized Log Collection**
 
 #### **Comprehensive Log Gathering Script**
+This script collects full logs from all Lair components and cluster events into a single directory for deep analysis or for sharing with support.
 ```bash
-# Create comprehensive log collection script
-cat > /usr/local/bin/lair-debug-logs.sh << 'EOF'
-
-/misc/debugging/lair-debug-logs.sh
-
-chmod +x /usr/local/bin/lair-debug-logs.sh
+# Run comprehensive log collection script
+./misc/debugging/lair-debug-logs.sh
 ```
 
 #### **Real-time Log Monitoring**
@@ -244,36 +241,10 @@ kubectl logs -n lair deployment/lair-openwebui | grep -E "started|ready|listenin
 ```
 
 #### **Log Correlation Analysis**
+This tool pulls logs from OpenWebUI, Ollama, N8N, and Ingress along with cluster events for a specific time range to correlate failures across multiple components.
 ```bash
-# Create log correlation script
-cat > /usr/local/bin/lair-log-correlation.sh << 'EOF'
-#!/bin/bash
-
-TIMESTAMP_START=${1:-"$(date -d '1 hour ago' '+%Y-%m-%dT%H:%M:%S')"}
-TIMESTAMP_END=${2:-"$(date '+%Y-%m-%dT%H:%M:%S')"}
-
-echo "=== LOG CORRELATION ANALYSIS ==="
-echo "Time range: $TIMESTAMP_START to $TIMESTAMP_END"
-echo
-
-# Get logs from all components with timestamps
-echo "=== OpenWebUI Logs ==="
-kubectl logs -n lair deployment/lair-openwebui --since-time="$TIMESTAMP_START" --timestamps | head -20
-
-echo "=== Ollama Logs ==="
-kubectl logs -n lair statefulset/lair-ollama --since-time="$TIMESTAMP_START" --timestamps | head -20
-
-echo "=== N8N Logs ==="
-kubectl logs -n lair deployment/lair-n8n --since-time="$TIMESTAMP_START" --timestamps | head -20
-
-echo "=== Ingress Logs ==="
-kubectl logs -n ingress-nginx deployment/ingress-nginx-controller --since-time="$TIMESTAMP_START" --timestamps | grep lair | head -20
-
-echo "=== Events During Time Range ==="
-kubectl get events -n lair --field-selector="firstTimestamp>=$TIMESTAMP_START,firstTimestamp<=$TIMESTAMP_END" --sort-by='.firstTimestamp'
-EOF
-
-chmod +x /usr/local/bin/lair-log-correlation.sh
+# Run log correlation script
+./misc/debugging/lair-log-correlation.sh
 ```
 
 ---
@@ -298,142 +269,26 @@ done
 ```
 
 #### **Memory Debugging**
+This script analyzes system memory, node memory pressure, and pod memory usage, identifying OOMKilled pods and comparing actual usage against configured limits.
 ```bash
-# Memory usage analysis script
-cat > /usr/local/bin/lair-memory-debug.sh << 'EOF'
-#!/bin/bash
-
-echo "=== MEMORY DEBUGGING ANALYSIS ==="
-echo "Timestamp: $(date)"
-echo
-
-# System memory
-echo "=== System Memory ==="
-free -h
-echo
-
-# Node memory pressure
-echo "=== Node Memory Pressure ==="
-kubectl describe nodes | grep -A 5 "MemoryPressure"
-echo
-
-# Pod memory usage
-echo "=== Pod Memory Usage ==="
-kubectl top pods -n lair --sort-by=memory
-echo
-
-# Memory-related events
-echo "=== Memory-Related Events ==="
-kubectl get events -A | grep -i "memory\|oom\|evict"
-echo
-
-# Check for OOMKilled pods
-echo "=== OOMKilled Pods ==="
-kubectl get pods -A -o json | jq -r '.items[] | select(.status.containerStatuses[]?.lastState.terminated.reason == "OOMKilled") | "\(.metadata.namespace)/\(.metadata.name)"'
-echo
-
-# Memory limits vs usage
-echo "=== Memory Limits vs Usage ==="
-for pod in $(kubectl get pods -n lair -o jsonpath='{.items[*].metadata.name}'); do
-    echo "Pod: $pod"
-    kubectl get pod "$pod" -n lair -o json | jq -r '.spec.containers[] | "  Container: \(.name), Memory Limit: \(.resources.limits.memory // "none"), Memory Request: \(.resources.requests.memory // "none")"'
-    kubectl top pod "$pod" -n lair --containers 2>/dev/null | tail -n +2 | awk '{print "  Current Usage: " $3}'
-    echo
-done
-EOF
-
-chmod +x /usr/local/bin/lair-memory-debug.sh
+# Run memory usage analysis script
+./misc/debugging/lair-memory-debug.sh
 ```
 
 #### **CPU Debugging**
+This script checks system CPU architecture, node CPU pressure, and pod CPU usage to detect CPU throttling and compare current usage against resource limits.
 ```bash
-# CPU usage analysis script
-cat > /usr/local/bin/lair-cpu-debug.sh << 'EOF'
-#!/bin/bash
-
-echo "=== CPU DEBUGGING ANALYSIS ==="
-echo "Timestamp: $(date)"
-echo
-
-# System CPU
-echo "=== System CPU ==="
-lscpu | grep -E "CPU\(s\)|Model name|Architecture"
-uptime
-echo
-
-# Node CPU pressure
-echo "=== Node CPU Pressure ==="
-kubectl describe nodes | grep -A 5 "PIDPressure\|DiskPressure"
-echo
-
-# Pod CPU usage
-echo "=== Pod CPU Usage ==="
-kubectl top pods -n lair --sort-by=cpu
-echo
-
-# CPU throttling detection
-echo "=== CPU Throttling Analysis ==="
-for pod in $(kubectl get pods -n lair -o jsonpath='{.items[*].metadata.name}'); do
-    echo "Pod: $pod"
-    kubectl get pod "$pod" -n lair -o json | jq -r '.spec.containers[] | "  Container: \(.name), CPU Limit: \(.resources.limits.cpu // "none"), CPU Request: \(.resources.requests.cpu // "none")"'
-    kubectl top pod "$pod" -n lair --containers 2>/dev/null | tail -n +2 | awk '{print "  Current Usage: " $2}'
-    echo
-done
-EOF
-
-chmod +x /usr/local/bin/lair-cpu-debug.sh
+# Run CPU usage analysis script
+./misc/debugging/lair-cpu-debug.sh
 ```
 
 ### 💾 **Storage Debugging**
 
 #### **Storage Analysis Tools**
+This script inspects system storage, Kubernetes Persistent Volumes, Storage Classes, Longhorn status, and pod-level storage usage to diagnose disk space or mount issues.
 ```bash
-# Storage debugging script
-cat > /usr/local/bin/lair-storage-debug.sh << 'EOF'
-#!/bin/bash
-
-echo "=== STORAGE DEBUGGING ANALYSIS ==="
-echo "Timestamp: $(date)"
-echo
-
-# System storage
-echo "=== System Storage ==="
-df -h
-echo
-
-# Kubernetes storage
-echo "=== Persistent Volumes ==="
-kubectl get pv -o wide
-echo
-
-echo "=== Persistent Volume Claims ==="
-kubectl get pvc -A -o wide
-echo
-
-echo "=== Storage Classes ==="
-kubectl get storageclass -o wide
-echo
-
-# Storage-related events
-echo "=== Storage-Related Events ==="
-kubectl get events -A | grep -i "storage\|volume\|pvc\|pv\|mount"
-echo
-
-# Longhorn status (if available)
-echo "=== Longhorn Status ==="
-kubectl get volumes.longhorn.io -n longhorn-system 2>/dev/null || echo "Longhorn not available"
-echo
-
-# Pod storage usage
-echo "=== Pod Storage Usage ==="
-for pod in $(kubectl get pods -n lair -o jsonpath='{.items[*].metadata.name}'); do
-    echo "Pod: $pod"
-    kubectl exec -n lair "$pod" -- df -h 2>/dev/null | grep -E "(Filesystem|/app|/data|/var)" || echo "  Cannot access storage info"
-    echo
-done
-EOF
-
-chmod +x /usr/local/bin/lair-storage-debug.sh
+# Run storage debugging script
+./misc/debugging/lair-storage-debug.sh
 ```
 
 ---
@@ -443,60 +298,10 @@ chmod +x /usr/local/bin/lair-storage-debug.sh
 ### 🔍 **Network Connectivity Analysis**
 
 #### **Comprehensive Network Debug**
+This script tests system network interfaces, Kubernetes services, endpoints, DNS resolution, and verifies connectivity between key Lair services (e.g., OpenWebUI to Ollama).
 ```bash
-# Network debugging script
-cat > /usr/local/bin/lair-network-debug.sh << 'EOF'
-#!/bin/bash
-
-echo "=== NETWORK DEBUGGING ANALYSIS ==="
-echo "Timestamp: $(date)"
-echo
-
-# System network
-echo "=== System Network Interfaces ==="
-ip addr show
-echo
-
-echo "=== System Network Routes ==="
-ip route show
-echo
-
-# Kubernetes network
-echo "=== Kubernetes Services ==="
-kubectl get services -A -o wide
-echo
-
-echo "=== Kubernetes Endpoints ==="
-kubectl get endpoints -A
-echo
-
-echo "=== Kubernetes Ingress ==="
-kubectl get ingress -A -o wide
-echo
-
-# DNS testing
-echo "=== DNS Resolution Testing ==="
-kubectl run dns-test --image=busybox --rm -it --restart=Never -- nslookup kubernetes.default 2>/dev/null || echo "DNS test failed"
-kubectl run dns-test --image=busybox --rm -it --restart=Never -- nslookup lair-ollama.lair.svc.cluster.local 2>/dev/null || echo "Service DNS test failed"
-echo
-
-# Connectivity testing
-echo "=== Service Connectivity Testing ==="
-kubectl exec -n lair deployment/lair-openwebui -- curl -s -o /dev/null -w "%{http_code}" lair-ollama:11434/api/tags 2>/dev/null || echo "Ollama connectivity failed"
-kubectl exec -n lair deployment/lair-openwebui -- curl -s -o /dev/null -w "%{http_code}" lair-tika:9998 2>/dev/null || echo "Tika connectivity failed"
-echo
-
-# Network policies
-echo "=== Network Policies ==="
-kubectl get networkpolicies -A
-echo
-
-# CNI status
-echo "=== CNI Status ==="
-kubectl get pods -n kube-system | grep -E "(calico|flannel|cni)"
-EOF
-
-chmod +x /usr/local/bin/lair-network-debug.sh
+# Run network debugging script
+./misc/debugging/lair-network-debug.sh
 ```
 
 #### **Advanced Network Diagnostics**
@@ -532,48 +337,10 @@ kubectl delete pod network-debug -n lair
 ### 🔧 **Ingress and Load Balancer Debugging**
 
 #### **Ingress Debugging**
+This tool checks the status of the ingress controller, LoadBalancer (MetalLB), TLS certificates, and retrieves recent ingress logs to debug routing and access issues.
 ```bash
-# Ingress debugging script
-cat > /usr/local/bin/lair-ingress-debug.sh << 'EOF'
-#!/bin/bash
-
-echo "=== INGRESS DEBUGGING ANALYSIS ==="
-echo "Timestamp: $(date)"
-echo
-
-# Ingress controller status
-echo "=== Ingress Controller Status ==="
-kubectl get pods -n ingress-nginx -o wide
-echo
-
-# Ingress configuration
-echo "=== Ingress Configuration ==="
-kubectl get ingress -n lair -o yaml
-echo
-
-# Ingress controller logs
-echo "=== Recent Ingress Controller Logs ==="
-kubectl logs -n ingress-nginx deployment/ingress-nginx-controller --tail=20
-echo
-
-# Load balancer status
-echo "=== Load Balancer Status ==="
-kubectl get services -n ingress-nginx -o wide
-echo
-
-# MetalLB status (if available)
-echo "=== MetalLB Status ==="
-kubectl get pods -n metallb-system 2>/dev/null || echo "MetalLB not available"
-kubectl get configmap config -n metallb-system -o yaml 2>/dev/null || echo "MetalLB config not available"
-echo
-
-# Certificate status
-echo "=== Certificate Status ==="
-kubectl get certificates -n lair 2>/dev/null || echo "No certificates found"
-kubectl get secrets -n lair | grep tls || echo "No TLS secrets found"
-EOF
-
-chmod +x /usr/local/bin/lair-ingress-debug.sh
+# Run ingress debugging script
+./misc/debugging/lair-ingress-debug.sh
 ```
 
 ---
@@ -583,108 +350,19 @@ chmod +x /usr/local/bin/lair-ingress-debug.sh
 ### 🤖 **OpenWebUI Debugging**
 
 #### **OpenWebUI Debug Script**
+This script specifically targets OpenWebUI, checking its pod status, connectivity to backend services (Ollama, Tika, PostgreSQL), recent application logs, and storage access.
 ```bash
-# OpenWebUI debugging script
-cat > /usr/local/bin/lair-openwebui-debug.sh << 'EOF'
-#!/bin/bash
-
-echo "=== OPENWEBUI DEBUGGING ANALYSIS ==="
-echo "Timestamp: $(date)"
-echo
-
-# Pod status
-echo "=== OpenWebUI Pod Status ==="
-kubectl get pods -n lair -l app=openwebui -o wide
-kubectl describe pods -n lair -l app=openwebui
-echo
-
-# Service connectivity
-echo "=== Service Connectivity Tests ==="
-echo "Testing Ollama connectivity:"
-kubectl exec -n lair deployment/lair-openwebui -- curl -s -o /dev/null -w "HTTP Status: %{http_code}, Time: %{time_total}s\n" lair-ollama:11434/api/tags 2>/dev/null || echo "Failed to connect to Ollama"
-
-echo "Testing Tika connectivity:"
-kubectl exec -n lair deployment/lair-openwebui -- curl -s -o /dev/null -w "HTTP Status: %{http_code}, Time: %{time_total}s\n" lair-tika:9998 2>/dev/null || echo "Failed to connect to Tika"
-
-echo "Testing PostgreSQL connectivity:"
-kubectl exec -n lair deployment/lair-openwebui -- nc -z lair-postgresql 5432 && echo "PostgreSQL: Connected" || echo "PostgreSQL: Connection failed"
-echo
-
-# Application logs analysis
-echo "=== Recent Application Logs ==="
-kubectl logs -n lair deployment/lair-openwebui --tail=50 | grep -E "(ERROR|WARN|INFO|startup|ready)"
-echo
-
-# Configuration check
-echo "=== Configuration Check ==="
-kubectl get configmap -n lair | grep openwebui || echo "No OpenWebUI ConfigMap found"
-kubectl get secret -n lair | grep openwebui || echo "No OpenWebUI secrets found"
-echo
-
-# Resource usage
-echo "=== Resource Usage ==="
-kubectl top pod -n lair -l app=openwebui 2>/dev/null || echo "Metrics not available"
-echo
-
-# Storage check
-echo "=== Storage Check ==="
-kubectl exec -n lair deployment/lair-openwebui -- df -h /app/backend/data 2>/dev/null || echo "Cannot access storage"
-kubectl exec -n lair deployment/lair-openwebui -- ls -la /app/backend/data 2>/dev/null | head -10 || echo "Cannot list storage contents"
-EOF
-
-chmod +x /usr/local/bin/lair-openwebui-debug.sh
+# Run OpenWebUI debugging script
+./misc/debugging/lair-openwebui-debug.sh
 ```
 
 ### 🧠 **Ollama Debugging**
 
 #### **Ollama Debug Script**
+This tool focuses on Ollama, checking pod health, API responsiveness, loaded models, GPU availability (via nvidia-smi), and storage access for downloaded models.
 ```bash
-# Ollama debugging script
-cat > /usr/local/bin/lair-ollama-debug.sh << 'EOF'
-#!/bin/bash
-
-echo "=== OLLAMA DEBUGGING ANALYSIS ==="
-echo "Timestamp: $(date)"
-echo
-
-# Pod status
-echo "=== Ollama Pod Status ==="
-kubectl get pods -n lair -l app=ollama -o wide
-kubectl describe pods -n lair -l app=ollama
-echo
-
-# API health check
-echo "=== API Health Check ==="
-kubectl exec -n lair statefulset/lair-ollama -- curl -s lair-ollama:11434/api/tags 2>/dev/null | jq '.' || echo "API not responding or invalid JSON"
-echo
-
-# Model status
-echo "=== Model Status ==="
-kubectl exec -n lair statefulset/lair-ollama -- ollama list 2>/dev/null || echo "Cannot list models"
-echo
-
-# GPU status (if available)
-echo "=== GPU Status ==="
-kubectl exec -n lair statefulset/lair-ollama -- nvidia-smi 2>/dev/null || echo "GPU not available or nvidia-smi not found"
-echo
-
-# Resource usage
-echo "=== Resource Usage ==="
-kubectl top pod -n lair -l app=ollama 2>/dev/null || echo "Metrics not available"
-echo
-
-# Storage check
-echo "=== Storage Check ==="
-kubectl exec -n lair statefulset/lair-ollama -- df -h /root/.ollama 2>/dev/null || echo "Cannot access Ollama storage"
-kubectl exec -n lair statefulset/lair-ollama -- ls -la /root/.ollama/models 2>/dev/null | head -10 || echo "Cannot list models directory"
-echo
-
-# Application logs analysis
-echo "=== Recent Application Logs ==="
-kubectl logs -n lair statefulset/lair-ollama --tail=50 | grep -E "(ERROR|WARN|INFO|model|load|GPU)"
-EOF
-
-chmod +x /usr/local/bin/lair-ollama-debug.sh
+# Run Ollama debugging script
+./misc/debugging/lair-ollama-debug.sh
 ```
 
 ---
@@ -694,91 +372,19 @@ chmod +x /usr/local/bin/lair-ollama-debug.sh
 ### 🔧 **Cluster Emergency Debug**
 
 #### **Rapid Cluster Assessment**
+This emergency script performs a rapid health check of the entire cluster, identifying critical failures in nodes, core components, and Lair services during severe outages.
 ```bash
-# Emergency cluster debug script
-
-misc/debugging/lair-emergency-debug.sh
+# Run emergency cluster debug script
+./misc/debugging/lair-emergency-debug.sh
 ```
 
 ### 🔄 **Recovery Procedures**
 
 #### **Automated Recovery Script**
+This script attempts automated remediation by checking cluster connectivity, restarting failed pods, restarting the ingress controller, and clearing the DNS cache if needed.
 ```bash
-# Automated recovery script
-cat > /usr/local/bin/lair-auto-recovery.sh << 'EOF'
-#!/bin/bash
-
-echo "=== AUTOMATED RECOVERY PROCEDURES ==="
-echo "Timestamp: $(date)"
-echo
-
-# Function to restart failed pods
-restart_failed_pods() {
-    echo "Checking for failed pods..."
-    FAILED_PODS=$(kubectl get pods -n lair --field-selector=status.phase!=Running -o jsonpath='{.items[*].metadata.name}')
-    
-    if [ ! -z "$FAILED_PODS" ]; then
-        echo "Found failed pods: $FAILED_PODS"
-        for pod in $FAILED_PODS; do
-            echo "Restarting pod: $pod"
-            kubectl delete pod "$pod" -n lair
-        done
-    else
-        echo "No failed pods found"
-    fi
-}
-
-# Function to restart ingress controller
-restart_ingress() {
-    echo "Restarting ingress controller..."
-    kubectl rollout restart deployment/ingress-nginx-controller -n ingress-nginx
-    kubectl rollout status deployment/ingress-nginx-controller -n ingress-nginx --timeout=300s
-}
-
-# Function to clear DNS cache
-clear_dns_cache() {
-    echo "Clearing DNS cache..."
-    kubectl delete pods -n kube-system -l k8s-app=kube-dns
-}
-
-# Main recovery logic
-echo "Starting automated recovery..."
-
-# Check cluster connectivity
-if ! kubectl cluster-info > /dev/null 2>&1; then
-    echo "ERROR: Cannot connect to cluster. Manual intervention required."
-    exit 1
-fi
-
-# Restart failed pods
-restart_failed_pods
-
-# Check ingress status
-INGRESS_READY=$(kubectl get pods -n ingress-nginx -l app.kubernetes.io/component=controller -o jsonpath='{.items[0].status.conditions[?(@.type=="Ready")].status}')
-if [ "$INGRESS_READY" != "True" ]; then
-    echo "Ingress controller not ready, restarting..."
-    restart_ingress
-fi
-
-# Check DNS resolution
-if ! kubectl exec -n lair deployment/lair-openwebui -- nslookup kubernetes.default > /dev/null 2>&1; then
-    echo "DNS resolution issues detected, clearing DNS cache..."
-    clear_dns_cache
-fi
-
-echo "Automated recovery complete. Waiting for stabilization..."
-sleep 30
-
-# Final status check
-echo "=== POST-RECOVERY STATUS ==="
-kubectl get pods -n lair
-kubectl get services -n lair
-kubectl get ingress -n lair
-
-echo "Recovery procedures completed at $(date)"
-EOF
-
-chmod +x /usr/local/bin/lair-auto-recovery.sh
+# Run automated recovery script
+./misc/debugging/lair-auto-recovery.sh
 ```
 
 ---
@@ -795,41 +401,10 @@ chmod +x /usr/local/bin/lair-auto-recovery.sh
 7. **Document findings**: Keep track of what you've checked
 
 ### 📊 **Debugging Checklist**
+This script provides an interactive, step-by-step checklist of standard debugging commands to systematically guide you through diagnosing complex cluster issues.
 ```bash
-# Create debugging checklist
-cat > /usr/local/bin/lair-debug-checklist.sh << 'EOF'
-#!/bin/bash
-
-echo "=== LAIR DEBUGGING CHECKLIST ==="
-echo "Use this checklist to systematically debug issues"
-echo
-
-echo "□ 1. Cluster connectivity (kubectl cluster-info)"
-echo "□ 2. Node status (kubectl get nodes)"
-echo "□ 3. Pod status (kubectl get pods -n lair)"
-echo "□ 4. Service status (kubectl get services -n lair)"
-echo "□ 5. Ingress status (kubectl get ingress -n lair)"
-echo "□ 6. Recent events (kubectl get events -n lair)"
-echo "□ 7. Resource usage (kubectl top pods -n lair)"
-echo "□ 8. Application logs (kubectl logs -n lair <pod-name>)"
-echo "□ 9. Service connectivity (curl tests between services)"
-echo "□ 10. DNS resolution (nslookup tests)"
-echo "□ 11. Storage status (kubectl get pvc -n lair)"
-echo "□ 12. Certificate status (kubectl get certificates -n lair)"
-echo "□ 13. Network policies (kubectl get networkpolicies -n lair)"
-echo "□ 14. External connectivity (ping, curl external services)"
-echo "□ 15. System resources (df -h, free -h, uptime)"
-echo
-
-echo "Run specific debug scripts:"
-echo "- Emergency debug: /misc/debugging/lair-emergency-debug.sh"
-echo "- Full debug logs: /misc/debugging/lair-debug-logs.sh"
-echo "- Network debug: /usr/local/bin/lair-network-debug.sh"
-echo "- OpenWebUI debug: /usr/local/bin/lair-openwebui-debug.sh"
-echo "- Ollama debug: /usr/local/bin/lair-ollama-debug.sh"
-EOF
-
-chmod +x /usr/local/bin/lair-debug-checklist.sh
+# Run debugging checklist
+./misc/debugging/lair-debug-checklist.sh
 ```
 
 ### 🚨 **When to Escalate**
@@ -841,4 +416,4 @@ chmod +x /usr/local/bin/lair-debug-checklist.sh
 
 ---
 
-**🎯 Ready to master debugging?** Continue with [Advanced Configuration](../../configuration/advanced/README.md) or explore [Component-Specific Guides](../../components/README.md)!
+**🎯 Ready to master debugging?** Continue with [Advanced Configuration](../configuration/advanced-configuration.md) or explore [Component-Specific Guides](../components/services-overview.md)!

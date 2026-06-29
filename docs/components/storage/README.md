@@ -1053,4 +1053,4 @@ kubectl get volumes.longhorn.io -n longhorn-system -o json | jq -r '.items[] | s
 
 ---
 
-**🎯 Ready to protect your data?** Continue with [Backup & Disaster Recovery](../../maintenance/backup-restore/README.md) or explore [Troubleshooting Storage Issues](../../troubleshooting/common-issues/storage.md)!
+**🎯 Ready to protect your data?** Continue with [Backup & Disaster Recovery](../../maintenance/backup-restore/README.md) or explore [Troubleshooting Storage Issues](../../troubleshooting/common-issues.md)!

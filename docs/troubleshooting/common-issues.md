@@ -899,4 +899,4 @@ free -h
 
 ---
 
-**🎯 Need more specific help?** Check [Platform-Specific Issues](../platform-specific/README.md) or [Debugging Tools](../debugging/README.md)!
+**🎯 Need more specific help?** Check [Platform-Specific Issues](platform-specific.md) or [Debugging Tools](debugging.md)!

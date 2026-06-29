@@ -47,4 +47,4 @@ kubectl exec -n lair deployment/lair-openwebui -- curl -s -o /dev/null lair-olla
 echo
 
 echo "=== EMERGENCY DEBUG COMPLETE ==="
-echo "If issues persist, run full debug collection: /usr/local/bin/lair-debug-logs.sh"
+echo "If issues persist, run full debug collection: ./misc/debugging/lair-debug-logs.sh"

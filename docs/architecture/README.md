@@ -392,4 +392,4 @@ Manual Config      →  GitOps Integration    →  AI-Driven Ops
 
 ---
 
-**🎯 Next Steps**: Explore specific components in the [Components Documentation](../components/README.md) or dive into [Installation Guides](../installation/README.md).
+**🎯 Next Steps**: Explore specific components in the [Components Documentation](../components/services-overview.md) or dive into [Installation Guides](../installation/microk8s-setup.md).

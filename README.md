@@ -356,6 +356,7 @@ helm upgrade lair . -n lair -f values.yaml -f values-yourname.yaml
 
 ### Getting Started
 - **[🚀 Practical Tutorial: Single-Node in Cloud](docs/Tutorial%20to%20Start.md)** — Step-by-step example of a real-world cloud installation
+- **[🚀 Practical Tutorial: Single-Node on PC with GPU](docs/Tutorial%20PC%20with%20GPU.md)** — Step-by-step example of a local LAN installation on a PC with GPU
 
 ### Installation & Setup
 - [Prerequisites & Requirements](docs/installation/requirements.md)
@@ -367,7 +368,7 @@ helm upgrade lair . -n lair -f values.yaml -f values-yourname.yaml
 ### Components & Configuration
 - [Services Overview](docs/components/services-overview.md)
 - [Network & Access](docs/configuration/network-access.md)
-- [Storage & Backup](docs/configuration/storage-backup.md)
+- [Storage & Backup](docs/configuration/storage-resources.md)
 - [Security & Certificates](docs/configuration/security-certificates.md)
 
 ### Maintenance & Operations

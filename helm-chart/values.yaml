@@ -195,6 +195,7 @@ ollama:
     keepAlive: 300
     maxLoadedModels: 1
     kvCacheType: "q8_0"
+    flashAttention: 1
   persistence:
     size: 20Gi
   probes:

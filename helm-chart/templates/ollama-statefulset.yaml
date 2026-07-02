@@ -102,7 +102,9 @@ spec:
               value: "{{ .Values.ollama.performances.keepAlive | default 300 }}"
             - name: OLLAMA_KV_CACHE_TYPE
               value: "{{ .Values.ollama.performances.kvCacheType | default "q8_0" }}"
-            # — logging sullo stdout del container —
+            - name: OLLAMA_FLASH_ATTENTION
+              value: "{{ .Values.ollama.performances.flashAttention | default 1 }}"
+           # — logging sullo stdout del container —
             - name: OLLAMA_LOGS
               value: "/dev/stdout"
             {{- if .Values.ollama.gpuEnabled }}

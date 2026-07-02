@@ -18,5 +18,3 @@ kubectl logs -n lair deployment/lair-n8n --since-time="$TIMESTAMP_START" --times
 echo "=== Ingress Logs ==="
 kubectl logs -n ingress-nginx deployment/ingress-nginx-controller --since-time="$TIMESTAMP_START" --timestamps | grep lair | head -20
 
-echo "=== Events During Time Range ==="
-kubectl get events -n lair --field-selector="firstTimestamp>=$TIMESTAMP_START,firstTimestamp<=$TIMESTAMP_END" --sort-by='.firstTimestamp'

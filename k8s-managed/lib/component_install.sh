@@ -12,7 +12,7 @@ run_component_install() {
     # Longhorn installation
     info "Installing Longhorn for persistent storage..."
     if helm repo add longhorn https://charts.longhorn.io && helm repo update; then
-        if run_cmd "helm install longhorn longhorn/longhorn --namespace longhorn-system --create-namespace --version 1.5.1 --set defaultSettings.allowVolumeCreationWithDegradedAvailability=true --set persistence.defaultClassReplicaCount=1 --set defaultSettings.defaultReplicaCount=1 --set storageClass.allowVolumeExpansion=true"; then
+        if run_cmd "helm install longhorn longhorn/longhorn --namespace longhorn-system --create-namespace --version 1.5.1 --set defaultSettings.allowVolumeCreationWithDegradedAvailability=true --set persistence.defaultClassReplicaCount=1 --set defaultSettings.defaultReplicaCount=1 --set storageClass.allowVolumeExpansion=true --set defaultSettings.guaranteedInstanceManagerCPU=12 --set longhornManager.resources.limits.memory=1000Mi --set longhornManager.resources.requests.memory=256Mi"; then
             ok "Longhorn installed successfully. Waiting for pods to be ready..."
             run_cmd "kubectl -n longhorn-system rollout status deploy/longhorn-driver-deployer"
             ok "Longhorn is ready."

@@ -1,3 +1,5 @@
+#!/bin/bash
+
 TIMESTAMP_START=${1:-"$(date -d '1 hour ago' '+%Y-%m-%dT%H:%M:%S')"}
 TIMESTAMP_END=${2:-"$(date '+%Y-%m-%dT%H:%M:%S')"}
 

@@ -29,10 +29,10 @@ spec:
           image: "{{ .Values.ollama.image.repository }}:{{ .Values.ollama.image.tag }}"
           {{- if contains "dustynv" .Values.ollama.image.repository }}
           command: ["/bin/sh"]
-          args: ["-c", "ollama serve & sleep 30 && ollama pull gemma3:1b-it-qat && pkill ollama"]
+          args: ["-c", "ollama serve & sleep 30 && ollama pull llama3.2:1b && pkill ollama"]
           {{- else }}
           command: ["/bin/sh"]
-          args: ["-c", "ollama serve & sleep 30 && ollama pull gemma3:1b-it-qat && pkill ollama"]
+          args: ["-c", "ollama serve & sleep 30 && ollama pull llama3.2:1b && pkill ollama"]
           {{- end }}
           env:
             - name: OLLAMA_LOGS
@@ -102,7 +102,9 @@ spec:
               value: "{{ .Values.ollama.performances.keepAlive | default 300 }}"
             - name: OLLAMA_KV_CACHE_TYPE
               value: "{{ .Values.ollama.performances.kvCacheType | default "q8_0" }}"
-            # — logging sullo stdout del container —
+            - name: OLLAMA_FLASH_ATTENTION
+              value: "{{ .Values.ollama.performances.flashAttention | default 1 }}"
+           # — logging sullo stdout del container —
             - name: OLLAMA_LOGS
               value: "/dev/stdout"
             {{- if .Values.ollama.gpuEnabled }}

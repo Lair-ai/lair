@@ -38,10 +38,10 @@ OpenWebUI serves as the main entry point for users to interact with AI models th
 #### **Default Access URLs**
 ```bash
 # LAN Access (.local domains)
-https://chat.hostname.local
+https://ai.hostname.local
 
 # Public Access (internet domains)
-https://chat.example.com
+https://ai.example.com
 
 # Internal Kubernetes Access
 http://lair-openwebui.lair.svc.cluster.local:8080
@@ -59,7 +59,7 @@ http://lair-openwebui.lair.svc.cluster.local:8080
 #### **Admin Account Creation**
 ```bash
 # First user registration automatically becomes admin
-# Navigate to: https://chat.hostname.local
+# Navigate to: https://ai.hostname.local
 # Click "Sign up" and create your account
 ```
 
@@ -416,7 +416,7 @@ openWebUI:
     google:
       clientId: "your-google-client-id"
       clientSecret: "your-google-client-secret"
-      redirectUri: "https://chat.example.com/oauth/google/callback"
+      redirectUri: "https://ai.example.com/oauth/google/callback"
 ```
 
 ##### **Microsoft Azure AD**
@@ -428,7 +428,7 @@ openWebUI:
       clientId: "your-azure-client-id"
       clientSecret: "your-azure-client-secret"
       tenantId: "your-tenant-id"
-      redirectUri: "https://chat.example.com/oauth/microsoft/callback"
+      redirectUri: "https://ai.example.com/oauth/microsoft/callback"
 ```
 
 ##### **GitHub OAuth**
@@ -452,7 +452,7 @@ openWebUI:
       providerName: "Custom SSO"
       scopes: "openid email profile"
       providerUrl: "https://your-oidc-provider.com"
-      redirectUri: "https://chat.example.com/oauth/oidc/callback"
+      redirectUri: "https://ai.example.com/oauth/oidc/callback"
 ```
 
 ### 🛡️ **Security Features**
@@ -713,12 +713,12 @@ POST /api/v1/generate         # Generate AI response
 import requests
 
 # Authentication
-auth_response = requests.post("https://chat.example.com/api/v1/auths/signin", 
+auth_response = requests.post("https://ai.example.com/api/v1/auths/signin", 
     json={"email": "user@example.com", "password": "password"})
 token = auth_response.json()["token"]
 
 # Generate response
-response = requests.post("https://chat.example.com/api/v1/generate",
+response = requests.post("https://ai.example.com/api/v1/generate",
     headers={"Authorization": f"Bearer {token}"},
     json={
         "model": "llama3.1:8b",

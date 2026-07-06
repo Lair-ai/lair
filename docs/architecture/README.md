@@ -23,7 +23,7 @@ Lair's architecture is designed as a **complete private AI infrastructure stack*
 │  ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────┐  │
 │  │   LAN Access    │  │  Public Access  │  │   API Access    │  │
 │  │  (.local TLS)   │  │ (Let's Encrypt) │  │ (Internal APIs) │  │
-│  │ chat.host.local │  │ chat.domain.com │  │ kubectl/helm    │  │
+│  │ ai.host.local │  │ ai.domain.com │  │ kubectl/helm    │  │
 │  └─────────────────┘  └─────────────────┘  └─────────────────┘  │
 └─────────────────────────────────────────────────────────────────┘
                                 │
@@ -204,8 +204,8 @@ Internet/LAN → MetalLB → NGINX Ingress → Services → Pods
                  ↓
          ┌─────────────────┐
          │  Ingress Rules  │
-         │  ├─ chat.*      │ → OpenWebUI Service
-         │  ├─ automation.*│ → N8N Service  
+         │  ├─ ai.*        │ → OpenWebUI Service
+         │  ├─ n8n.*       │ → N8N Service  
          │  ├─ images.*    │ → ComfyUI Service
          │  └─ storage.*   │ → MinIO Service
          └─────────────────┘
@@ -392,4 +392,4 @@ Manual Config      →  GitOps Integration    →  AI-Driven Ops
 
 ---
 
-**🎯 Next Steps**: Explore specific components in the [Components Documentation](../components/README.md) or dive into [Installation Guides](../installation/README.md).
+**🎯 Next Steps**: Explore specific components in the [Components Documentation](../components/services-overview.md) or dive into [Installation Guides](../installation/microk8s-setup.md).

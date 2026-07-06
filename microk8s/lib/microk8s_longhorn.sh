@@ -90,7 +90,10 @@ if ! $IS_JETSON; then
 
   LH_VALUES="--set csi.kubeletRootDir=/var/snap/microk8s/common/var/lib/kubelet \
              --set-string defaultSettings.defaultReplicaCount=${REP_CNT} \
-             --set storageClass.allowVolumeExpansion=true"
+             --set storageClass.allowVolumeExpansion=true \
+             --set defaultSettings.guaranteedInstanceManagerCPU=12 \
+             --set longhornManager.resources.limits.memory=1000Mi \
+             --set longhornManager.resources.requests.memory=256Mi"
 
   if microk8s helm3 list -n longhorn-system | grep -iq '^longhorn'; then
     info "Longhorn already present: performing upgrade"

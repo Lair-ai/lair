@@ -136,7 +136,7 @@ spec:
             - name: RAG_EMBEDDING_MODEL_DIR
               value: "/app/backend/data/cache/embedding_models"
             - name: RAG_EMBEDDING_ENGINE
-              value: "ollama"
+              value: ""
             - name: RESPONSE_WATERMARK
               value: "Generato da Lair Nexid"
             - name: ENABLE_WEB_SEARCH

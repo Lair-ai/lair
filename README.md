@@ -48,18 +48,18 @@ Lair enables organizations to deploy **private AI infrastructure** with comprehe
 - **Data Privacy Compliance**: RAG, documents, files, knowledge bases are stored locally, no data leaves your infrastructure
 - **Enterprise Integration**: Add AI capabilities to existing business systems using FastAPI and N8N
 - **Edge & Desktop AI**: Complete AI infrastructure on NVIDIA Jetson devices or a DGX Spark workstation — production-grade workflows at the edge and on the desk
-- **Backend for vibecoding**: by using a DGX Spark you can run an open‑source model (such as *Qwen3-Next-Coder*) and use it as a backend for vibecoding, without the hassle of tokens or time‑limited subscriptions, and your code and data remain on your device
+- **Backend for vibecoding**: By using a DGX Spark you can run an open‑source model (such as *Qwen3-Next-Coder*) and use it as a backend for vibecoding, without the hassle of tokens or time‑limited subscriptions, and your code and data remain on your device
 
 ### What You See
 
 Users get:
 
-- a **chat interface** with multiple features and customization options (powered by *OpenWebUI*)
-- the ability to choose between **local models** (via *Ollama*) and **open‑source AI providers** (e.g. OVH AI Endpoints)
-- the option to use major **cloud AI providers** (such as ChatGPT, Claude, Gemini) via API, without user profiling and with the ability to prevent data from being used for training
-- the ability to **upload documents** and use them as context for conversations (powered by *Tika*)
-- local **image generation** (powered by *ComfyUI*, when a GPU is available)
-- a no‑code interface to **build and automate workflows** (powered by *N8N*)
+- A **chat interface** with multiple features and customization options (powered by *OpenWebUI*)
+- The ability to choose between **local models** (via *Ollama*) and **open‑source AI providers** (e.g. OVH AI Endpoints)
+- The option to use major **cloud AI providers** (such as ChatGPT, Claude, Gemini) via API, without user profiling and with the ability to prevent data from being used for training
+- The ability to **upload documents** and use them as context for conversations (powered by *Tika*)
+- Local **image generation** (powered by *ComfyUI*, when a GPU is available)
+- A no‑code interface to **build and automate workflows** (powered by *N8N*)
 
 ### What You Get
 
@@ -99,7 +99,7 @@ Users get:
 
 ## Architecture Overview
 
-### High Level Overview 
+### High-Level Overview 
 
 ![alt text](https://dev.lair-ai.it/wp-content/uploads/2026/06/schema_ai.png "Lair Architecture Overview")
 
@@ -165,77 +165,29 @@ sudo ./setup.sh
 
 ## Installation Paths
 
-Choose the installation path that best fits your infrastructure:
+The unified setup wizard (`sudo ./setup.sh`) automatically detects your environment and guides you through the appropriate installation path. It supports the following main deployment scenarios:
 
-Before choosing, here are the main deployment scenarios (aligned with the paths below):
+1. **Local MicroK8s (Recommended)**
+   - **Single-node**: Perfect for development, cloud VMs, edge computing (Jetson), and DGX Spark.
+   - **Multi-node**: Setup a primary node and secondary workers for production/high availability.
+2. **Managed Kubernetes (Enterprise)**
+   - Deploy on existing clusters like OVH MKS, EKS, GKE, or AKS.
+3. **Helm-Only (Advanced)**
+   - Direct deployment to any pre-configured Kubernetes cluster.
 
-1. **Single machine in local environment (for example DGX Spark or Jetson)** → **Path 1 (Local MicroK8s)**
-2. **Single machine in cloud (one VM/node)** → **Path 1 (Local MicroK8s)**
-3. **On-prem or LAN multi-node setup (primary + workers)** → **Path 1 (Local MicroK8s)**
-4. **Managed multi-node Kubernetes in cloud (OVH MKS, EKS, GKE, AKS)** → **Path 2 (Managed Kubernetes)**
-5. **Already prepared Kubernetes cluster (advanced direct deploy)** → **Path 3 (Helm-Only)**
-
-### Path 1: Local MicroK8s (Recommended for most users)
-
-Perfect for development, edge computing, and production deployments. **Supports multi-node clusters and DGX Spark.**
-
-#### Single-Node Setup (Development / Edge / DGX Spark)
-```bash
-sudo ./microk8s/setup.sh
-# Select: Node type: single (default)
-```
-
-#### Multi-Node Setup (Production/High Availability)
-```bash
-# 1. Setup primary node (master)
-sudo ./microk8s/setup.sh
-# Select: Node type: primary
-
-# 2. Setup secondary nodes (workers) — on each additional machine
-sudo ./microk8s/utils/setup-secondary.sh <PRIMARY_IP> <JOIN_TOKEN>
-
-# 3. Deploy Lair applications
-cd helm-chart
-sudo ./setup.sh
-```
-
- **Best for**: Development, testing, edge computing, NVIDIA Jetson, DGX Spark, single-node production
-
-> **Jetson Note**: On NVIDIA Jetson devices, MicroK8s automatically configures Flannel CNI (instead of Calico) and Hostpath storage (instead of Longhorn), and supports single-node only.
-
-> **DGX Spark Note**: DGX Spark is treated as a standard Ubuntu 24.04 ARM64 host. Use the same setup flow and scripts as any other supported Ubuntu machine.
-
-### Path 2: Managed Kubernetes (Enterprise)
-
-Deploy on existing Kubernetes clusters such as [OVH MKS](https://www.ovhcloud.com/en/public-cloud/kubernetes/).
-
-```bash
-# 1. Setup cluster components (Longhorn, Ingress, Cert-Manager)
-sudo ./k8s-managed/setup.sh
-
-# 2. Deploy Lair applications
-cd helm-chart
-sudo ./setup.sh
-```
-
- **Best for**: Enterprise environments, multi-node clusters, existing K8s infrastructure
-
-### Path 3: Helm-Only (Advanced)
-
-Deploy directly to any Kubernetes cluster with existing infrastructure.
-
-```bash
-cd helm-chart
-sudo ./setup.sh
-```
-
- **Best for**: Advanced users with pre-configured Kubernetes clusters
-
+For advanced users who prefer manual execution or need granular control over each step, detailed guides and scripts are available in the [Installation Documentation](docs/installation/).
 ---
+
+## How to evaluate Lair
+
+The easiest and most cost-effective way to evaluate Lair is using a VPS in the internal data center or in a cloud provider. You will need a couple of subdomain names and an external AI provider (we recommend OVH or equivalent open-source Provider)
+
+Please, follow instructions in the [Tutorial to start](docs/Tutorial%20To%20Start.md) to deploy Lair on a VPS
+
 
 ## Edge AI & Desktop Supercomputing: NVIDIA Jetson & DGX Spark
 
-Lair deploys a complete production-grade AI infrastructure on compact edge devices (NVIDIA Jetson) and desktop AI systems such as NVIDIA DGX Spark. It is a strong on-premise option for privacy, open-source control, and predictable costs, because models and data remain on your own hardware.
+Lair deploys a complete production-grade AI infrastructure on compact edge devices (NVIDIA Jetson) and desktop AI systems such as NVIDIA DGX Spark. It is a strong on-premises option for privacy, open-source control, and predictable costs, because models and data remain on your own hardware.
 
 ### NVIDIA DGX Spark — Desktop AI Supercomputer
 
@@ -264,25 +216,13 @@ The DGX Spark is powered by the **NVIDIA GB10 Grace Blackwell Superchip** and br
 
 ### DGX Spark Quick Start
 
-```bash
-# On DGX Spark (DGX OS / Ubuntu 24.04 ARM64)
-git clone https://github.com/Lair-ai/lair.git
-cd lair
-sudo ./setup.sh
-# Choose your preferred access mode (LAN or Public)
-# Same installation flow as any other supported Ubuntu host
-```
+Run the unified setup wizard (`sudo ./setup.sh`) directly on your DGX Spark (running DGX OS / Ubuntu 24.04 ARM64). The wizard will guide you through the same installation flow as any other supported Ubuntu host.
 
 ### NVIDIA Jetson — Edge AI
 
 For deployments at the network edge, Lair runs on all NVIDIA Jetson devices with automatic ARM64 optimizations.
 
-```bash
-git clone https://github.com/Lair-ai/lair.git
-cd lair
-sudo ./setup.sh
-# Choose "lan" when prompted — Jetson is detected automatically
-```
+Run the unified setup wizard (`sudo ./setup.sh`) and choose "lan" when prompted. The hardware optimizations will be applied automatically.
 
 ### What Runs on Both Platforms
 
@@ -298,7 +238,7 @@ sudo ./setup.sh
 | Multi-node clustering | ❌ | ✅ *(via ConnectX)* |
 
 ### Why This Matters
-- **Technical scope**: Production AI stack on ARM64 — from <10W Jetson devices to a 240W desktop system
+- **Technical scope**: Production AI stack on ARM64 — from <60W Jetson devices to a 240W desktop system
 - **Data locality**: Run enterprise-grade AI directly where your data resides
 - **Privacy**: Process sensitive data locally with zero required cloud dependency
 - **Cost considerations**: DGX Spark can be cost-competitive with cloud A100 workloads for sustained, full-time use
@@ -307,54 +247,27 @@ sudo ./setup.sh
 
 ## Use Case Examples
 
+When running the unified setup wizard (`sudo ./setup.sh`), it will prompt you for configuration choices. Here are some common scenarios:
+
 ### Private AI Development Lab (LAN Mode)
-```bash
-sudo ./microk8s/setup.sh
-# Choose "lan" when prompted for access mode
-cd helm-chart
-./setup.sh --config lair-config-standard.yaml
-```
-**Perfect for**: Office environments, internal development, secure networks, DGX Spark workstations
+- **Environment**: Office environments, internal development, secure networks, DGX Spark workstations.
+- **Wizard Choices**: Choose **Cluster Setup (MicroK8s)** -> **Single-node**, and select **LAN access** when prompted.
 
 ### Edge AI Deployment (NVIDIA Jetson)
-```bash
-sudo ./microk8s/setup.sh
-# Choose "lan" when prompted
-cd helm-chart
-./setup.sh --config lair-config-template-jetson.yaml
-```
-
-**Enterprise Edge Use Cases:**
-- **Manufacturing**: AI quality control with real-time defect detection and automated responses
-- **Retail**: Local customer behavior analysis with privacy-compliant workflow automation
-- **Agriculture**: Autonomous crop monitoring with local AI processing and decision workflows
-- **Security**: Real-time threat detection with automated response protocols — fully air-gapped
+- **Environment**: Manufacturing, Retail, Agriculture, Security (air-gapped or restricted networks).
+- **Wizard Choices**: The platform automatically detects the Jetson hardware. Choose **Cluster Setup (MicroK8s)** -> **Single-node**, and select **LAN access**.
 
 ### Cloud Public Deployment (OVHCloud or AWS, GCP, Azure)
-```bash
-sudo ./microk8s/setup.sh
-# Choose "public" — optimized for cloud environments
-cd helm-chart
-./setup.sh --config lair-config-standard.yaml
-```
-**Perfect for**: OVH MKS, AWS EC2, GCP Compute Engine, Azure VMs where public IP is assigned directly to the instance
+- **Environment**: Cloud VMs where a public IP is assigned directly to the instance.
+- **Wizard Choices**: Choose **Cluster Setup (MicroK8s)** -> **Single-node**, and select **Public access** to automatically configure internet routing and Let's Encrypt certificates.
 
 ### On-Premises Public Access (Router/NAT Setup)
-```bash
-sudo ./microk8s/setup.sh
-# Choose "public" and enter your router's public IP when prompted
-cd helm-chart
-./setup.sh --config lair-config-standard.yaml
-```
-**Perfect for**: Home servers, office setups with router port forwarding, VPS with NAT
+- **Environment**: Home servers, office setups with router port forwarding, VPS with NAT.
+- **Wizard Choices**: Choose **Cluster Setup (MicroK8s)** -> **Single-node**, select **Public access**, and provide your router's public IP when prompted for the external IP.
 
 ### Enterprise Managed Kubernetes (OVH MKS / EKS / GKE / AKS)
-```bash
-sudo ./k8s-managed/setup.sh
-cd helm-chart
-./setup.sh --config lair-config-standard.yaml
-```
-**Perfect for**: OVH MKS, AWS EKS, Google GKE, Azure AKS, OpenShift, Rancher
+- **Environment**: Existing enterprise K8s infrastructure.
+- **Wizard Choices**: Choose **Cluster Setup (Managed K8s)** to install required infrastructure components, then proceed to the **Deploy Lair application** step.
 
 ---
 
@@ -449,6 +362,10 @@ helm upgrade lair . -n lair -f values.yaml -f values-yourname.yaml
 
 > **[Complete Documentation](docs/INTRO.md)** — Comprehensive guides for installation, configuration, and maintenance
 
+### Getting Started
+- **[🚀 Practical Tutorial: Single-Node in Cloud](docs/Tutorial%20to%20Start.md)** — Step-by-step example of a real-world cloud installation
+- **[🚀 Practical Tutorial: Single-Node on PC with GPU](docs/Tutorial%20PC%20with%20GPU.md)** — Step-by-step example of a local LAN installation on a PC with GPU
+
 ### Installation & Setup
 - [Prerequisites & Requirements](docs/installation/requirements.md)
 - [MicroK8s Setup](docs/installation/microk8s-setup.md)
@@ -459,7 +376,7 @@ helm upgrade lair . -n lair -f values.yaml -f values-yourname.yaml
 ### Components & Configuration
 - [Services Overview](docs/components/services-overview.md)
 - [Network & Access](docs/configuration/network-access.md)
-- [Storage & Backup](docs/configuration/storage-backup.md)
+- [Storage & Backup](docs/configuration/storage-resources.md)
 - [Security & Certificates](docs/configuration/security-certificates.md)
 
 ### Maintenance & Operations
@@ -472,54 +389,6 @@ helm upgrade lair . -n lair -f values.yaml -f values-yourname.yaml
 ## Contributing
 
 Contributions are what make the open-source community such an amazing place. **Any contribution you make is greatly appreciated.**
-
-### Ways to Contribute
-
-- **Report bugs** — open an [issue](https://github.com/Lair-ai/lair/issues) with the `bug` label
-- **Request features** — open an [issue](https://github.com/Lair-ai/lair/issues) with the `enhancement` label
-- **Improve documentation** — fix typos, clarify steps, translate content
-- **Submit code** — fix bugs or implement new features
-
-### Development Workflow
-
-1. **Fork** the repository
-2. **Create** a feature branch from `main`
- ```bash
- git checkout -b feature/my-amazing-feature
- ```
-3. **Set up** your development environment (Ubuntu 24.04 LTS or DGX OS required)
-4. **Make** your changes and write or update tests where applicable
-5. **Test** your changes on a clean Ubuntu 24.04 system — ensure nothing is broken
-6. **Commit** your changes using conventional commits
- ```bash
- git commit -m "feat: add support for XYZ"
- ```
-7. **Push** to your branch
- ```bash
- git push origin feature/my-amazing-feature
- ```
-8. **Open** a Pull Request against the `main` branch
-
-### Commit Message Convention
-
-We follow the [Conventional Commits](https://www.conventionalcommits.org/) specification:
-
-| Prefix | Use for |
-|--------|---------|
-| `feat:` | A new feature |
-| `fix:` | A bug fix |
-| `docs:` | Documentation only changes |
-| `chore:` | Maintenance tasks (CI, dependencies, etc.) |
-| `refactor:` | Code refactoring without behaviour change |
-| `test:` | Adding or fixing tests |
-
-### Pull Request Guidelines
-
-- Keep PRs focused — one feature or fix per PR
-- Include a clear description of what changes you made and why
-- Reference any related issues (e.g. `Closes #42`)
-- Make sure all scripts are tested on a clean Ubuntu 24.04 environment
-- Update the documentation if your change affects user-facing behaviour
 
 For larger features or architectural changes, please **open an issue first** to discuss the approach before investing time in implementation.
 
@@ -539,7 +408,7 @@ We take security seriously. **Please do not report security vulnerabilities thro
 
 If you discover a security vulnerability, please send a responsible disclosure email to:
 
-** [security@lair-ai.it](mailto:security@lair-ai.it)**
+**[security@lair-ai.it](mailto:security@lair-ai.it)**
 
 Include:
 - A description of the vulnerability
@@ -581,26 +450,13 @@ Created by **[NEXiD s.r.l.](https://www.nexid.it)**
 
 ## Acknowledgements
 
-### Canonical
-
-Thank you to **Canonical** for Ubuntu and MicroK8s, which provide the operating system and lightweight Kubernetes foundation used by Lair.
-
-### OVHcloud
-
-Thank you to **OVHcloud** for cloud infrastructure, Managed Kubernetes, S3-compatible object storage, and AI endpoint services that help make sovereign AI deployments practical.
-
 ### Ianustec
 
 Thank you to **[IANUSTEC s.r.l.](https://ianustec.com)** for development support, technical guidance, and hands-on contributions to the Lair project.
 
-Lair also thanks the open-source communities and maintainers behind the software used by the package: Kubernetes, Helm, OpenWebUI, N8N, Ollama, Apache Tika, ComfyUI, MinIO, PostgreSQL, pgvector, Redis, ingress-nginx, cert-manager, Let's Encrypt, Longhorn, Velero, CoreDNS, MetalLB, Calico, Flannel, Hostpath provisioner, dnsmasq, and mkcert.
+### Open-Source Projects
+Lair also thanks the open-source communities and maintainers behind the software used by the package: [Kubernetes](https://github.com/kubernetes/kubernetes), [Helm](https://github.com/helm/helm), [PostgreSQL](https://github.com/postgres/postgres), [Redis](https://github.com/redis/redis), [N8N](https://github.com/n8n-io/n8n), [OpenWebUI](https://github.com/openwebui/openwebui), [Longhorn](https://github.com/longhorn/longhorn), [cert-manager](https://github.com/cert-manager/cert-manager), [ingress-nginx](https://github.com/kubernetes/ingress-nginx), [Velero](https://github.com/vmware-tanzu/velero), [CoreDNS](https://github.com/coredns/coredns), [MetalLB](https://github.com/metallb/metallb), [Let's Encrypt](https://github.com/letsencrypt/boulder), [MinIO](https://github.com/minio/minio), [Apache Tika](https://github.com/apache/tika), [ComfyUI](https://github.com/comfyanonymous/ComfyUI), [Ollama](https://github.com/ollama/ollama), [pgvector](https://github.com/pgvector/pgvector), [Calico](https://github.com/projectcalico/calico), [Flannel](https://github.com/flannel-io/flannel), [hostpath provisioner](https://github.com/kubernetes-sigs/sig-storage-local-static-provisioner), [dnsmasq](https://github.com/thekelleys/dnsmasq), and [mkcert](https://github.com/FiloSottile/mkcert).
 
 ---
 
-** Ready to deploy your private AI infrastructure?**
-
-```bash
-sudo ./setup.sh
-```
-
-**Made in Italy by [LAiR](https://dev.lair-ai.it/)**
+**Made in Italy by [LAiR](https://www.lair-ai.it/)** 

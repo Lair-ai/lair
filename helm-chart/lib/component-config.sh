@@ -122,7 +122,7 @@ configure_access_mode_and_email() {
     ENABLE_LAN_ACCESS="true"
     echo "✅ LAN access enabled"
     echo "  • Services will be accessible on local network"
-    echo "  • Uses .local domains (e.g., chat.myhost.local)"
+    echo "  • Uses .local domains (e.g., ai.myhost.local)"
     echo "  • No Let's Encrypt certificates needed"
     echo ""
     
@@ -167,7 +167,7 @@ configure_access_mode_and_email() {
   if [[ "$ENABLE_LAN_ACCESS" == "false" ]]; then
     echo "✅ Public access automatically enabled (LAN access is disabled)"
     echo "  • Services will be accessible from internet"
-    echo "  • Uses public domains (e.g., chat.mycompany.com)"
+    echo "  • Uses public domains (e.g., ai.mycompany.com)"
     echo "  • Let's Encrypt will provide automatic TLS certificates"
     ENABLE_PUBLIC_ACCESS="true"
     echo ""
@@ -188,7 +188,7 @@ configure_access_mode_and_email() {
       ENABLE_PUBLIC_ACCESS="true"
       echo "✅ Public access enabled"
       echo "  • Services will be accessible from internet"
-      echo "  • Uses public domains (e.g., chat.mycompany.com)"
+      echo "  • Uses public domains (e.g., ai.mycompany.com)"
       echo "  • Let's Encrypt will provide automatic TLS certificates"
       echo ""
       

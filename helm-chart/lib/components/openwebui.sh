@@ -25,8 +25,8 @@ configure_openwebui() {
   # Public domain configuration
   if [[ "$ENABLE_PUBLIC_ACCESS" == "true" ]]; then
     echo -e "${BLUE}🌍 Public Domain Configuration${NC}"
-    read -p "🌐 OpenWebUI public domain [default: openwebui.example.com]: " OPENWEBUI_DOMAIN_PUBLIC
-    OPENWEBUI_DOMAIN_PUBLIC=${OPENWEBUI_DOMAIN_PUBLIC:-openwebui.example.com}
+    read -p "🌐 OpenWebUI public domain [default: ai.example.com]: " OPENWEBUI_DOMAIN_PUBLIC
+    OPENWEBUI_DOMAIN_PUBLIC=${OPENWEBUI_DOMAIN_PUBLIC:-ai.example.com}
     echo "✅ Public Domain: $OPENWEBUI_DOMAIN_PUBLIC"
     echo ""
   fi

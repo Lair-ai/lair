@@ -317,7 +317,7 @@ while [[ $# -gt 0 ]]; do
             echo "Usage: $0 [OPTIONS]"
             echo ""
             echo "Options:"
-            echo "  --domains DOMAINS     Comma-separated list of domains (e.g., 'chat.lair.local,n8n.lair.local')"
+            echo "  --domains DOMAINS     Comma-separated list of domains (e.g., 'ai.lair.local,n8n.lair.local')"
             echo "  --wildcard DOMAIN     Generate wildcard certificate for domain (e.g., 'lair.local')"
             echo "  --namespace NS        Kubernetes namespace (default: lair)"
             echo "  --secret NAME         Secret name (default: lair-tls-local)"
@@ -332,7 +332,7 @@ while [[ $# -gt 0 ]]; do
             echo "Examples:"
             echo "  $0 --wildcard neura.local"
             echo "  $0 --wildcard neura.local --remote-host 192.168.1.100 --remote-user ubuntu"
-            echo "  $0 --domains 'chat.neura.local,n8n.neura.local'"
+            echo "  $0 --domains 'ai.neura.local,n8n.neura.local'"
             exit 0
             ;;
         *)
@@ -420,7 +420,7 @@ echo ""
 echo "2. Ensure your DNS resolves .local domains to your cluster IP:"
 echo -e "   ${YELLOW}# Add to /etc/hosts on each client machine${NC}"
 if [ -n "$WILDCARD_DOMAIN" ]; then
-    echo -e "   ${YELLOW}192.168.1.100 chat.$WILDCARD_DOMAIN n8n.$WILDCARD_DOMAIN storage.$WILDCARD_DOMAIN${NC}"
+    echo -e "   ${YELLOW}192.168.1.100 ai.$WILDCARD_DOMAIN n8n.$WILDCARD_DOMAIN storage.$WILDCARD_DOMAIN${NC}"
 else
     echo -e "   ${YELLOW}192.168.1.100 ${CUSTOM_DOMAINS/,/ }${NC}"
 fi
@@ -430,7 +430,7 @@ echo -e "   ${YELLOW}helm upgrade --install lair . -n lair -f your-config.yaml${
 echo ""
 echo "4. Access your services with HTTPS:"
 if [ -n "$WILDCARD_DOMAIN" ]; then
-    echo -e "   ${YELLOW}https://chat.$WILDCARD_DOMAIN${NC}"
+    echo -e "   ${YELLOW}https://ai.$WILDCARD_DOMAIN${NC}"
     echo -e "   ${YELLOW}https://n8n.$WILDCARD_DOMAIN${NC}"
     echo -e "   ${YELLOW}https://storage.$WILDCARD_DOMAIN${NC}"
 else

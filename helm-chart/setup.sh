@@ -408,7 +408,7 @@ main() {
     echo ""
     echo -e "${GREEN}📖 Your .local domains will be:${NC}"
     if [[ "$ENABLE_LAN_ACCESS" == "true" ]]; then
-      echo -e "   • https://chat.$SYSTEM_HOSTNAME.local"
+      echo -e "   • https://ai.$SYSTEM_HOSTNAME.local"
       echo -e "   • https://n8n.$SYSTEM_HOSTNAME.local"
       echo -e "   • https://storage.$SYSTEM_HOSTNAME.local"
     fi

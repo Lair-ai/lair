@@ -815,4 +815,4 @@ result = generate_image("a beautiful sunset over mountains")
 
 ---
 
-**🎯 Ready to create amazing AI art?** Continue with [MinIO Object Storage](minio.md) or explore [PostgreSQL Database](postgresql.md)!
+**🎯 Ready to create amazing AI art?** Continue with [MinIO Object Storage](minio.md) or explore [PostgreSQL Database](../services-overview.md)!

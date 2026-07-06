@@ -99,7 +99,7 @@ platform:
 
   # System hostname for LAN domain generation
   # Used to generate .local domains like: subdomain.hostname.local
-  # Examples: "lair" → chat.lair.local, "myserver" → chat.myserver.local
+  # Examples: "lair" → ai.lair.local, "myserver" → ai.myserver.local
   # Leave empty to auto-detect hostname or be prompted during setup
   system_hostname: ""
 
@@ -140,7 +140,7 @@ access:
     # - true: System will ask for public domain for each component
     # - false: No public access configuration
     # When enabled, the system asks for domains like:
-    # - "OpenWebUI public domain [default: openwebui.example.com]"
+    # - "OpenWebUI public domain [default: ai.example.com]"
     # - "N8N public domain [default: n8n.example.com]"
     enabled: true
     # Public access is suitable for:
@@ -187,7 +187,7 @@ domains:
   # These domains must be publicly accessible and point to your cluster
   # Make sure these domains point to your Kubernetes cluster's ingress
   public:
-    openwebui: "openwebui.example.com" # OpenWebUI - Main chat interface
+    openwebui: "ai.example.com" # OpenWebUI - Main chat interface
     n8n: "n8n.example.com" # N8N - Workflow automation
     comfyui: "comfyui.example.com" # ComfyUI - AI image generation
     minio: "storage.example.com" # MinIO - S3-compatible storage
@@ -203,7 +203,7 @@ domains:
 # - etc.
 #
 # IF PUBLIC ACCESS IS ENABLED:
-# - "🌐 OpenWebUI public domain [default: openwebui.example.com]: "
+# - "🌐 OpenWebUI public domain [default: ai.example.com]: "
 # - "🌐 N8N public domain [default: n8n.example.com]: "
 # - "🌐 ComfyUI public domain (leave empty for internal-only): "
 # - etc.
@@ -310,7 +310,7 @@ openwebui:
       #       client_id: "12345678-1234-1234-1234-123456789abc"
       #       client_secret: "your-microsoft-client-secret"
       #       tenant_id: "87654321-4321-4321-4321-cba987654321"
-      #       redirect_uri: "https://chat.example.com/oauth/microsoft/callback"
+      #       redirect_uri: "https://ai.example.com/oauth/microsoft/callback"
       #
       # GitHub OAuth:
       # openwebui:
@@ -331,7 +331,7 @@ openwebui:
       #       client_secret: "your-oidc-client-secret"
       #       provider_name: "Keycloak"
       #       provider_url: "https://keycloak.example.com/realms/master/.well-known/openid-configuration"
-      #       redirect_uri: "https://chat.example.com/oauth/oidc/callback"
+      #       redirect_uri: "https://ai.example.com/oauth/oidc/callback"
       #
       # Trusted Header (for Tailscale, Cloudflare Access, oauth2-proxy):
       # openwebui:
@@ -502,7 +502,7 @@ deployment:
 # 2. "Enable public access with internet domains? (y/n) [default: n]:"
 # 3. For each component:
 #    - "🌐 OpenWebUI LAN domain [default: openwebui.lair.local]:"
-#    - "🌐 OpenWebUI public domain [default: openwebui.example.com]:"
+#    - "🌐 OpenWebUI public domain [default: ai.example.com]:"
 #    - "🌐 N8N LAN domain [default: n8n.lair.local]:"
 #    - "🌐 N8N public domain [default: n8n.example.com]:"
 #    - And so on for each component...

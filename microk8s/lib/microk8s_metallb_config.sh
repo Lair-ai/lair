@@ -15,7 +15,7 @@ fi
 ACCESS_MODE="lan"
 if $INTERACTIVE; then
   while :; do
-    read -rp "🌐 Modalità di accesso? [lan/public] (default: lan): " choice
+    read -rp "🌐 Access mode? [lan/public] (default: lan): " choice
     choice="${choice,,}"
     if [[ -z "$choice" || "$choice" == "lan" ]]; then
       ACCESS_MODE="lan"
@@ -24,7 +24,7 @@ if $INTERACTIVE; then
       ACCESS_MODE="public"
       break
     else
-      warn "Scelta non valida: inserisci 'lan' o 'public'."
+      warn "Please make a choice: enter 'lan' or 'public'."
     fi
   done
 else

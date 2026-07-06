@@ -37,7 +37,7 @@ email:
 # Domain configuration
 domains:
   # Legacy domains (for backward compatibility)
-  openwebui: "chat.lair-ai.com"
+  openwebui: "ai.lair-ai.com"
   n8n: "n8n.lair-ai.com"
   comfyui: "" # Internal-only access: lair-comfyui.lair.svc.cluster.local:80
   minio: "minio.lair-ai.com" # External access enabled
@@ -45,7 +45,7 @@ domains:
 
   # Public domains (for dual access mode)
   public:
-    openwebui: "chat.lair-ai.com"
+    openwebui: "ai.lair-ai.com"
     n8n: "n8n.lair-ai.com"
     comfyui: "" # Internal-only access
     minio: "minio.lair-ai.com"

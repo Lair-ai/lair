@@ -30,126 +30,104 @@ Understanding the complete Lair ecosystem and how components work together.
 Step-by-step guides for different deployment scenarios.
 
 #### Cluster Setup
-- **[MicroK8s Installation](installation/microk8s/README.md)** - Kubernetes cluster setup (single-node and multi-node)
-  - [Prerequisites & Requirements](installation/microk8s/prerequisites.md)
-  - [Single-Node Setup](installation/microk8s/single-node-setup.md)
-  - [Multi-Node Setup](installation/microk8s/multi-node-setup.md)
-  - [Network Configuration](installation/microk8s/network-config.md)
-  - [Platform-Specific Setup](installation/microk8s/platform-specific.md)
-  - [Jetson Optimization](installation/microk8s/jetson-setup.md)
+- **[MicroK8s Installation](installation/microk8s-setup.md)** - Kubernetes cluster setup (single-node and multi-node)
+  - [Prerequisites & Requirements](installation/requirements.md)
+  - [Single-Node Setup](installation/microk8s-setup.md)
+  - [Multi-Node Setup](installation/microk8s-setup.md)
+  - [Network Configuration](installation/microk8s-setup.md)
+  - [Platform-Specific Setup](installation/microk8s-setup.md)
+  - [Jetson Optimization](installation/microk8s-setup.md)
 
-- **[Managed Kubernetes Setup](installation/managed-k8s/README.md)** - Deploy on existing clusters
-  - [Prerequisites & Requirements](installation/managed-k8s/prerequisites.md)
-  - [Component Installation](installation/managed-k8s/components.md)
-  - [Cloud Provider Guides](installation/managed-k8s/cloud-providers.md)
+- **[Managed Kubernetes Setup](installation/managed-k8s-setup.md)** - Deploy on existing clusters
+  - [Prerequisites & Requirements](installation/requirements.md)
+  - [Component Installation](installation/managed-k8s-setup.md)
+  - [Cloud Provider Guides](installation/managed-k8s-setup.md)
 
 #### Application Deployment
-- **[Helm Chart Deployment](installation/helm-chart/README.md)** - Lair application deployment
-  - [Configuration Generation](installation/helm-chart/configuration.md)
-  - [Resource Planning](installation/helm-chart/resource-planning.md)
-  - [Deployment Options](installation/helm-chart/deployment-options.md)
+- **[Helm Chart Deployment](installation/helm-chart-setup.md)** - Lair application deployment
+  - [Configuration Generation](installation/helm-chart-setup.md)
+  - [Resource Planning](installation/helm-chart-setup.md)
+  - [Deployment Options](installation/helm-chart-setup.md)
 
 ### 🧩 **Components**
 Detailed documentation for each system component.
 
 #### Cluster Components
-- **[Kubernetes Cluster](components/cluster/README.md)** - Core cluster functionality
-  - [MicroK8s Configuration](components/cluster/microk8s.md)
-  - [Addon Management](components/cluster/addons.md)
-  - [Remote Access](components/cluster/remote-access.md)
+- **[Kubernetes Cluster](components/cluster.md)** - Core cluster functionality
+  - [MicroK8s Configuration](components/cluster.md)
+  - [Addon Management](components/cluster.md)
+  - [Remote Access](components/cluster.md)
 
-- **[Networking](components/networking/README.md)** - Network configuration and management
-  - [CNI Configuration](components/networking/cni.md)
-  - [Ingress Controllers](components/networking/ingress.md)
-  - [MetalLB Load Balancer](components/networking/metallb.md)
-  - [DNS Configuration](components/networking/dns.md)
+- **[Networking](components/networking.md)** - Network configuration and management
+  - [CNI Configuration](components/networking.md)
+  - [Ingress Controllers](components/networking.md)
+  - [MetalLB Load Balancer](components/networking.md)
+  - [DNS Configuration](components/networking.md)
 
-- **[Storage](components/storage/README.md)** - Storage solutions and management
-  - [Longhorn Distributed Storage](components/storage/longhorn.md)
-  - [Hostpath Storage (Jetson)](components/storage/hostpath.md)
-  - [Storage Classes](components/storage/storage-classes.md)
-  - [Persistent Volumes](components/storage/persistent-volumes.md)
+- **[Storage](components/storage.md)** - Storage solutions and management
+  - [Longhorn Distributed Storage](components/storage.md)
+  - [Hostpath Storage (Jetson)](components/storage.md)
+  - [Storage Classes](components/storage.md)
+  - [Persistent Volumes](components/storage.md)
 
-- **[Backup & Disaster Recovery](components/backup/README.md)** - Data protection with Velero
-  - [Velero Configuration](components/backup/velero-setup.md)
-  - [Backup Strategies](components/backup/backup-strategies.md)
-  - [Restore Procedures](components/backup/restore-procedures.md)
+- **[Backup & Disaster Recovery](components/backup.md)** - Data protection with Velero
+  - [Velero Configuration](components/backup.md)
+  - [Backup Strategies](components/backup.md)
+  - [Restore Procedures](components/backup.md)
 
 #### Application Components
-- **[Applications Overview](components/applications/README.md)** - All Lair applications
+- **[Applications Overview](components/services-overview.md)** - All Lair applications
   - [OpenWebUI](components/applications/openwebui.md) - AI Chat Interface
   - [N8N](components/applications/n8n.md) - Workflow Automation
   - [Ollama](components/applications/ollama.md) - LLM Serving Platform
   - [ComfyUI](components/applications/comfyui.md) - AI Image Generation
   - [MinIO](components/applications/minio.md) - Object Storage
-  - [Tika](components/applications/tika.md) - Document Processing
-  - [PostgreSQL](components/applications/postgresql.md) - Database
-  - [Redis](components/applications/redis.md) - Cache & Queue
+  - [Tika](components/services-overview.md) - Document Processing
+  - [PostgreSQL](components/services-overview.md) - Database
+  - [Redis](components/services-overview.md) - Cache & Queue
 
 ### ⚙️ **Configuration**
 Configuration guides for different aspects of the system.
 
-- **[Access Modes](configuration/access-modes/README.md)** - LAN vs Public access configuration
-  - [LAN Access (.local domains)](configuration/access-modes/lan-access.md)
-  - [Public Access (internet domains)](configuration/access-modes/public-access.md)
-  - [Dual Access Configuration](configuration/access-modes/dual-access.md)
+- **[Network & Access](configuration/network-access.md)** - LAN vs Public access configuration
 
-- **[Certificates & Security](configuration/certificates/README.md)** - TLS and security configuration
-  - [Let's Encrypt (Public)](configuration/certificates/letsencrypt.md)
-  - [mkcert (LAN)](configuration/certificates/mkcert.md)
-  - [Certificate Management](configuration/certificates/management.md)
+- **[Certificates & Security](configuration/security-certificates.md)** - TLS and security configuration
 
-- **[Resource Management](configuration/resources/README.md)** - CPU, memory, and storage allocation
-  - [Resource Detection](configuration/resources/detection.md)
-  - [Allocation Strategies](configuration/resources/allocation.md)
-  - [Platform Optimization](configuration/resources/optimization.md)
+- **[Storage & Resources](configuration/storage-resources.md)** - Resource and storage configuration
 
-- **[Advanced Configuration](configuration/advanced/README.md)** - Advanced setup options
-  - [Multi-Environment Setup](configuration/advanced/multi-environment.md)
-  - [Custom Configurations](configuration/advanced/custom-configs.md)
-  - [Integration Patterns](configuration/advanced/integration-patterns.md)
+- **[Advanced Configuration](configuration/advanced-configuration.md)** - Advanced setup options
 
 ### 🔧 **Maintenance & Operations**
 Ongoing maintenance, updates, and operational procedures.
 
-- **[Updates & Upgrades](maintenance/updates/README.md)** - Keeping the system current
-  - [Component Updates](maintenance/updates/component-updates.md)
-  - [Application Updates](maintenance/updates/application-updates.md)
-  - [Security Updates](maintenance/updates/security-updates.md)
+- **[Updates & Upgrades](maintenance/updates.md)** - Keeping the system current
+  - [Component Updates](maintenance/updates.md)
+  - [Application Updates](maintenance/updates.md)
+  - [Security Updates](maintenance/updates.md)
 
-- **[Backup & Restore](maintenance/backup-restore/README.md)** - Data protection procedures
-  - [Backup Procedures](maintenance/backup-restore/backup-procedures.md)
-  - [Restore Procedures](maintenance/backup-restore/restore-procedures.md)
-  - [Disaster Recovery](maintenance/backup-restore/disaster-recovery.md)
+- **[Backup & Restore](maintenance/backup-restore.md)** - Data protection procedures
+  - [Backup Procedures](maintenance/backup-restore.md)
+  - [Restore Procedures](maintenance/backup-restore.md)
+  - [Disaster Recovery](maintenance/backup-restore.md)
 
-- **[Monitoring & Health](maintenance/monitoring/README.md)** - System monitoring and health checks
-  - [Health Monitoring](maintenance/monitoring/health-monitoring.md)
-  - [Performance Monitoring](maintenance/monitoring/performance.md)
-  - [Log Management](maintenance/monitoring/log-management.md)
+- **[Monitoring & Health](maintenance/monitoring.md)** - System monitoring and health checks
+  - [Health Monitoring](maintenance/monitoring.md)
+  - [Performance Monitoring](maintenance/monitoring.md)
+  - [Log Management](maintenance/monitoring.md)
 
-- **[Cleanup & Maintenance](maintenance/cleanup/README.md)** - System cleanup and maintenance
-  - [Regular Maintenance](maintenance/cleanup/regular-maintenance.md)
-  - [Storage Cleanup](maintenance/cleanup/storage-cleanup.md)
-  - [Complete Removal](maintenance/cleanup/complete-removal.md)
+- **[Cleanup & Maintenance](maintenance/cleanup.md)** - System cleanup and maintenance
+  - [Regular Maintenance](maintenance/cleanup.md)
+  - [Storage Cleanup](maintenance/cleanup.md)
+  - [Complete Removal](maintenance/cleanup.md)
 
 ### 🔍 **Troubleshooting**
 Problem diagnosis and resolution guides.
 
-- **[Common Issues](troubleshooting/common-issues/README.md)** - Frequently encountered problems
-  - [Installation Issues](troubleshooting/common-issues/installation.md)
-  - [Network Issues](troubleshooting/common-issues/network.md)
-  - [Storage Issues](troubleshooting/common-issues/storage.md)
-  - [Application Issues](troubleshooting/common-issues/applications.md)
+- **[Common Issues](troubleshooting/common-issues.md)** - Frequently encountered problems
 
-- **[Platform-Specific Issues](troubleshooting/platform-specific/README.md)** - Platform-specific problems
-  - [Jetson Issues](troubleshooting/platform-specific/jetson.md)
-  - [Cloud Platform Issues](troubleshooting/platform-specific/cloud.md)
-  - [Network Configuration Issues](troubleshooting/platform-specific/network.md)
+- **[Platform-Specific Issues](troubleshooting/platform-specific.md)** - Platform-specific problems
 
-- **[Debugging Tools](troubleshooting/debugging/README.md)** - Diagnostic tools and procedures
-  - [Log Analysis](troubleshooting/debugging/log-analysis.md)
-  - [Network Debugging](troubleshooting/debugging/network-debugging.md)
-  - [Resource Debugging](troubleshooting/debugging/resource-debugging.md)
+- **[Debugging Tools](troubleshooting/debugging.md)** - Diagnostic tools and procedures
 
 ---
 
@@ -157,31 +135,31 @@ Problem diagnosis and resolution guides.
 
 ### 🎯 **New Users - Start Here**
 1. **[Architecture Overview](architecture/README.md)** - Understand the system
-2. **[Installation Requirements](installation/microk8s/README.md)** - Check prerequisites
-3. **[Single-Node Setup](installation/microk8s/README.md#single-node-installation)** - Install your first cluster
-4. **[Application Deployment](installation/helm-chart/README.md)** - Deploy Lair applications
+2. **[Installation Requirements](installation/microk8s-setup.md)** - Check prerequisites
+3. **[Single-Node Setup](installation/microk8s-setup.md#single-node-installation)** - Install your first cluster
+4. **[Application Deployment](installation/helm-chart-setup.md)** - Deploy Lair applications
 
 ### 🔧 **System Administrators**
-1. **[Multi-Node Setup](installation/microk8s/README.md#multi-node-cluster-setup)** - Scale to production
-2. **[Resource Planning](installation/helm-chart/resource-planning.md)** - Plan your deployment
-3. **[Network Configuration](components/networking/README.md)** - Configure networking
-4. **[Backup Setup](components/backup/README.md)** - Configure backups
-5. **[Monitoring Setup](maintenance/monitoring/README.md)** - Monitor your system
+1. **[Multi-Node Setup](installation/microk8s-setup.md#multi-node-cluster-setup)** - Scale to production
+2. **[Resource Planning](installation/helm-chart-setup.md)** - Plan your deployment
+3. **[Network Configuration](components/networking.md)** - Configure networking
+4. **[Backup Setup](components/backup.md)** - Configure backups
+5. **[Monitoring Setup](maintenance/monitoring.md)** - Monitor your system
 
 ### 🏢 **Enterprise Users**
-1. **[Multi-Node Architecture](installation/microk8s/README.md#multi-node-architecture)** - High availability setup
-2. **[Managed K8s Setup](installation/managed-k8s/README.md)** - Deploy on existing clusters
-3. **[Advanced Configuration](configuration/advanced/README.md)** - Enterprise features
-4. **[Multi-Environment](configuration/advanced/README.md#multi-environment-setup)** - Multiple environments
-5. **[Disaster Recovery](maintenance/backup-restore/README.md)** - Enterprise DR
+1. **[Multi-Node Architecture](installation/microk8s-setup.md#multi-node-architecture)** - High availability setup
+2. **[Managed K8s Setup](installation/managed-k8s-setup.md)** - Deploy on existing clusters
+3. **[Advanced Configuration](configuration/advanced-configuration.md)** - Enterprise features
+4. **[Multi-Environment](configuration/advanced-configuration.md#multi-environment-setup)** - Multiple environments
+5. **[Disaster Recovery](maintenance/backup-restore.md)** - Enterprise DR
 
 ### 🤖 **Edge Computing (Jetson)**
 > **Note**: Jetson deployments are **single-node only** with Flannel CNI and Hostpath storage
 
-1. **[Jetson Prerequisites](installation/microk8s/prerequisites.md)** - Jetson-specific requirements
-2. **[Jetson Setup Guide](installation/microk8s/jetson-setup.md)** - Single-node Jetson installation
-3. **[Jetson Troubleshooting](troubleshooting/platform-specific/jetson.md)** - Jetson-specific issues
-4. **[Edge Optimization](configuration/resources/optimization.md)** - Single-node edge optimization
+1. **[Jetson Prerequisites](installation/requirements.md)** - Jetson-specific requirements
+2. **[Jetson Setup Guide](installation/microk8s-setup.md)** - Single-node Jetson installation
+3. **[Jetson Troubleshooting](troubleshooting/platform-specific.md)** - Jetson-specific issues
+4. **[Edge Optimization](configuration/advanced-configuration.md)** - Single-node edge optimization
 
 ---
 
@@ -235,4 +213,4 @@ We welcome contributions to improve this documentation!
 
 ---
 
-**📖 Happy reading! If you need help, check our [Troubleshooting](troubleshooting/README.md) section or open an issue.**
+**📖 Happy reading! If you need help, check our [Troubleshooting](troubleshooting/common-issues.md) section or open an issue.**

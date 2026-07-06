@@ -48,18 +48,18 @@ Lair enables organizations to deploy **private AI infrastructure** with comprehe
 - **Data Privacy Compliance**: RAG, documents, files, knowledge bases are stored locally, no data leaves your infrastructure
 - **Enterprise Integration**: Add AI capabilities to existing business systems using FastAPI and N8N
 - **Edge & Desktop AI**: Complete AI infrastructure on NVIDIA Jetson devices or a DGX Spark workstation — production-grade workflows at the edge and on the desk
-- **Backend for vibecoding**: by using a DGX Spark you can run an open‑source model (such as *Qwen3-Next-Coder*) and use it as a backend for vibecoding, without the hassle of tokens or time‑limited subscriptions, and your code and data remain on your device
+- **Backend for vibecoding**: By using a DGX Spark you can run an open‑source model (such as *Qwen3-Next-Coder*) and use it as a backend for vibecoding, without the hassle of tokens or time‑limited subscriptions, and your code and data remain on your device
 
 ### What You See
 
 Users get:
 
-- a **chat interface** with multiple features and customization options (powered by *OpenWebUI*)
-- the ability to choose between **local models** (via *Ollama*) and **open‑source AI providers** (e.g. OVH AI Endpoints)
-- the option to use major **cloud AI providers** (such as ChatGPT, Claude, Gemini) via API, without user profiling and with the ability to prevent data from being used for training
-- the ability to **upload documents** and use them as context for conversations (powered by *Tika*)
-- local **image generation** (powered by *ComfyUI*, when a GPU is available)
-- a no‑code interface to **build and automate workflows** (powered by *N8N*)
+- A **chat interface** with multiple features and customization options (powered by *OpenWebUI*)
+- The ability to choose between **local models** (via *Ollama*) and **open‑source AI providers** (e.g. OVH AI Endpoints)
+- The option to use major **cloud AI providers** (such as ChatGPT, Claude, Gemini) via API, without user profiling and with the ability to prevent data from being used for training
+- The ability to **upload documents** and use them as context for conversations (powered by *Tika*)
+- Local **image generation** (powered by *ComfyUI*, when a GPU is available)
+- A no‑code interface to **build and automate workflows** (powered by *N8N*)
 
 ### What You Get
 
@@ -99,7 +99,7 @@ Users get:
 
 ## Architecture Overview
 
-### High Level Overview 
+### High-Level Overview 
 
 ![alt text](https://dev.lair-ai.it/wp-content/uploads/2026/06/schema_ai.png "Lair Architecture Overview")
 
@@ -178,9 +178,16 @@ The unified setup wizard (`sudo ./setup.sh`) automatically detects your environm
 For advanced users who prefer manual execution or need granular control over each step, detailed guides and scripts are available in the [Installation Documentation](docs/installation/).
 ---
 
+## How to evaluate Lair
+
+The easiest and most cost-effective way to evaluate Lair is using a VPS in the internal data center or in a cloud provider. You will need a couple of subdomain names and an external AI provider (we recommend OVH or equivalent open-source Provider)
+
+Please, follow instructions in the [Tutorial to start](docs/Tutorial%20To%20Start.md) to deploy Lair on a VPS
+
+
 ## Edge AI & Desktop Supercomputing: NVIDIA Jetson & DGX Spark
 
-Lair deploys a complete production-grade AI infrastructure on compact edge devices (NVIDIA Jetson) and desktop AI systems such as NVIDIA DGX Spark. It is a strong on-premise option for privacy, open-source control, and predictable costs, because models and data remain on your own hardware.
+Lair deploys a complete production-grade AI infrastructure on compact edge devices (NVIDIA Jetson) and desktop AI systems such as NVIDIA DGX Spark. It is a strong on-premises option for privacy, open-source control, and predictable costs, because models and data remain on your own hardware.
 
 ### NVIDIA DGX Spark — Desktop AI Supercomputer
 
@@ -261,6 +268,7 @@ When running the unified setup wizard (`sudo ./setup.sh`), it will prompt you fo
 ### Enterprise Managed Kubernetes (OVH MKS / EKS / GKE / AKS)
 - **Environment**: Existing enterprise K8s infrastructure.
 - **Wizard Choices**: Choose **Cluster Setup (Managed K8s)** to install required infrastructure components, then proceed to the **Deploy Lair application** step.
+
 ---
 
 ## Platform Support & Smart Features
@@ -442,14 +450,6 @@ Created by **[NEXiD s.r.l.](https://www.nexid.it)**
 
 ## Acknowledgements
 
-### Canonical
-
-Thank you to **[Canonical](https://canonical.com)** for Ubuntu and MicroK8s, which provide the operating system and lightweight Kubernetes foundation used by Lair.
-
-### OVHcloud
-
-Thank you to **[OVHcloud](https://www.ovhcloud.com/)** for cloud infrastructure, Managed Kubernetes, S3-compatible object storage, and AI endpoint services that help make sovereign AI deployments practical.
-
 ### Ianustec
 
 Thank you to **[IANUSTEC s.r.l.](https://ianustec.com)** for development support, technical guidance, and hands-on contributions to the Lair project.
@@ -459,4 +459,4 @@ Lair also thanks the open-source communities and maintainers behind the software
 
 ---
 
-**Made in Italy by [LAiR](https://dev.lair-ai.it/)** 
+**Made in Italy by [LAiR](https://www.lair-ai.it/)** 

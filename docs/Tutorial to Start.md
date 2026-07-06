@@ -149,6 +149,46 @@ After the reboot, reconnect to your server via SSH:
 ssh ubuntu@demo.<your-domain>
 ```
 
+First step, check if every pod is running in the just created cluster:
+```bash
+kubectl get pods --all-namespaces
+```
+
+You should see a table as the following, where you can check the STATUS column:
+```bash
+
+NAMESPACE         NAME                                                READY   STATUS    RESTARTS        AGE
+cert-manager      cert-manager-cainjector-fd9bf654b-vq8zl             1/1     Running   1 (2m25s ago)   7m27s
+cert-manager      cert-manager-ff4b94468-98j4l                        1/1     Running   1 (2m25s ago)   7m27s
+cert-manager      cert-manager-webhook-7749797f6-wtkrr                1/1     Running   1 (2m25s ago)   7m27s
+ingress           nginx-ingress-microk8s-controller-qrbch             1/1     Running   1 (2m25s ago)   7m27s
+kube-system       calico-kube-controllers-5947598c79-pxxd5            1/1     Running   1 (2m25s ago)   9m23s
+kube-system       calico-node-g97zz                                   1/1     Running   1 (2m25s ago)   9m23s
+kube-system       coredns-79b94494c7-jd6t5                            1/1     Running   1 (2m25s ago)   9m23s
+kube-system       metrics-server-7dbd8b5cc9-lz4f4                     1/1     Running   1 (2m25s ago)   5m11s
+longhorn-system   csi-attacher-578c8d8874-5c5xb                       1/1     Running   2 (98s ago)     5m36s
+longhorn-system   csi-attacher-578c8d8874-fwxjw                       1/1     Running   2 (97s ago)     5m36s
+longhorn-system   csi-attacher-578c8d8874-jjcj7                       1/1     Running   2 (98s ago)     5m36s
+longhorn-system   csi-provisioner-648dfd9fcf-n9rwp                    1/1     Running   2 (97s ago)     5m36s
+longhorn-system   csi-provisioner-648dfd9fcf-p95lq                    1/1     Running   2 (96s ago)     5m35s
+longhorn-system   csi-provisioner-648dfd9fcf-przxm                    1/1     Running   2 (98s ago)     5m35s
+longhorn-system   csi-resizer-749999f5bf-jlm88                        1/1     Running   2 (96s ago)     5m35s
+longhorn-system   csi-resizer-749999f5bf-jx8r5                        1/1     Running   2 (98s ago)     5m35s
+longhorn-system   csi-resizer-749999f5bf-z7mnb                        1/1     Running   2 (96s ago)     5m35s
+longhorn-system   csi-snapshotter-654587999d-56xc6                    1/1     Running   2 (98s ago)     5m35s
+longhorn-system   csi-snapshotter-654587999d-5fhd2                    1/1     Running   2 (97s ago)     5m35s
+longhorn-system   csi-snapshotter-654587999d-x5lss                    1/1     Running   2 (97s ago)     5m35s
+longhorn-system   engine-image-ei-a4d05f02-fcdrx                      1/1     Running   1 (2m25s ago)   6m8s
+longhorn-system   instance-manager-5645c7ab1a0fdf91c031007d54dfb6a1   1/1     Running   0               65s
+longhorn-system   longhorn-csi-plugin-hbrdr                           3/3     Running   4 (97s ago)     5m35s
+longhorn-system   longhorn-driver-deployer-7579c76c98-5fstz           1/1     Running   1 (2m25s ago)   6m28s
+longhorn-system   longhorn-manager-95c5q                              2/2     Running   3 (2m25s ago)   6m28s
+longhorn-system   longhorn-ui-674df74d95-bbtkg                        1/1     Running   3 (75s ago)     6m28s
+longhorn-system   longhorn-ui-674df74d95-krsxs                        1/1     Running   3 (76s ago)     6m28s
+metallb-system    controller-7ffc454778-zr8q4                         1/1     Running   1 (2m25s ago)   7m5s
+metallb-system    speaker-cdt4b                                       1/1     Running   1 (2m25s ago)   7m5s
+```
+
 Navigate back to the directory and run the setup script again to deploy the application:
 
 ```bash
@@ -227,6 +267,10 @@ Once all pods show the `Running` status, you must immediately secure your instan
    - Write in the URL field: `https://oai.endpoints.kepler.ai.cloud.ovh.net/v1`
    - Write the API Key you just created in the API Key field
 
+   To show only some models in Chat menu:
+   - Go to **Admin Settings** → **Models**
+   - Disable models for embedding (as bge..), safeguard (Qwen3Guard), audio (as whisper..), images (as stable diffusion..)
+
    For image generation you can try this free service:
    - Go to **Admin Settings** → **Images** → **Create Image**
    - Write in Model field: `stable-diffusion-xl-1024-v1-0`
@@ -234,12 +278,6 @@ Once all pods show the `Running` status, you must immediately secure your instan
    - Write in Image Generation Engine: `OpenAI`
    - Write in URL field: `https://oai.endpoints.kepler.ai.cloud.ovh.net/v1`
    - Write the API Key you just created in the API Key field
-
-   For embeddings:
-   - Go to **Admin Settings** → **Documents** → **Embeddings**
-   - Without a GPU you can choose:
-   -  a) SentenceTransformers (default) for internal process
-   -  b) Openai settings, and previous OVH Url and API Key for external process for more heavy work
 
 2. **N8N Workflow**: Visit `https://n8ndemo.<your-domain>`.
    - *During the first steps, you may be required to request a free activation key to set up your local N8N instance.*

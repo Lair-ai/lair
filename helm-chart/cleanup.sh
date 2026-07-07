@@ -14,7 +14,7 @@ YELLOW='\033[0;33m'
 BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
-# Detect environment type
+# Detect the environment type
 detect_environment() {
   if command -v microk8s &>/dev/null && microk8s kubectl get nodes &>/dev/null; then
     ENVIRONMENT_TYPE="microk8s"

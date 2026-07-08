@@ -2,8 +2,8 @@
 # Usage: sudo ./setup.sh --config lair-config-template-jetson.yaml
 
 # Basic Configuration
-client_name: "nexid"
-config_name: "nexid-jetson"
+client_name: "CHANGE_ME_CLIENT_NAME"
+config_name: "CHANGE_ME_CONFIG_NAME"
 
 # System Detection
 detection_choice: 1 # Use local system detection for Jetson
@@ -20,7 +20,7 @@ platform:
   is_jetson: true # NVIDIA Jetson platform
   has_gpu: true # GPU available (automatic for Jetson)
   vram_percentage: 70 # Conservative VRAM allocation for Jetson
-  system_hostname: "jetson" # Hostname for LAN domains (subdomain.jetson.local)
+  system_hostname: "CHANGE_ME_HOSTNAME" # Hostname for LAN domains (subdomain.jetson.local)
 
 # Dual Access Configuration
 access:
@@ -32,21 +32,21 @@ access:
 
 # Email and Domains
 email:
-  cert_email: "service@example.com"
+  cert_email: "CHANGE_ME_CERT_EMAIL"
 
 # Domain configuration
 domains:
   # Legacy domains (for backward compatibility)
-  openwebui: "ai.jetson.local"
-  n8n: "n8n.jetson.local"
+  openwebui: "CHANGE_ME_OPENWEBUI_LAN_DOMAIN"
+  n8n: "CHANGE_ME_N8N_LAN_DOMAIN"
   comfyui: "" # Internal-only access for Jetson: lair-comfyui.lair.svc.cluster.local:80
   minio: "" # Internal-only access for Jetson: lair-minio.lair.svc.cluster.local
   ollama: "" # Internal-only access (recommended for security)
 
   # LAN domains (for dual access mode)
   lan:
-    openwebui: "ai.jetson.local"
-    n8n: "n8n.jetson.local"
+    openwebui: "CHANGE_ME_OPENWEBUI_LAN_DOMAIN"
+    n8n: "CHANGE_ME_N8N_LAN_DOMAIN"
     comfyui: "" # Internal-only access
     minio: "" # Internal-only access
     ollama: "" # Internal-only access
@@ -104,14 +104,14 @@ components:
 
   minio:
     enabled: true
-    root_user: "minioadmin" # Root/admin username (change for production!)
-    root_password: "minioadmin" # Root/admin password (change for production!)
-    access_key: "jetson"
-    secret_key: "jetson123"
+    root_user: "CHANGE_ME_MINIO_ROOT_USER" # Root/admin username (change for production!)
+    root_password: "CHANGE_ME_MINIO_ROOT_PASSWORD" # Root/admin password (change for production!)
+    access_key: "CHANGE_ME_MINIO_ACCESS_KEY"
+    secret_key: "CHANGE_ME_MINIO_SECRET_KEY"
 
 # N8N Configuration
 n8n:
-  encryption_key: "" # Leave empty for auto-generation
+  encryption_key: "CHANGE_ME_N8N_ENCRYPTION_KEY" # Leave empty for auto-generation
   worker:
     enabled: true
     replicas: 1 # Single worker for Jetson
@@ -125,20 +125,20 @@ n8n:
   # SMTP configuration for user management
   smtp:
     enabled: false # Disabled by default - set to true and configure below to enable
-    host: "smtp.gmail.com"
+    host: "CHANGE_ME_SMTP_HOST"
     port: 587
-    user: "your-email@gmail.com"
-    password: "your-smtp-password"
-    sender: "your-email@gmail.com"
+    user: "CHANGE_ME_SMTP_USER"
+    password: "CHANGE_ME_SMTP_PASSWORD"
+    sender: "CHANGE_ME_SMTP_SENDER"
     ssl: true
     starttls: true
 
   # Admin user configuration (required for N8N access)
   adminUser:
-    email: "admin@n8n.local" # Admin email - used for login and notifications
-    password: "n8n123" # Admin password - CHANGE FOR PRODUCTION!
-    firstName: "Admin" # Admin first name
-    lastName: "User" # Admin last name
+    email: "CHANGE_ME_N8N_ADMIN_EMAIL" # Admin email - used for login and notifications
+    password: "CHANGE_ME_N8N_ADMIN_PASSWORD" # Admin password - CHANGE FOR PRODUCTION!
+    firstName: "CHANGE_ME_FIRST_NAME" # Admin first name
+    lastName: "CHANGE_ME_LAST_NAME" # Admin last name
     # SECURITY WARNING: Change these credentials for production deployments!
 
     # Auto-deployment

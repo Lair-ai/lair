@@ -197,7 +197,7 @@ configure_google_oauth() {
   echo ""
   
   read -p "📱 Google Client ID: " OPENWEBUI_GOOGLE_CLIENT_ID
-  read -p "🔑 Google Client Secret: " OPENWEBUI_GOOGLE_CLIENT_SECRET
+  read -s -p "🔑 Google Client Secret (hidden): " OPENWEBUI_GOOGLE_CLIENT_SECRET
   echo ""
   
   if [[ -z "$OPENWEBUI_GOOGLE_CLIENT_ID" || -z "$OPENWEBUI_GOOGLE_CLIENT_SECRET" ]]; then
@@ -225,7 +225,7 @@ configure_microsoft_oauth() {
   echo ""
   
   read -p "📱 Microsoft Client ID: " OPENWEBUI_MICROSOFT_CLIENT_ID
-  read -p "🔑 Microsoft Client Secret: " OPENWEBUI_MICROSOFT_CLIENT_SECRET
+  read -s -p "🔑 Microsoft Client Secret (hidden): " OPENWEBUI_MICROSOFT_CLIENT_SECRET
   echo ""
   read -p "🏢 Microsoft Tenant ID (use '9188040d-6c67-4c5b-b112-36a304b66dad' for personal accounts): " OPENWEBUI_MICROSOFT_CLIENT_TENANT_ID
   
@@ -254,7 +254,7 @@ configure_github_oauth() {
   echo ""
   
   read -p "📱 GitHub Client ID: " OPENWEBUI_GITHUB_CLIENT_ID
-  read -p "🔑 GitHub Client Secret: " OPENWEBUI_GITHUB_CLIENT_SECRET
+  read -s -p "🔑 GitHub Client Secret (hidden): " OPENWEBUI_GITHUB_CLIENT_SECRET
   echo ""
   
   if [[ -z "$OPENWEBUI_GITHUB_CLIENT_ID" || -z "$OPENWEBUI_GITHUB_CLIENT_SECRET" ]]; then
@@ -281,7 +281,7 @@ configure_oidc_oauth() {
   echo ""
   
   read -p "📱 OIDC Client ID: " OPENWEBUI_OAUTH_CLIENT_ID
-  read -p "🔑 OIDC Client Secret: " OPENWEBUI_OAUTH_CLIENT_SECRET
+  read -s -p "🔑 OIDC Client Secret (hidden): " OPENWEBUI_OAUTH_CLIENT_SECRET
   echo ""
   read -p "🌐 OIDC Provider URL (e.g., https://accounts.google.com/.well-known/openid-configuration): " OPENWEBUI_OPENID_PROVIDER_URL
   read -p "📛 Provider Display Name [default: SSO]: " OPENWEBUI_OAUTH_PROVIDER_NAME

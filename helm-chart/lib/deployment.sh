@@ -393,6 +393,13 @@ EOF
 
 # Helper function for Helm deployment
 execute_helm_deployment() {
+  if [ "$USE_CONFIG_FILE" = "true" ] && [ -n "$CONFIG_FILE_PATH" ]; then
+    if ! validate_configuration_placeholders "$CONFIG_FILE_PATH"; then
+      echo -e "${RED}❌ Deployment aborted due to validation failure.${NC}"
+      exit 1
+    fi
+  fi
+
   echo "Proceeding with installation"
   
   # Let user choose which helm to use

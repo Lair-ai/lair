@@ -89,7 +89,8 @@ configure_minio() {
     echo ""
     read -p "🔑 Root username [default: minioadmin]: " MINIO_ROOT_USER
     MINIO_ROOT_USER=${MINIO_ROOT_USER:-minioadmin}
-    read -p "🔑 Root password [default: minioadmin]: " MINIO_ROOT_PASSWORD
+    read -s -p "🔑 Root password [default: minioadmin] (hidden): " MINIO_ROOT_PASSWORD
+    echo ""
     MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD:-minioadmin}
     
     # Show security warning for default credentials

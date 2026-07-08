@@ -190,7 +190,7 @@ configure_n8n_smtp() {
     N8N_SMTP_PORT=${N8N_SMTP_PORT:-587}
     
     read -p "   👤 SMTP Username/Email: " N8N_SMTP_USER
-    read -p "   🔒 SMTP Password: " N8N_SMTP_PASS
+    read -s -p "   🔒 SMTP Password (hidden): " N8N_SMTP_PASS
     echo ""
     
     read -p "   📤 Sender Email [default: $N8N_SMTP_USER]: " N8N_SMTP_SENDER
@@ -229,7 +229,7 @@ configure_n8n_admin_user() {
   read -p "👤 Admin email [default: admin@n8n.local]: " N8N_ADMIN_EMAIL
   N8N_ADMIN_EMAIL=${N8N_ADMIN_EMAIL:-admin@n8n.local}
   
-  read -p "🔑 Admin password [default: n8n123]: " N8N_ADMIN_PASSWORD
+  read -s -p "🔑 Admin password [default: n8n123] (hidden): " N8N_ADMIN_PASSWORD
   echo ""
   N8N_ADMIN_PASSWORD=${N8N_ADMIN_PASSWORD:-n8n123}
   

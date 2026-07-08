@@ -484,7 +484,102 @@ load_configuration_from_file() {
   echo -e "${BLUE}Client: $(read_yaml_value "$config_file" ".client_name" "Unknown")${NC}"
   echo -e "${BLUE}Platform: $PLATFORM_TYPE, GPU: $(if [[ "$HAS_GPU" == "y" ]]; then echo "Yes"; else echo "No"; fi)${NC}"
   
+  if ! validate_configuration_placeholders "$config_file"; then
+    return 1
+  fi
+
   USE_CONFIG_FILE=true
+  return 0
+}
+
+# Function to validate that active placeholders (CHANGE_ME) are modified
+validate_configuration_placeholders() {
+  local has_errors=false
+  local config_file=$1
+
+  echo -e "${BLUE}🔍 Validating configuration placeholders in $config_file...${NC}"
+
+  # Helper function to check a single path
+  check_placeholder() {
+    local path=$1
+    local name=$2
+    local value
+    value=$(read_yaml_value "$config_file" "$path" "")
+
+    if [[ "$value" == *CHANGE_ME* ]]; then
+      echo -e "${RED}❌ Validation Error: Field '$name' ($path) contains an unmodified placeholder: '$value'${NC}"
+      has_errors=true
+    fi
+  }
+
+  # 1. Base Configuration Check (Always required)
+  check_placeholder ".client_name" "Client Name"
+  check_placeholder ".config_name" "Configuration Name"
+
+  # 2. Public Access Check
+  if [[ "$ENABLE_PUBLIC_ACCESS" == "true" ]]; then
+    check_placeholder ".email.cert_email" "Certificate Email"
+
+    # Check public domains only if the overall public access is enabled
+    check_placeholder ".domains.public.openwebui" "OpenWebUI Public Domain"
+    check_placeholder ".domains.public.n8n" "N8N Public Domain"
+
+    if [[ "$ENABLE_MINIO" == "y" || "$ENABLE_MINIO" == "Y" ]]; then
+      check_placeholder ".domains.public.minio" "MinIO Public Domain"
+    fi
+    if [[ "$ENABLE_COMFYUI" == "y" || "$ENABLE_COMFYUI" == "Y" ]]; then
+      # Only validate if not empty (it's optional)
+      local comfyui_pub
+      comfyui_pub=$(read_yaml_value "$config_file" ".domains.public.comfyui" "")
+      if [[ "$comfyui_pub" == *CHANGE_ME* ]]; then
+        check_placeholder ".domains.public.comfyui" "ComfyUI Public Domain"
+      fi
+    fi
+  fi
+
+  # 3. LAN Access Check
+  if [[ "$ENABLE_LAN_ACCESS" == "true" ]]; then
+    check_placeholder ".domains.lan.openwebui" "OpenWebUI LAN Domain"
+    check_placeholder ".domains.lan.n8n" "N8N LAN Domain"
+
+    if [[ "$ENABLE_MINIO" == "y" || "$ENABLE_MINIO" == "Y" ]]; then
+      check_placeholder ".domains.lan.minio" "MinIO LAN Domain"
+    fi
+  fi
+
+  # 4. MinIO Credentials Check (only if MinIO is active)
+  if [[ "$ENABLE_MINIO" == "y" || "$ENABLE_MINIO" == "Y" ]]; then
+    check_placeholder ".components.minio.root_user" "MinIO Root User"
+    check_placeholder ".components.minio.root_password" "MinIO Root Password"
+  fi
+
+  # 5. SMTP Check (only if SMTP is enabled)
+  local smtp_enabled
+  smtp_enabled=$(read_yaml_value "$config_file" ".n8n.smtp.enabled" "false")
+  if [[ "$smtp_enabled" == "true" || "$smtp_enabled" == "True" ]]; then
+    check_placeholder ".n8n.smtp.host" "SMTP Host"
+    check_placeholder ".n8n.smtp.user" "SMTP User"
+    check_placeholder ".n8n.smtp.password" "SMTP Password"
+    check_placeholder ".n8n.smtp.sender" "SMTP Sender"
+  fi
+
+  # 6. N8N Encryption Key
+  check_placeholder ".n8n.encryption_key" "N8N Encryption Key"
+
+  # 7. N8N Admin User (Always check since N8N configuration reads it)
+  check_placeholder ".n8n.adminUser.email" "N8N Admin Email"
+  check_placeholder ".n8n.adminUser.password" "N8N Admin Password"
+  check_placeholder ".n8n.adminUser.firstName" "N8N Admin First Name"
+  check_placeholder ".n8n.adminUser.lastName" "N8N Admin Last Name"
+
+  if [ "$has_errors" = "true" ]; then
+    echo ""
+    echo -e "${RED}🚨 DEPLOYMENT BLOCKED: Please edit '$config_file' and replace all active CHANGE_ME placeholders with valid, secure values before running setup again.${NC}"
+    echo ""
+    return 1
+  fi
+
+  echo -e "${GREEN}✅ Configuration validation passed! No active placeholders found.${NC}"
   return 0
 }
 

@@ -272,8 +272,8 @@ n8n:
       # tag: 15-alpine
       repository: ankane/pgvector
       tag: v0.5.1
+    # Password is stored in Kubernetes Secret n8n-postgres-secret.
     user: n8n
-    password: n8npassword
     database: n8n
     persistence:
       size: 5Gi

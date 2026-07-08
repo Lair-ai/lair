@@ -420,12 +420,20 @@ execute_helm_deployment() {
     
       # At this point the namespace should already exist (created by verify_and_prepare_namespace)
       echo -e "${GREEN}Proceeding with installation in prepared namespace${NC}"
+      if ! ensure_n8n_postgres_secret "$NAMESPACE" "$RELEASE_NAME"; then
+        echo "Unable to prepare PostgreSQL Secret."
+        exit 1
+      fi
       run_helm_with_fallback "install" "$RELEASE_NAME" "$NAMESPACE" "$CONFIG_FILE" false || {
         echo "Installation failed."
         exit 1
       }
   else
     echo "Upgrading Lair with Helm..."
+    if ! ensure_n8n_postgres_secret "$NAMESPACE" "$RELEASE_NAME"; then
+      echo "Unable to prepare PostgreSQL Secret."
+      exit 1
+    fi
     run_helm_with_fallback "upgrade" "$RELEASE_NAME" "$NAMESPACE" "$CONFIG_FILE" false || {
       echo "Upgrade failed."
       exit 1

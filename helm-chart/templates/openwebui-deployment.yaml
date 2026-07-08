@@ -157,10 +157,15 @@ spec:
             - name: AUDIO_TTS_ENGINE
               value: "{{ .Values.openWebUI.audio.ttsEngine | default "openai" }}"
             # PostgreSQL Database Configuration
+            - name: OPENWEBUI_POSTGRES_PASSWORD_URL
+              valueFrom:
+                secretKeyRef:
+                  name: n8n-postgres-secret
+                  key: postgres-password-url
             - name: DATABASE_URL
-              value: "postgresql://{{ .Values.n8n.postgres.user }}:{{ .Values.n8n.postgres.password }}@n8n-postgres.{{ .Values.namespace }}.svc.cluster.local:5432/openwebui"
+              value: "postgresql://{{ .Values.n8n.postgres.user }}:$(OPENWEBUI_POSTGRES_PASSWORD_URL)@n8n-postgres.{{ .Values.namespace }}.svc.cluster.local:5432/openwebui"
             - name: WEBUI_DB_URL
-              value: "postgresql://{{ .Values.n8n.postgres.user }}:{{ .Values.n8n.postgres.password }}@n8n-postgres.{{ .Values.namespace }}.svc.cluster.local:5432/openwebui"
+              value: "postgresql://{{ .Values.n8n.postgres.user }}:$(OPENWEBUI_POSTGRES_PASSWORD_URL)@n8n-postgres.{{ .Values.namespace }}.svc.cluster.local:5432/openwebui"
             - name: ENABLE_DB_MIGRATE
               value: "true"
             - name: RESET_CONFIG_ON_START

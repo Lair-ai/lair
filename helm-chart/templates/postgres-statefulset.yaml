@@ -119,9 +119,23 @@ spec:
 ---
 apiVersion: v1
 kind: Secret
+{{- $postgresSecretName := "n8n-postgres-secret" }}
+{{- $existingPostgresSecret := lookup "v1" "Secret" .Values.namespace $postgresSecretName }}
+{{- $postgresPassword := "" }}
+{{- $postgresPasswordURL := "" }}
+{{- if and $existingPostgresSecret $existingPostgresSecret.data (index $existingPostgresSecret.data "postgres-password") }}
+{{- $postgresPassword = index $existingPostgresSecret.data "postgres-password" }}
+{{- $postgresPasswordURL = default ((b64dec $postgresPassword) | urlquery | b64enc) (index $existingPostgresSecret.data "postgres-password-url") }}
+{{- else }}
+{{- $generatedPostgresPassword := randAlphaNum 32 }}
+{{- $postgresPassword = $generatedPostgresPassword | b64enc }}
+{{- $postgresPasswordURL = $generatedPostgresPassword | urlquery | b64enc }}
+{{- end }}
 metadata:
-  name: n8n-postgres-secret
+  name: {{ $postgresSecretName }}
   namespace: {{ .Values.namespace }}
+
 type: Opaque
 data:
-  postgres-password: {{ .Values.n8n.postgres.password | b64enc }}
+  postgres-password: {{ $postgresPassword | quote }}
+  postgres-password-url: {{ $postgresPasswordURL | quote }}

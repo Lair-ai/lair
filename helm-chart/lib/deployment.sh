@@ -463,4 +463,4 @@ execute_helm_deployment() {
   echo -e "${GREEN}Expected startup time: 2-5 minutes for all services to be ready${NC}"
   echo ""
   echo "Press Ctrl+C to exit the watch command when all pods show 'Running' status."
-} 
+}

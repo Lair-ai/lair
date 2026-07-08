@@ -134,7 +134,12 @@ kind: Secret
 metadata:
   name: {{ $postgresSecretName }}
   namespace: {{ .Values.namespace }}
-
+  labels:
+    app.kubernetes.io/managed-by: {{ .Release.Service | quote }}
+  annotations:
+    meta.helm.sh/release-name: {{ .Release.Name | quote }}
+    meta.helm.sh/release-namespace: {{ .Release.Namespace | quote }}
+    helm.sh/resource-policy: keep
 type: Opaque
 data:
   postgres-password: {{ $postgresPassword | quote }}

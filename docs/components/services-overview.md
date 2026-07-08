@@ -325,7 +325,7 @@ postgres:
   image:
     repository: ankane/pgvector  # PostgreSQL with vector extension
     tag: v0.5.1
-    
+
   # Password is stored in Kubernetes Secret n8n-postgres-secret.
   user: n8n
   database: n8n

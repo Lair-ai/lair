@@ -133,40 +133,42 @@ configure_n8n_non_interactive() {
 
 # Configure N8N encryption key
 configure_n8n_key() {
-  # Check for existing key
+  # 1. Check for existing key in the local file
   if [ -f "$N8N_KEY_FILE" ]; then
     EXISTING_N8N_KEY=$(cat "$N8N_KEY_FILE")
     if [ -n "$EXISTING_N8N_KEY" ]; then
-      echo "   🔑 Found existing N8N encryption key in $N8N_KEY_FILE"
-      echo "   Key: $EXISTING_N8N_KEY"
-      read -p "   Use existing key? (y/n) [default: y]: " USE_EXISTING
-      USE_EXISTING=${USE_EXISTING:-y}
-      if [[ "$USE_EXISTING" == "y" || "$USE_EXISTING" == "Y" ]]; then
-        N8N_KEY="$EXISTING_N8N_KEY"
-        echo "   ✅ Using existing N8N encryption key"
-        return
+      N8N_KEY="$EXISTING_N8N_KEY"
+      echo "   🔑 Found and loaded existing local N8N encryption key"
+      return
+    fi
+  fi
+
+  # 2. If cluster is accessible, try to fetch from existing Secret in the namespace
+  if [ "$K8S_CLUSTER_ACCESSIBLE" = "true" ] && [ -n "$KUBECTL_CMD" ]; then
+    SECRET_KEY_B64=$($KUBECTL_CMD get secret n8n-encryption-secret -n "$NAMESPACE" -o jsonpath='{.data.encryptionKey}' 2>/dev/null)
+    if [ -n "$SECRET_KEY_B64" ]; then
+      if command -v base64 &>/dev/null; then
+        EXISTING_N8N_KEY=$(echo "$SECRET_KEY_B64" | base64 --decode 2>/dev/null || echo "$SECRET_KEY_B64" | base64 -d 2>/dev/null || echo "$SECRET_KEY_B64" | base64 -D 2>/dev/null)
+        if [ -n "$EXISTING_N8N_KEY" ]; then
+          N8N_KEY="$EXISTING_N8N_KEY"
+          echo "$N8N_KEY" > "$N8N_KEY_FILE"
+          echo "   🔑 Retrieved existing N8N encryption key from Secret and saved to $N8N_KEY_FILE"
+          return
+        fi
       fi
     fi
   fi
-  
-  # Generate new key
-  read -p "   🔑 N8N encryption key (leave empty for auto-generation): " N8N_KEY_INPUT
-  if [ -z "$N8N_KEY_INPUT" ]; then
-    if command -v openssl &>/dev/null; then
-      N8N_KEY=$(openssl rand -hex 16)
-    else
-      N8N_KEY=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1)
-    fi
-    echo "   ✅ Generated new encryption key: $N8N_KEY"
-    echo "   ⚠️  Store this key safely! It's required for data decryption"
+
+  # 3. Otherwise, generate a new key silently
+  if command -v openssl &>/dev/null; then
+    N8N_KEY=$(openssl rand -hex 16)
   else
-    N8N_KEY="$N8N_KEY_INPUT"
-    echo "   ✅ Using provided encryption key"
+    N8N_KEY=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1)
   fi
+  echo "   ✅ Generated new N8N encryption key automatically"
   
-  # Save key
+  # Save key locally for consistency
   echo "$N8N_KEY" > "$N8N_KEY_FILE"
-  echo "   💾 Key saved to $N8N_KEY_FILE for future use"
 }
 
 # Configure N8N SMTP settings

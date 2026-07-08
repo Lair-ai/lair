@@ -39,7 +39,7 @@ data:
   # N8N
   N8N_HOST: "{{ .Values.namespace }}-n8n.{{ .Values.namespace }}.svc.cluster.local"
   N8N_URL: "http://{{ .Values.namespace }}-n8n.{{ .Values.namespace }}.svc.cluster.local"
-  N8N_ENCRYPTION_KEY: "{{ .Values.n8n.encryptionKey | default (randAlphaNum 32) }}"
+  
   
   # PostgreSQL per N8N
   N8N_POSTGRES_HOST: "n8n-postgres.{{ .Values.namespace }}.svc.cluster.local"

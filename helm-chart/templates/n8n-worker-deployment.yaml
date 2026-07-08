@@ -60,10 +60,11 @@ spec:
                   name: n8n-postgres-secret
                   key: postgres-password
             {{- end }}
-            {{- if .Values.n8n.encryptionKey }}
             - name: N8N_ENCRYPTION_KEY
-              value: "{{ .Values.n8n.encryptionKey }}"
-            {{- end }}
+              valueFrom:
+                secretKeyRef:
+                  name: n8n-encryption-secret
+                  key: encryptionKey
             # Worker configuration to process the queue
             - name: EXECUTIONS_MODE
               value: "queue"

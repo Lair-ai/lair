@@ -85,7 +85,7 @@ openWebUI:
   auth:
     enabled: true
     secretName: openwebui-auth
-    secretKey: "supersegreto123" # Will be base64 encoded automatically
+    secretKey: "" # If left empty, a random 32-character key will be automatically generated during installation
     enableSignup: true # Allow new user registration
     defaultUserRole: "pending" # Default role for new users
     userPermissions:

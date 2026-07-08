@@ -392,7 +392,7 @@ openWebUI:
   auth:
     enabled: true
     secretName: openwebui-auth
-    secretKey: "supersegreto123"
+    secretKey: "" # Leave empty to automatically generate a random 32-character key
 ```
 
 #### **Single Sign-On (SSO)**

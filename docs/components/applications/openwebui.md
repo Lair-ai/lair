@@ -677,7 +677,7 @@ kubectl exec -n lair deployment/lair-minio -- mc mb minio/openwebui-storage
 kubectl exec -n lair deployment/lair-minio -- mc alias set test \
   http://localhost:9000 \
   $(kubectl get configmap -n lair services-config -o jsonpath='{.data.MINIO_ACCESS_KEY}') \
-  $(kubectl get configmap -n lair services-config -o jsonpath='{.data.MINIO_SECRET_KEY}')
+  $(kubectl get secret -n lair minio-secret -o jsonpath='{.data.MINIO_SECRET_KEY}' | base64 --decode)
 ```
 
 #### **Performance Issues**

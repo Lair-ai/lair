@@ -14,7 +14,6 @@ data:
   MINIO_PORT: "{{ .Values.minio.port }}"
   MINIO_CONSOLE_PORT: "{{ .Values.minio.consolePort }}"
   MINIO_ACCESS_KEY: "{{ .Values.minio.rootUser }}"
-  MINIO_SECRET_KEY: "{{ .Values.minio.rootPassword }}"
   MINIO_ENDPOINT: "http://{{ .Values.namespace }}-minio.{{ .Values.namespace }}.svc.cluster.local:{{ .Values.minio.port }}"
   MINIO_CONSOLE_ENDPOINT: "http://{{ .Values.namespace }}-minio.{{ .Values.namespace }}.svc.cluster.local:9001"
   {{- end }}

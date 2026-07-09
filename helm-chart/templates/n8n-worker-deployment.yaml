@@ -91,8 +91,8 @@ spec:
                   key: MINIO_ACCESS_KEY
             - name: N8N_FILESYSTEM_ALIAS_S3_SECRET_ACCESS_KEY
               valueFrom:
-                configMapKeyRef:
-                  name: services-config
+                secretKeyRef:
+                  name: minio-secret
                   key: MINIO_SECRET_KEY
             {{- end }}
             {{- if .Values.n8n.extraEnv }}

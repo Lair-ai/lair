@@ -51,8 +51,8 @@ spec:
                   key: MINIO_ACCESS_KEY
             - name: MINIO_SECRET_KEY
               valueFrom:
-                configMapKeyRef:
-                  name: services-config
+                secretKeyRef:
+                  name: minio-secret
                   key: MINIO_SECRET_KEY
             - name: BUCKET_NAME
               value: "{{ .Values.openWebUI.s3.bucketName | default "openwebui-storage" }}"
@@ -256,8 +256,8 @@ spec:
                   key: MINIO_ACCESS_KEY
             - name: AWS_SECRET_ACCESS_KEY
               valueFrom:
-                configMapKeyRef:
-                  name: services-config
+                secretKeyRef:
+                  name: minio-secret
                   key: MINIO_SECRET_KEY
             {{- end }}
             # SSO Configuration

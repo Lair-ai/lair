@@ -297,6 +297,7 @@ execute_infrastructure_setup_phase() {
   
   # Start building config file with basic infrastructure
   echo "# values-${CONFIG_NAME}.yaml" > $CONFIG_FILE
+  chmod 600 "$CONFIG_FILE"
   cat <<-EOF >> $CONFIG_FILE
 namespace: $NAMESPACE
 

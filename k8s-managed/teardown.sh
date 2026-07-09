@@ -21,20 +21,35 @@ ok()   { printf '%b' "$GREEN"; log "OK"    "$1"; printf '%b' "$NC"; }
 warn() { printf '%b' "$YELLOW";log "WARN"  "$1"; printf '%b' "$NC"; }
 err()  { printf '%b' "$RED";   log "ERROR" "$1"; printf '%b' "$NC"; }
 
+# Function to redact secrets from commands
+redact_secrets() {
+  local input="$1"
+  printf "%s\n" "$input" | sed -E \
+    -e "s/(aws_secret_access_key[[:space:]]*=[[:space:]]*['\"]?)[^'\"[:space:]]+/\1[REDACTED]/gI" \
+    -e "s/(aws_access_key_id[[:space:]]*=[[:space:]]*['\"]?)[^'\"[:space:]]+/\1[REDACTED]/gI" \
+    -e "s/(--from-literal=[^'\"[:space:]=]+=['\"]?)[^'\"[:space:]]+/\1[REDACTED]/gI" \
+    -e "s/(--from-literal=['\"]?[^'\"[:space:]=]+=[[:space:]]*)[^'\"[:space:]]+/\1[REDACTED]/gI" \
+    -e "s/((token|password|secret|key|passwd)[[:space:]]*=[[:space:]]*['\"]?)[^'\"[:space:]]+/\1[REDACTED]/gI" \
+    -e "s/(--?(token|password|secret|key|passwd)[[:space:]]+['\"]?)[^'\"[:space:]]+/\1[REDACTED]/gI"
+}
+
 # Function to execute commands with retry
 run_cmd() {
   local cmd="$1"
   local max_attempts="${2:-1}"
   local attempt=1
   
+  local redacted_cmd
+  redacted_cmd=$(redact_secrets "$cmd")
+  
   while [ $attempt -le $max_attempts ]; do
-    info "Execution (attempt $attempt/$max_attempts): $cmd"
+    info "Execution (attempt $attempt/$max_attempts): $redacted_cmd"
     if eval "$cmd"; then
       ok "Command executed successfully."
       return 0
     else
       if [ $attempt -eq $max_attempts ]; then
-        err "Error executing command after $max_attempts attempts: $cmd"
+        err "Error executing command after $max_attempts attempts: $redacted_cmd"
         return 1
       else
         warn "Attempt $attempt failed, retrying in 5 seconds..."

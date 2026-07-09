@@ -308,7 +308,7 @@ EOF
     rm -f "$VELERO_TMP_VALUES" || true
     
     # Cleanup Velero config file (keep it for troubleshooting)
-    # rm -f "/etc/lair_velero_config.env" || true
+    rm -f "/etc/lair_velero_config.env" || true
   else
     err "📦 Install Velero: helm upgrade/install failed"
     err "Command that failed: $helm_cmd"
@@ -322,7 +322,7 @@ EOF
     run_cmd "microk8s kubectl get pods -n ${LAIR_VELERO_NAMESPACE}" "Check Velero namespace pods" || true
     rm -f "$VELERO_TMP_VALUES" || true
     # Keep config file for troubleshooting
-    # rm -f "/etc/lair_velero_config.env" || true
+    rm -f "/etc/lair_velero_config.env" || true
     return 1
   fi
 }

@@ -680,5 +680,22 @@ EOF
 EOF
     fi
 
+    # Add ingress basic auth configuration
+    if [ -n "$COMFYUI_AUTH_HASH" ]; then
+      cat <<-EOF >> $CONFIG_FILE
+  ingress:
+    auth:
+      enabled: true
+      username: "$COMFYUI_AUTH_USER"
+      hashedPassword: "$COMFYUI_AUTH_HASH"
+EOF
+    else
+      cat <<-EOF >> $CONFIG_FILE
+  ingress:
+    auth:
+      enabled: false
+EOF
+    fi
+
   fi
 }

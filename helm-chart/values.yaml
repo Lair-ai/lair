@@ -224,6 +224,11 @@ comfyUI:
     repository: mmartial/comfyui-nvidia-docker
     tag: ubuntu24_cuda12.6.3-latest
   plugins: []
+  ingress:
+    auth:
+      enabled: false
+      username: ""
+      hashedPassword: ""
   # Special configuration for optimized images
   lowVram: "" # Reserved for future use
   modelsDownload: "" # Reserved for future use

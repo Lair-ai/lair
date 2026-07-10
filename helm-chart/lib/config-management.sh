@@ -352,6 +352,8 @@ load_configuration_from_file() {
   COMFYUI_IMAGE=$(read_yaml_value "$config_file" ".components.comfyui.image" "")
   COMFYUI_LOW_VRAM=$(read_yaml_value "$config_file" ".components.comfyui.low_vram" "")
   COMFYUI_MODELS_DOWNLOAD=$(read_yaml_value "$config_file" ".components.comfyui.models_download" "")
+  COMFYUI_AUTH_USER=$(read_yaml_value "$config_file" ".components.comfyui.auth_user" "admin")
+  COMFYUI_AUTH_HASH=$(read_yaml_value "$config_file" ".components.comfyui.auth_hash" "")
   
   # Load Ollama configuration
   OLLAMA_IMAGE=$(read_yaml_value "$config_file" ".components.ollama.image" "")

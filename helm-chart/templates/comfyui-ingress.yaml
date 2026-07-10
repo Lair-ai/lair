@@ -1,0 +1,111 @@
+{{- if and .Values.comfyUI.enabled .Values.comfyUI.ingress.auth.enabled }}
+apiVersion: v1
+kind: Secret
+metadata:
+  name: comfyui-auth-secret
+  namespace: {{ .Values.namespace }}
+  labels:
+    app.kubernetes.io/managed-by: {{ .Release.Service | quote }}
+  annotations:
+    meta.helm.sh/release-name: {{ .Release.Name | quote }}
+    meta.helm.sh/release-namespace: {{ .Release.Namespace | quote }}
+    helm.sh/resource-policy: keep
+type: Opaque
+data:
+  auth: {{ .Values.comfyUI.ingress.auth.hashedPassword | b64enc | quote }}
+{{- end }}
+
+{{- if .Values.comfyUI.enabled }}
+{{- if or .Values.ingress.lan.enabled .Values.ingress.public.enabled }}
+{{- range $mode := list "lan" "public" }}
+{{- $modeConfig := index $.Values.ingress $mode }}
+{{- if $modeConfig.enabled }}
+{{- $hosts := list }}
+{{- range $modeConfig.hosts }}
+  {{- if contains "comfyui" .serviceName }}
+    {{- $hosts = append $hosts . }}
+  {{- end }}
+{{- end }}
+{{- if gt (len $hosts) 0 }}
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ $.Values.namespace }}-comfyui-ingress-{{ $mode }}
+  namespace: {{ $.Values.namespace }}
+  annotations:
+    # Basic Auth Annotations for ComfyUI
+    {{- if $.Values.comfyUI.ingress.auth.enabled }}
+    nginx.ingress.kubernetes.io/auth-type: basic
+    nginx.ingress.kubernetes.io/auth-secret: comfyui-auth-secret
+    nginx.ingress.kubernetes.io/auth-realm: "Authentication Required - ComfyUI"
+    {{- end }}
+
+    # Timeout and generic config from the global ingress (as ComfyUI generates large images)
+    nginx.ingress.kubernetes.io/proxy-body-size: "20g"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "7200"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "7200"
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: "600"
+    nginx.ingress.kubernetes.io/proxy-request-buffering: "off"
+    nginx.ingress.kubernetes.io/proxy-buffering: "off"
+    nginx.ingress.kubernetes.io/proxy-upgrade: "websocket"
+    nginx.ingress.kubernetes.io/proxy-connection: "upgrade"
+    nginx.ingress.kubernetes.io/enable-cors: "true"
+    nginx.ingress.kubernetes.io/cors-allow-methods: "GET,PUT,POST,DELETE,PATCH,OPTIONS"
+    nginx.ingress.kubernetes.io/cors-allow-headers: "DNT,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization"
+    nginx.ingress.kubernetes.io/cors-allow-credentials: "true"
+
+    {{- if eq $mode "lan" }}
+      {{- if $.Values.ingress.lan.enableTLS }}
+      nginx.ingress.kubernetes.io/ssl-redirect: "true"
+      {{- else }}
+      nginx.ingress.kubernetes.io/ssl-redirect: "false"
+      {{- end }}
+    {{- else }}
+      cert-manager.io/cluster-issuer: {{ $.Values.certManager.clusterIssuer | quote }}
+      nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    {{- end }}
+
+    {{- with $.Values.ingress.annotations }}
+    {{- range $key, $value := . }}
+    {{- if and (ne $key "cert-manager.io/cluster-issuer") (ne $key "kubernetes.io/ingress.class") }}
+    {{ $key }}: {{ $value | quote }}
+    {{- end }}
+    {{- end }}
+    {{- end }}
+spec:
+  ingressClassName: {{ $.Values.ingress.className }}
+  {{- if or (eq $mode "public") $.Values.ingress.lan.enableTLS }}
+  tls:
+    - hosts:
+        {{- range $hosts }}
+        - {{ .host }}
+        {{- end }}
+      {{- if eq $mode "lan" }}
+      secretName: {{ $.Values.ingress.lan.tlsSecretName | default "lair-tls-local" }}
+      {{- else }}
+      secretName: lair-tls-comfyui-public
+      {{- end }}
+  {{- end }}
+  rules:
+    {{- range $hosts }}
+    - host: {{ .host }}
+      http:
+        paths:
+          {{- $service := .serviceName }}
+          {{- $port := .servicePort }}
+          {{- range .paths }}
+          - path: {{ .path }}
+            pathType: {{ .pathType }}
+            backend:
+              service:
+                name: {{ $.Values.namespace }}-{{ $service }}
+                port:
+                  number: {{ $port }}
+          {{- end }}
+    {{- end }}
+{{- end }}
+{{- end }}
+{{- end }}
+{{- end }}
+{{- end }}

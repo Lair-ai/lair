@@ -92,12 +92,15 @@ spec:
   tls:
     - hosts:
         {{- range .Values.ingress.lan.hosts }}
+        {{- if not (contains "comfyui" .serviceName) }}
         - {{ .host }}
+        {{- end }}
         {{- end }}
       secretName: {{ .Values.ingress.lan.tlsSecretName | default "lair-tls-local" }}
   {{- end }}
   rules:
     {{- range .Values.ingress.lan.hosts }}
+    {{- if not (contains "comfyui" .serviceName) }}
     - host: {{ .host }}
       http:
         paths:
@@ -112,6 +115,7 @@ spec:
                 port:
                   number: {{ $port }}
           {{- end }}
+    {{- end }}
     {{- end }}
 {{- end }}
 
@@ -204,11 +208,14 @@ spec:
   tls:
     - hosts:
         {{- range .Values.ingress.public.hosts }}
+        {{- if not (contains "comfyui" .serviceName) }}
         - {{ .host }}
+        {{- end }}
         {{- end }}
       secretName: lair-tls-public
   rules:
     {{- range .Values.ingress.public.hosts }}
+    {{- if not (contains "comfyui" .serviceName) }}
     - host: {{ .host }}
       http:
         paths:
@@ -223,5 +230,6 @@ spec:
                 port:
                   number: {{ $port }}
           {{- end }}
+    {{- end }}
     {{- end }}
 {{- end }}

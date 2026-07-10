@@ -41,7 +41,7 @@ domains:
   n8n: "CHANGE_ME_N8N_PUBLIC_DOMAIN"
   comfyui: "" # Internal-only access: lair-comfyui.lair.svc.cluster.local:80
   minio: "CHANGE_ME_MINIO_PUBLIC_DOMAIN" # External access enabled
-  ollama: "CHANGE_ME_OLLAMA_PUBLIC_DOMAIN" # External API access enabled (use with caution)
+  ollama: "" # Strictly internal-only access for security reasons
 
   # Public domains (for dual access mode)
   public:
@@ -49,7 +49,7 @@ domains:
     n8n: "CHANGE_ME_N8N_PUBLIC_DOMAIN"
     comfyui: "" # Internal-only access
     minio: "CHANGE_ME_MINIO_PUBLIC_DOMAIN"
-    ollama: "CHANGE_ME_OLLAMA_PUBLIC_DOMAIN"
+    ollama: "" # Strictly internal-only access for security reasons
 
   # LAN domains (not used when access.lan.enabled: false)
   lan:

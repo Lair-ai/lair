@@ -289,11 +289,8 @@ load_configuration_from_file() {
     MINIO_DOMAIN_LAN=""
   fi
   
-  if [ -n "$OLLAMA_DOMAIN_LAN_RAW" ]; then
-    OLLAMA_DOMAIN_LAN="$OLLAMA_SUBDOMAIN_LAN.$SYSTEM_HOSTNAME.local"
-  else
-    OLLAMA_DOMAIN_LAN=""
-  fi
+  # SECURITY: Force Ollama LAN domain to be empty for security reasons
+  OLLAMA_DOMAIN_LAN=""  # Always internal-only for security
   
   # Load public domain configurations
   OPENWEBUI_DOMAIN_PUBLIC=$(read_yaml_value "$config_file" ".domains.public.openwebui" "ai.example.com")

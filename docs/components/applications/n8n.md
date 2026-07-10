@@ -238,7 +238,7 @@ n8n:
       "name": "Ollama",
       "type": "n8n-nodes-base.httpRequest",
       "parameters": {
-        "url": "http://lair-ollama:11434/api/generate",
+        "url": "http://lair-ollama/api/generate",
         "method": "POST",
         "body": {
           "model": "llama3.1:8b",
@@ -284,7 +284,7 @@ n8n:
       "name": "AI Analysis",
       "type": "n8n-nodes-base.httpRequest",
       "parameters": {
-        "url": "http://lair-ollama:11434/api/generate",
+        "url": "http://lair-ollama/api/generate",
         "method": "POST",
         "body": {
           "model": "llama3.1:8b",
@@ -312,7 +312,7 @@ n8n:
       "name": "Content Analysis",
       "type": "n8n-nodes-base.httpRequest",
       "parameters": {
-        "url": "http://lair-ollama:11434/api/generate",
+        "url": "http://lair-ollama/api/generate",
         "body": {
           "model": "llama3.1:8b",
           "prompt": "Classify this content type: {{$json.content}}"
@@ -366,7 +366,7 @@ n8n:
       "name": "Process Batch",
       "type": "n8n-nodes-base.httpRequest",
       "parameters": {
-        "url": "http://lair-ollama:11434/api/generate"
+        "url": "http://lair-ollama/api/generate"
       }
     },
     {
@@ -387,7 +387,7 @@ n8n:
 ```javascript
 // Custom node for Ollama integration
 const ollamaRequest = {
-  url: 'http://lair-ollama:11434/api/generate',
+  url: 'http://lair-ollama/api/generate',
   method: 'POST',
   headers: {
     'Content-Type': 'application/json'
@@ -437,7 +437,7 @@ fetch(webhookUrl, {
       "name": "Sentiment Analysis",
       "type": "n8n-nodes-base.httpRequest",
       "parameters": {
-        "url": "http://lair-ollama:11434/api/generate",
+        "url": "http://lair-ollama/api/generate",
         "body": {
           "model": "llama3.1:8b",
           "prompt": "Analyze sentiment and extract key points: {{$json.interaction}}"
@@ -469,7 +469,7 @@ fetch(webhookUrl, {
       "name": "Email Classification",
       "type": "n8n-nodes-base.httpRequest",
       "parameters": {
-        "url": "http://lair-ollama:11434/api/generate",
+        "url": "http://lair-ollama/api/generate",
         "body": {
           "model": "llama3.1:8b",
           "prompt": "Classify this email and suggest response: {{$json.text}}"

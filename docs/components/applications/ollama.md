@@ -32,20 +32,22 @@ Ollama serves as the backbone of AI capabilities in Lair, providing a robust API
 
 #### **Internal API Access (Recommended)**
 ```bash
-# Internal Kubernetes DNS (secure, recommended)
-http://lair-ollama.lair.svc.cluster.local:11434
+# Internal Kubernetes DNS (secure, recommended - runs on service port 80)
+http://lair-ollama.lair.svc.cluster.local
 
-# From within cluster
-kubectl exec -n lair deployment/lair-openwebui -- curl lair-ollama:11434/api/tags
+# From within cluster (using default port 80)
+kubectl exec -n lair deployment/lair-openwebui -- curl lair-ollama/api/tags
 ```
 
-#### **External API Access (Optional)**
+#### **External API Access (Disabled for Security)**
 ```bash
-# LAN Access (if configured during setup)
-https://api.hostname.local  # If external access enabled
+# For security reasons, Ollama is strictly restricted to internal cluster access only.
+# No public or LAN ingress route is created to prevent unauthorized model execution or DoS.
+# If you need to access Ollama externally for development or administration, use port-forwarding:
+kubectl port-forward -n lair statefulset/lair-ollama 11434:11434
 
-# Public Access (disabled by default for security)
-# Ollama is configured for internal-only access for security reasons
+# Then access on your local machine at:
+http://localhost:11434
 ```
 
 ### 🔧 **Basic API Usage**
@@ -70,7 +72,7 @@ kubectl exec -n lair statefulset/lair-ollama -- curl http://localhost:11434/api/
 #### **Generate Text**
 ```bash
 # Simple text generation
-curl -X POST http://lair-ollama:11434/api/generate \
+curl -X POST http://lair-ollama/api/generate \
   -H "Content-Type: application/json" \
   -d '{
     "model": "llama3.1:8b",
@@ -82,7 +84,7 @@ curl -X POST http://lair-ollama:11434/api/generate \
 #### **Chat Completion (OpenAI-compatible)**
 ```bash
 # Chat completion format
-curl -X POST http://lair-ollama:11434/v1/chat/completions \
+curl -X POST http://lair-ollama/v1/chat/completions \
   -H "Content-Type: application/json" \
   -d '{
     "model": "llama3.1:8b",
@@ -279,12 +281,12 @@ orca-mini:7b       # 3.8GB - Instruction following
 #### **Install Models via API**
 ```bash
 # Install a model
-curl -X POST http://lair-ollama:11434/api/pull \
+curl -X POST http://lair-ollama/api/pull \
   -H "Content-Type: application/json" \
   -d '{"name": "llama3.1:8b"}'
 
 # Check installation progress
-curl http://lair-ollama:11434/api/ps
+curl http://lair-ollama/api/ps
 ```
 
 #### **Install Models via CLI**
@@ -655,13 +657,13 @@ kubectl exec -n lair statefulset/lair-ollama -- ollama create custom-model -f /t
 #### **OpenAI-Compatible Endpoints**
 ```bash
 # Chat completions
-POST http://lair-ollama:11434/v1/chat/completions
+POST http://lair-ollama/v1/chat/completions
 
 # Text completions  
-POST http://lair-ollama:11434/v1/completions
+POST http://lair-ollama/v1/completions
 
 # Embeddings
-POST http://lair-ollama:11434/v1/embeddings
+POST http://lair-ollama/v1/embeddings
 ```
 
 #### **Custom Integration Example**

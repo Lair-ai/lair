@@ -109,7 +109,7 @@ OpenWebUI automatically detects models available in Ollama:
 
 ```bash
 # Check available models via Ollama API
-curl http://lair-ollama:11434/api/tags
+curl http://lair-ollama/api/tags
 
 # Common models in Lair:
 - llama3.1:8b      # General purpose, fast
@@ -630,7 +630,7 @@ kubectl exec -n lair deployment/lair-openwebui -- python manage.py reset-admin
 ```bash
 # Issue: Models not showing in dropdown
 # Check Ollama connectivity
-kubectl exec -n lair deployment/lair-openwebui -- curl lair-ollama:11434/api/tags
+kubectl exec -n lair deployment/lair-openwebui -- curl lair-ollama/api/tags
 
 # Check Ollama service
 kubectl get services -n lair lair-ollama

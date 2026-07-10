@@ -193,8 +193,8 @@ comfyUI:
 - **Multimodal**: LLaVA (vision + language)
 
 **Default Access**:
-- **Internal API**: `lair-ollama.lair.svc.cluster.local:11434`
-- **Public API**: `https://api.example.com` (if configured)
+- **Internal API**: `lair-ollama.lair.svc.cluster.local` (port 80)
+- **External Access**: Disabled (Internal-only for security)
 
 **Performance Configuration**:
 ```yaml
@@ -522,7 +522,7 @@ kubectl logs -n lair deployment/lair-n8n
 #### **Service Connectivity**
 ```bash
 # Test internal service connectivity
-kubectl exec -it deployment/lair-openwebui -n lair -- curl lair-ollama:11434/api/tags
+kubectl exec -it deployment/lair-openwebui -n lair -- curl lair-ollama/api/tags
 kubectl exec -it deployment/lair-n8n -n lair -- curl lair-redis:6379
 
 # Test external access

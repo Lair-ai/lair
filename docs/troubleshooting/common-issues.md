@@ -282,7 +282,7 @@ kubectl patch service ingress-nginx-controller -n ingress-nginx -p '{"spec":{"ty
 # Diagnosis:
 kubectl get services -n lair
 kubectl get endpoints -n lair
-kubectl exec -n lair deployment/lair-openwebui -- curl lair-ollama:11434
+kubectl exec -n lair deployment/lair-openwebui -- curl lair-ollama
 
 # Solutions:
 # 1. Check service names and ports
@@ -448,7 +448,7 @@ kubectl describe configmap lair-openwebui-config -n lair
 # Error: "No models available"
 
 # Diagnosis:
-kubectl exec -n lair deployment/lair-openwebui -- curl lair-ollama:11434/api/tags
+kubectl exec -n lair deployment/lair-openwebui -- curl lair-ollama/api/tags
 kubectl logs -n lair statefulset/lair-ollama
 
 # Solutions:
@@ -759,7 +759,7 @@ kubectl run network-test --image=busybox --rm -it -- ping google.com
 kubectl run dns-test --image=busybox --rm -it -- nslookup kubernetes.default
 
 # Service connectivity
-kubectl exec -n lair deployment/lair-openwebui -- curl lair-ollama:11434/api/tags
+kubectl exec -n lair deployment/lair-openwebui -- curl lair-ollama/api/tags
 kubectl exec -n lair deployment/lair-openwebui -- curl lair-tika:9998
 ```
 

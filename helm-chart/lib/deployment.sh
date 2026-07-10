@@ -393,6 +393,13 @@ EOF
 
 # Helper function for Helm deployment
 execute_helm_deployment() {
+  if [ "$USE_CONFIG_FILE" = "true" ] && [ -n "$CONFIG_FILE_PATH" ]; then
+    if ! validate_configuration_placeholders "$CONFIG_FILE_PATH"; then
+      echo -e "${RED}❌ Deployment aborted due to validation failure.${NC}"
+      exit 1
+    fi
+  fi
+
   echo "Proceeding with installation"
   
   # Let user choose which helm to use
@@ -420,12 +427,20 @@ execute_helm_deployment() {
     
       # At this point the namespace should already exist (created by verify_and_prepare_namespace)
       echo -e "${GREEN}Proceeding with installation in prepared namespace${NC}"
+      if ! ensure_n8n_postgres_secret "$NAMESPACE" "$RELEASE_NAME"; then
+        echo "Unable to prepare PostgreSQL Secret."
+        exit 1
+      fi
       run_helm_with_fallback "install" "$RELEASE_NAME" "$NAMESPACE" "$CONFIG_FILE" false || {
         echo "Installation failed."
         exit 1
       }
   else
     echo "Upgrading Lair with Helm..."
+    if ! ensure_n8n_postgres_secret "$NAMESPACE" "$RELEASE_NAME"; then
+      echo "Unable to prepare PostgreSQL Secret."
+      exit 1
+    fi
     run_helm_with_fallback "upgrade" "$RELEASE_NAME" "$NAMESPACE" "$CONFIG_FILE" false || {
       echo "Upgrade failed."
       exit 1
@@ -455,4 +470,4 @@ execute_helm_deployment() {
   echo -e "${GREEN}Expected startup time: 2-5 minutes for all services to be ready${NC}"
   echo ""
   echo "Press Ctrl+C to exit the watch command when all pods show 'Running' status."
-} 
+}

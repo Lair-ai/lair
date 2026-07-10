@@ -20,22 +20,12 @@ configure_ollama() {
   echo "  • Internal DNS: lair-ollama.lair.svc.cluster.local:11434"
   echo ""
   
-  # LAN domain configuration - RECOMMENDED INTERNAL ONLY
+  # LAN domain configuration - FORCED INTERNAL ONLY
   if [[ "$ENABLE_LAN_ACCESS" == "true" ]]; then
     echo -e "${BLUE}🏠 LAN Domain Configuration${NC}"
-    echo "🔒 For security reasons, Ollama is recommended for internal-only access"
-    echo "   Leave empty to use internal DNS: lair-ollama.lair.svc.cluster.local:11434"
-    read -p "🌐 Ollama LAN subdomain (leave empty for internal-only access - RECOMMENDED): " OLLAMA_SUBDOMAIN_LAN
-    OLLAMA_SUBDOMAIN_LAN=${OLLAMA_SUBDOMAIN_LAN:-}
-    
-    if [ -n "$OLLAMA_SUBDOMAIN_LAN" ]; then
-      OLLAMA_DOMAIN_LAN="$OLLAMA_SUBDOMAIN_LAN.$SYSTEM_HOSTNAME.local"
-      echo "✅ Ollama LAN API will be accessible at: https://$OLLAMA_DOMAIN_LAN"
-      echo "⚠️  Warning: External Ollama API access may have security implications"
-    else
-      OLLAMA_DOMAIN_LAN=""
-      echo "✅ Ollama LAN API: Internal access only via lair-ollama.lair.svc.cluster.local:11434 (RECOMMENDED)"
-    fi
+    echo "🔒 Ollama is configured for internal-only access for security reasons"
+    OLLAMA_DOMAIN_LAN=""
+    echo "ℹ️  Ollama LAN API: Internal access only via lair-ollama.lair.svc.cluster.local:11434"
     echo ""
   fi
   

@@ -311,12 +311,47 @@ configure_comfyui_non_interactive() {
       echo "   🎮 GPU Status: ✅ GPU acceleration enabled"
     fi
     
+    # Basic Auth configuration
+    echo ""
+    echo -e "${BLUE}🔐 ComfyUI Basic Authentication Configuration${NC}"
+    echo "To protect your ComfyUI web interface from unauthorized access:"
+    
+    read -p "👤 Username [default: admin]: " COMFYUI_AUTH_USER
+    COMFYUI_AUTH_USER=${COMFYUI_AUTH_USER:-admin}
+    
+    while true; do
+      read -s -p "🔑 Password (minimum 6 chars): " COMFYUI_AUTH_PASS
+      echo ""
+      if [ ${#COMFYUI_AUTH_PASS} -ge 6 ]; then
+        break
+      else
+        echo -e "${RED}❌ Password must be at least 6 characters long.${NC}"
+      fi
+    done
+    
+    # Generate apr1 hash using openssl or fallback
+    COMFYUI_AUTH_HASH=""
+    if command -v openssl >/dev/null 2>&1; then
+      HASH_VAL=$(openssl passwd -apr1 "$COMFYUI_AUTH_PASS" 2>/dev/null || true)
+      if [ -n "$HASH_VAL" ]; then
+        COMFYUI_AUTH_HASH="$COMFYUI_AUTH_USER:$HASH_VAL"
+      fi
+    fi
+    
+    if [ -z "$COMFYUI_AUTH_HASH" ]; then
+      COMFYUI_AUTH_HASH="$COMFYUI_AUTH_USER:{PLAIN}$COMFYUI_AUTH_PASS"
+    fi
+    
+    echo "✅ ComfyUI Basic Auth configured successfully."
+
     COMFYUI_ENABLED=true
   else
     echo "❌ ComfyUI: Disabled"
     COMFYUI_ENABLED=false
     COMFYUI_STORAGE_SIZE=""
     COMFYUI_STORAGE_GB=0
+    COMFYUI_AUTH_USER=""
+    COMFYUI_AUTH_HASH=""
   fi
   
   echo "✅ ComfyUI configuration completed"

@@ -203,16 +203,11 @@ spec:
                   name: n8n-postgres-secret
                   key: postgres-password
             {{- end }}
-            {{- if .Values.n8n.encryptionKey }}
             - name: N8N_ENCRYPTION_KEY
-              value: "{{ .Values.n8n.encryptionKey }}"
-            {{- else }}
-            # IMPORTANT: N8N_ENCRYPTION_KEY not defined in values.
-            # n8n will generate a random key. This can cause "Mismatching encryption keys" problems
-            # after pod recreations if this generated key is not persisted or provided consistently.
-            # It is STRONGLY RECOMMENDED to define .Values.n8n.encryptionKey explicitly.
-            # For now, we let n8n handle generation if not provided, but this is a potential issue.
-            {{- end }}
+              valueFrom:
+                secretKeyRef:
+                  name: n8n-encryption-secret
+                  key: encryptionKey
             # Redis for execution queue, not as database
             - name: EXECUTIONS_MODE
               value: "queue"
@@ -244,8 +239,8 @@ spec:
                   key: MINIO_ACCESS_KEY
             - name: N8N_FILESYSTEM_ALIAS_S3_SECRET_ACCESS_KEY
               valueFrom:
-                configMapKeyRef:
-                  name: services-config
+                secretKeyRef:
+                  name: minio-secret
                   key: MINIO_SECRET_KEY
             {{- end }}
             {{- if .Values.n8n.extraEnv }}

@@ -43,6 +43,13 @@ https://images.example.com
 http://lair-comfyui.lair.svc.cluster.local:8188
 ```
 
+#### **🔐 Authentication & Access Security**
+When ComfyUI is exposed externally (either via LAN or Public Access), it is protected by **Basic HTTP Authentication** to prevent unauthorized remote code execution (RCE) via custom node extensions:
+- **Credentials Setup**: Username and password are created dynamically during the interactive installation wizard (`setup.sh`) or specified in your `values-config.yaml`.
+- **Default Username**: `admin` (or custom user defined during setup).
+- **Access Protection**: Only authenticated requests matching the credentials can access the web interface or API externally.
+- **Internal Bypass**: OpenWebUI and internal cluster microservices bypass authentication and connect securely directly via the internal Kubernetes DNS name (`http://lair-comfyui.lair.svc.cluster.local:8188`).
+
 #### **System Requirements**
 ```yaml
 # Minimum Requirements

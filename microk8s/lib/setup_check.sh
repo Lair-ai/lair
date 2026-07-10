@@ -100,6 +100,7 @@ fi
 # region 31) Access token extraction and saving
 info "Extracting MicroK8s access tokens..."
 TOKEN_FILE="$SCRIPT_DIR/microk8s-access-tokens.txt"
+install -m 600 /dev/null "$TOKEN_FILE"
 echo "=== MicroK8s Access Tokens ===" > "$TOKEN_FILE"
 echo "Generated on: $(date)" >> "$TOKEN_FILE"
 echo "=============================" >> "$TOKEN_FILE"
@@ -256,7 +257,7 @@ if [ "$ADMIN_TOKEN" = "extraction_failed" ]; then
 elif [ "$ADMIN_TOKEN" = "certificate_based_auth" ]; then
   echo -e "${YELLOW}🔐 Certificate-based authentication (no bearer token)${NC}"
 else
-  echo "$ADMIN_TOKEN"
+  echo -e "${YELLOW}[PROTECTED] Saved securely in: $TOKEN_FILE${NC}"
 fi
 echo -e "\n${GREEN}Server Endpoint:${NC}"
 echo "$SERVER_ENDPOINT"

@@ -716,7 +716,7 @@ spec:
           app: ollama
     ports:
     - protocol: TCP
-      port: 11434
+      port: 80
   - to:
     - podSelector:
         matchLabels:
@@ -792,7 +792,7 @@ kubectl run external-test --image=busybox --rm -it -- ping google.com
 kubectl run dns-test --image=busybox --rm -it -- nslookup kubernetes.default
 
 # Test service connectivity
-kubectl exec -n lair deployment/lair-openwebui -- curl lair-ollama:11434/api/tags
+kubectl exec -n lair deployment/lair-openwebui -- curl lair-ollama/api/tags
 ```
 
 #### **Network Performance Testing**

@@ -48,7 +48,7 @@ if [[ "${IS_PRIMARY_NODE:-false}" == "true" ]]; then
   run_cmd "microk8s config > \"$PAR_HOME/.kube/config\"" "Kubeconfig export"
 
   # Rename cluster and context in kubeconfig to match $CLUSTER_NAME
-  local target_cluster_name="${CLUSTER_NAME:-microk8s-cluster}"
+target_cluster_name="${CLUSTER_NAME:-microk8s-cluster}"
   if [[ -n "$target_cluster_name" && "$target_cluster_name" != "microk8s" && "$target_cluster_name" != "microk8s-cluster" ]]; then
     info "Renaming kubeconfig cluster and context to '$target_cluster_name'..."
     sed -i "s|name: microk8s-cluster|name: ${target_cluster_name}|g" "$PAR_HOME/.kube/config"
@@ -237,7 +237,7 @@ elif [[ "${IS_SECONDARY_NODE:-false}" == "true" ]]; then
     sed -i "s|server: https://[^:]*:16443|server: https://${PRIMARY_NODE_IP}:16443|g" "$PAR_HOME/.kube/config"
     
     # Rename cluster and context in kubeconfig to match $CLUSTER_NAME
-    local target_cluster_name="${CLUSTER_NAME:-microk8s-cluster}"
+    target_cluster_name="${CLUSTER_NAME:-microk8s-cluster}"
     if [[ -n "$target_cluster_name" && "$target_cluster_name" != "microk8s" && "$target_cluster_name" != "microk8s-cluster" ]]; then
       info "Renaming kubeconfig cluster and context to '$target_cluster_name'..."
       sed -i "s|name: microk8s-cluster|name: ${target_cluster_name}|g" "$PAR_HOME/.kube/config"

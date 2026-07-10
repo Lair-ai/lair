@@ -160,7 +160,7 @@ case "$NODE_TYPE" in
         
         # Set cluster name
         # Keep existing CLUSTER_NAME from config/env as default if present
-        local default_cluster_name="${CLUSTER_NAME:-microk8s-cluster}"
+        default_cluster_name="${CLUSTER_NAME:-microk8s-cluster}"
         if $INTERACTIVE; then
             read -rp "📛 Enter cluster name [$default_cluster_name]: " user_cluster_name
             CLUSTER_NAME="${user_cluster_name:-$default_cluster_name}"

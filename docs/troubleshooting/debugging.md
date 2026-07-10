@@ -178,7 +178,7 @@ kubectl run network-test --image=busybox --rm -it -- nslookup kubernetes.default
 kubectl run dns-debug --image=busybox --rm -it -- nslookup lair-ollama.lair.svc.cluster.local
 
 # Service connectivity testing
-kubectl exec -n lair deployment/lair-openwebui -- curl -v lair-ollama:11434/api/tags
+kubectl exec -n lair deployment/lair-openwebui -- curl -v lair-ollama/api/tags
 ```
 
 ---
@@ -327,7 +327,7 @@ kubectl wait --for=condition=Ready pod/network-debug -n lair --timeout=60s
 # Network diagnostics from inside cluster
 kubectl exec -n lair network-debug -- ping -c 3 lair-ollama.lair.svc.cluster.local
 kubectl exec -n lair network-debug -- nslookup lair-ollama.lair.svc.cluster.local
-kubectl exec -n lair network-debug -- curl -v lair-ollama:11434/api/tags
+kubectl exec -n lair network-debug -- curl -v lair-ollama/api/tags
 kubectl exec -n lair network-debug -- traceroute lair-ollama.lair.svc.cluster.local
 
 # Cleanup

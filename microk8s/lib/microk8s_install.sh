@@ -46,6 +46,16 @@ if [[ "${IS_PRIMARY_NODE:-false}" == "true" ]]; then
 
   debug "Exporting kubeconfig"
   run_cmd "microk8s config > \"$PAR_HOME/.kube/config\"" "Kubeconfig export"
+
+  # Rename cluster and context in kubeconfig to match $CLUSTER_NAME
+target_cluster_name="${CLUSTER_NAME:-microk8s-cluster}"
+  if [[ -n "$target_cluster_name" && "$target_cluster_name" != "microk8s" && "$target_cluster_name" != "microk8s-cluster" ]]; then
+    info "Renaming kubeconfig cluster and context to '$target_cluster_name'..."
+    sed -i "s|name: microk8s-cluster|name: ${target_cluster_name}|g" "$PAR_HOME/.kube/config"
+    sed -i "s|cluster: microk8s-cluster|cluster: ${target_cluster_name}|g" "$PAR_HOME/.kube/config"
+    sed -i "s|name: microk8s|name: ${target_cluster_name}|g" "$PAR_HOME/.kube/config"
+    sed -i "s|current-context: microk8s|current-context: ${target_cluster_name}|g" "$PAR_HOME/.kube/config"
+  fi
 elif [[ "${IS_SECONDARY_NODE:-false}" == "true" ]]; then
   info "🔗 SECONDARY NODE: Kubeconfig will be configured after joining cluster"
   debug "Creating .kube directory for the user"
@@ -225,6 +235,16 @@ elif [[ "${IS_SECONDARY_NODE:-false}" == "true" ]]; then
     
     # Replace any server endpoint with primary node IP (more robust approach)
     sed -i "s|server: https://[^:]*:16443|server: https://${PRIMARY_NODE_IP}:16443|g" "$PAR_HOME/.kube/config"
+    
+    # Rename cluster and context in kubeconfig to match $CLUSTER_NAME
+    target_cluster_name="${CLUSTER_NAME:-microk8s-cluster}"
+    if [[ -n "$target_cluster_name" && "$target_cluster_name" != "microk8s" && "$target_cluster_name" != "microk8s-cluster" ]]; then
+      info "Renaming kubeconfig cluster and context to '$target_cluster_name'..."
+      sed -i "s|name: microk8s-cluster|name: ${target_cluster_name}|g" "$PAR_HOME/.kube/config"
+      sed -i "s|cluster: microk8s-cluster|cluster: ${target_cluster_name}|g" "$PAR_HOME/.kube/config"
+      sed -i "s|name: microk8s|name: ${target_cluster_name}|g" "$PAR_HOME/.kube/config"
+      sed -i "s|current-context: microk8s|current-context: ${target_cluster_name}|g" "$PAR_HOME/.kube/config"
+    fi
     
     ok "Kubeconfig server endpoint updated to primary node"
     

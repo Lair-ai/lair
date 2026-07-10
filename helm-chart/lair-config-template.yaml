@@ -46,13 +46,13 @@
 # Client identification - used for documentation and logging
 # This helps you identify which client this configuration belongs to
 # Examples: "acme-corp", "startup-xyz", "enterprise-client"
-client_name: "example-client"
+client_name: "CHANGE_ME_CLIENT_NAME"
 
 # Configuration name - determines the output filename
 # The script will generate: values-{config_name}.yaml
 # Use descriptive names for different environments or setups
 # Examples: "production", "staging", "gpu-server", "jetson-edge", "dual-access"
-config_name: "example-config"
+config_name: "CHANGE_ME_CONFIG_NAME"
 
 # ============================================================================
 # SYSTEM DETECTION & RESOURCES
@@ -167,7 +167,7 @@ email:
   # Email address for Let's Encrypt certificate generation
   # This email will receive notifications about certificate renewals
   # Only used when public access is enabled
-  cert_email: "admin@example.com"
+  cert_email: "CHANGE_ME_CERT_EMAIL"
 
 # Domain configuration for different access modes
 # The system asks for domains interactively, these are the defaults used
@@ -177,20 +177,20 @@ domains:
   # Format: subdomain.hostname.local (hostname is auto-detected)
   # During setup, you only specify the subdomain (e.g., "ai", "n8n", etc.)
   lan:
-    openwebui: "ai.lair.local" # OpenWebUI - Main chat interface (subdomain: ai)
-    n8n: "n8n.lair.local" # N8N - Workflow automation (subdomain: n8n)
-    comfyui: "images.lair.local" # ComfyUI - AI image generation (subdomain: images)
-    minio: "storage.lair.local" # MinIO - S3-compatible storage (subdomain: storage)
+    openwebui: "CHANGE_ME_OPENWEBUI_LAN_DOMAIN" # OpenWebUI - Main chat interface (subdomain: ai)
+    n8n: "CHANGE_ME_N8N_LAN_DOMAIN" # N8N - Workflow automation (subdomain: n8n)
+    comfyui: "CHANGE_ME_COMFYUI_LAN_DOMAIN" # ComfyUI - AI image generation (subdomain: images)
+    minio: "CHANGE_ME_MINIO_LAN_DOMAIN" # MinIO - S3-compatible storage (subdomain: storage)
     ollama: "" # Ollama - Leave empty for internal-only access
 
   # Public (Internet) domains - used when access.public.enabled: true
   # These domains must be publicly accessible and point to your cluster
   # Make sure these domains point to your Kubernetes cluster's ingress
   public:
-    openwebui: "ai.example.com" # OpenWebUI - Main chat interface
-    n8n: "n8n.example.com" # N8N - Workflow automation
-    comfyui: "comfyui.example.com" # ComfyUI - AI image generation
-    minio: "storage.example.com" # MinIO - S3-compatible storage
+    openwebui: "CHANGE_ME_OPENWEBUI_PUBLIC_DOMAIN" # OpenWebUI - Main chat interface
+    n8n: "CHANGE_ME_N8N_PUBLIC_DOMAIN" # N8N - Workflow automation
+    comfyui: "CHANGE_ME_COMFYUI_PUBLIC_DOMAIN" # ComfyUI - AI image generation
+    minio: "CHANGE_ME_MINIO_PUBLIC_DOMAIN" # MinIO - S3-compatible storage
     ollama: "" # Ollama - Leave empty for internal-only access
 
 # DOMAIN CONFIGURATION BEHAVIOR:
@@ -350,8 +350,8 @@ components:
   # MinIO - S3-compatible object storage
   minio:
     enabled: true # Recommended for file storage and backups
-    root_user: "minioadmin" # Root username (provides both admin AND S3 API access)
-    root_password: "minioadmin" # Root password (change for production!)
+    root_user: "CHANGE_ME_MINIO_ROOT_USER" # Root username (provides both admin AND S3 API access)
+    root_password: "CHANGE_ME_MINIO_ROOT_PASSWORD" # Root password (change for production!)
     # SECURITY WARNING: Change these credentials for production deployments!
     # Root credentials provide full access to MinIO (console + S3 API)
 
@@ -396,7 +396,7 @@ n8n:
   # Encryption key for N8N credentials and sensitive data
   # Leave empty ("") for auto-generation, or specify existing key for migration
   # IMPORTANT: Save this key! You'll need it to decrypt your workflows
-  encryption_key: "" # Leave empty for auto-generation
+  encryption_key: "CHANGE_ME_N8N_ENCRYPTION_KEY" # Leave empty for auto-generation
 
   # Worker configuration for processing the execution queue
   # N8N in production should use queue mode with separate workers
@@ -410,24 +410,25 @@ n8n:
     # - Each worker gets 50% of main N8N instance allocation
     # - CPU and memory requests/limits are set automatically
     # - Resources scale with your cluster capacity
+    # - N8N_WORKER_REPLICAS defaults to 1 for Jetson, 2 for Standard
 
     # SMTP configuration for user management (optional)
   smtp:
     enabled: false # Set to true to enable SMTP for user invitations and password resets
-    host: "smtp.gmail.com" # SMTP server hostname
+    host: "CHANGE_ME_SMTP_HOST" # SMTP server hostname
     port: 587 # SMTP server port (587 for STARTTLS, 465 for SSL)
-    user: "your-email@gmail.com" # SMTP username/email
-    password: "your-app-password" # SMTP password or app-specific password
-    sender: "your-email@gmail.com" # Email address used as sender (defaults to user if not specified)
+    user: "CHANGE_ME_SMTP_USER" # SMTP username/email
+    password: "CHANGE_ME_SMTP_PASSWORD" # SMTP password or app-specific password
+    sender: "CHANGE_ME_SMTP_SENDER" # Email address used as sender (defaults to user if not specified)
     ssl: true # Use SSL/TLS encryption
     starttls: true # Use STARTTLS for secure connection
 
   # Admin user configuration (required for N8N access)
   adminUser:
-    email: "admin@n8n.local" # Admin email - used for login and notifications
-    password: "n8n123" # Admin password - CHANGE FOR PRODUCTION!
-    firstName: "Admin" # Admin first name
-    lastName: "User" # Admin last name
+    email: "CHANGE_ME_N8N_ADMIN_EMAIL" # Admin email - used for login and notifications
+    password: "CHANGE_ME_N8N_ADMIN_PASSWORD" # Admin password - CHANGE FOR PRODUCTION!
+    firstName: "CHANGE_ME_FIRST_NAME" # Admin first name
+    lastName: "CHANGE_ME_LAST_NAME" # Admin last name
     # SECURITY WARNING: Change these credentials for production deployments!
     # The admin user has full access to all N8N workflows and settings
 

@@ -85,7 +85,7 @@ openWebUI:
   auth:
     enabled: true
     secretName: openwebui-auth
-    secretKey: "supersegreto123" # Will be base64 encoded automatically
+    secretKey: "" # If left empty, a random 32-character key will be automatically generated during installation
     enableSignup: true # Allow new user registration
     defaultUserRole: "pending" # Default role for new users
     userPermissions:
@@ -224,6 +224,11 @@ comfyUI:
     repository: mmartial/comfyui-nvidia-docker
     tag: ubuntu24_cuda12.6.3-latest
   plugins: []
+  ingress:
+    auth:
+      enabled: false
+      username: ""
+      hashedPassword: ""
   # Special configuration for optimized images
   lowVram: "" # Reserved for future use
   modelsDownload: "" # Reserved for future use
@@ -272,8 +277,8 @@ n8n:
       # tag: 15-alpine
       repository: ankane/pgvector
       tag: v0.5.1
+    # Password is stored in Kubernetes Secret n8n-postgres-secret.
     user: n8n
-    password: n8npassword
     database: n8n
     persistence:
       size: 5Gi

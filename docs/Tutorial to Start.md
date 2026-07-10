@@ -151,7 +151,7 @@ ssh ubuntu@demo.<your-domain>
 
 First step, check if every pod is running in the just created cluster:
 ```bash
-kubectl get pods --all-namespaces
+watch -n 10 kubectl get pods --all-namespaces
 ```
 
 You should see a table as the following, where you can check the STATUS column:
@@ -189,6 +189,7 @@ metallb-system    controller-7ffc454778-zr8q4                         1/1     Ru
 metallb-system    speaker-cdt4b                                       1/1     Running   1 (2m25s ago)   7m5s
 ```
 
+When all pods will be ready, exit using ctrl-c.
 Navigate back to the directory and run the setup script again to deploy the application:
 
 ```bash
@@ -215,8 +216,6 @@ Answer the wizard prompts to configure Lair:
 - **Custom Ollama image (leave empty for default):** `<Press Enter>`
 - **N8N public domain:** `n8ndemo.<your-domain>`
 - **N8N workflows storage in GB:** `<Press Enter>`
-- **Use existing key? (y/n) [default: y]:** `n`
-- **N8N encryption key (leave empty for auto-generation):** `<Press Enter>`
 - **Enable SMTP for N8N user management? (y/n) [default: n]:** `y`
 - **SMTP Host:** `ssl0.ovh.net` *(or your provider's SMTP)*
 - **SMTP Port:** `465`

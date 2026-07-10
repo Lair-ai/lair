@@ -208,9 +208,17 @@ save_and_deploy_configuration() {
       echo "Installation cancelled due to namespace issues."
       return 1
     fi
+    if ! ensure_n8n_postgres_secret "$NAMESPACE" "$RELEASE_NAME"; then
+      echo "Unable to prepare PostgreSQL Secret."
+      return 1
+    fi
     run_helm_with_fallback "install" "$RELEASE_NAME" "$NAMESPACE" "$CONFIG_FILE" false
   else
     echo "Upgrading existing Helm release..."
+    if ! ensure_n8n_postgres_secret "$NAMESPACE" "$RELEASE_NAME"; then
+      echo "Unable to prepare PostgreSQL Secret."
+      return 1
+    fi
     run_helm_with_fallback "upgrade" "$RELEASE_NAME" "$NAMESPACE" "$CONFIG_FILE" false
   fi
   

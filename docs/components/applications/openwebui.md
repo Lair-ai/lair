@@ -109,7 +109,7 @@ OpenWebUI automatically detects models available in Ollama:
 
 ```bash
 # Check available models via Ollama API
-curl http://lair-ollama:11434/api/tags
+curl http://lair-ollama/api/tags
 
 # Common models in Lair:
 - llama3.1:8b      # General purpose, fast
@@ -392,7 +392,7 @@ openWebUI:
   auth:
     enabled: true
     secretName: openwebui-auth
-    secretKey: "supersegreto123"
+    secretKey: "" # Leave empty to automatically generate a random 32-character key
 ```
 
 #### **Single Sign-On (SSO)**
@@ -630,7 +630,7 @@ kubectl exec -n lair deployment/lair-openwebui -- python manage.py reset-admin
 ```bash
 # Issue: Models not showing in dropdown
 # Check Ollama connectivity
-kubectl exec -n lair deployment/lair-openwebui -- curl lair-ollama:11434/api/tags
+kubectl exec -n lair deployment/lair-openwebui -- curl lair-ollama/api/tags
 
 # Check Ollama service
 kubectl get services -n lair lair-ollama
@@ -677,7 +677,7 @@ kubectl exec -n lair deployment/lair-minio -- mc mb minio/openwebui-storage
 kubectl exec -n lair deployment/lair-minio -- mc alias set test \
   http://localhost:9000 \
   $(kubectl get configmap -n lair services-config -o jsonpath='{.data.MINIO_ACCESS_KEY}') \
-  $(kubectl get configmap -n lair services-config -o jsonpath='{.data.MINIO_SECRET_KEY}')
+  $(kubectl get secret -n lair minio-secret -o jsonpath='{.data.MINIO_SECRET_KEY}' | base64 --decode)
 ```
 
 #### **Performance Issues**

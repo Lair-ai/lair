@@ -71,8 +71,6 @@ Answer the wizard prompts to configure Lair:
 - **Custom Ollama image (leave empty for default):** `<Press Enter>`
 - N8N LAN subdomain [default: n8n]:
 - **N8N workflows storage in GB:** `<Press Enter>`
-- **Use existing key? (y/n) [default: y]:** `n`
-- **N8N encryption key (leave empty for auto-generation):** `<Press Enter>`
 - **Enable SMTP for N8N user management? (y/n) [default: n]:** `y`
 - **SMTP Host:** `ssl0.ovh.net` *(or your provider's SMTP)*
 - **SMTP Port:** `465`

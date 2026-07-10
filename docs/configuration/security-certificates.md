@@ -210,9 +210,10 @@ sudo ./generate-lan-certificates.sh --wildcard hostname.local
 # Linux (Ubuntu/Debian)
 sudo apt update
 sudo apt install libnss3-tools
-curl -JLO "https://dl.filippo.io/mkcert/latest?for=linux/amd64"
-chmod +x mkcert-v*-linux-amd64
-sudo mv mkcert-v*-linux-amd64 /usr/local/bin/mkcert
+curl -JLO "https://dl.filippo.io/mkcert/v1.4.4?for=linux/amd64"
+echo "6d31c65b03972c6dc4a14ab429f2928300518b26503f58723e532d1b0a3bbb52  mkcert-v1.4.4-linux-amd64" | sha256sum -c -
+chmod +x mkcert-v1.4.4-linux-amd64
+sudo mv mkcert-v1.4.4-linux-amd64 /usr/local/bin/mkcert
 
 # macOS
 brew install mkcert

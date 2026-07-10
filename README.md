@@ -182,7 +182,7 @@ For advanced users who prefer manual execution or need granular control over eac
 
 The easiest and most cost-effective way to evaluate Lair is using a VPS in the internal data center or in a cloud provider. You will need a couple of subdomain names and an external AI provider (we recommend OVH or equivalent open-source Provider)
 
-Please, follow instructions in the [Tutorial to start](docs/Tutorial%20To%20Start.md) to deploy Lair on a VPS
+Please, follow instructions in the [Tutorial to start](docs/Tutorial%20to%20Start.md) to deploy Lair on a VPS
 
 
 ## Edge AI & Desktop Supercomputing: NVIDIA Jetson & DGX Spark

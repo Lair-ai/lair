@@ -51,8 +51,8 @@ spec:
                   key: MINIO_ACCESS_KEY
             - name: MINIO_SECRET_KEY
               valueFrom:
-                configMapKeyRef:
-                  name: services-config
+                secretKeyRef:
+                  name: minio-secret
                   key: MINIO_SECRET_KEY
             - name: BUCKET_NAME
               value: "{{ .Values.openWebUI.s3.bucketName | default "openwebui-storage" }}"
@@ -157,10 +157,15 @@ spec:
             - name: AUDIO_TTS_ENGINE
               value: "{{ .Values.openWebUI.audio.ttsEngine | default "openai" }}"
             # PostgreSQL Database Configuration
+            - name: OPENWEBUI_POSTGRES_PASSWORD_URL
+              valueFrom:
+                secretKeyRef:
+                  name: n8n-postgres-secret
+                  key: postgres-password-url
             - name: DATABASE_URL
-              value: "postgresql://{{ .Values.n8n.postgres.user }}:{{ .Values.n8n.postgres.password }}@n8n-postgres.{{ .Values.namespace }}.svc.cluster.local:5432/openwebui"
+              value: "postgresql://{{ .Values.n8n.postgres.user }}:$(OPENWEBUI_POSTGRES_PASSWORD_URL)@n8n-postgres.{{ .Values.namespace }}.svc.cluster.local:5432/openwebui"
             - name: WEBUI_DB_URL
-              value: "postgresql://{{ .Values.n8n.postgres.user }}:{{ .Values.n8n.postgres.password }}@n8n-postgres.{{ .Values.namespace }}.svc.cluster.local:5432/openwebui"
+              value: "postgresql://{{ .Values.n8n.postgres.user }}:$(OPENWEBUI_POSTGRES_PASSWORD_URL)@n8n-postgres.{{ .Values.namespace }}.svc.cluster.local:5432/openwebui"
             - name: ENABLE_DB_MIGRATE
               value: "true"
             - name: RESET_CONFIG_ON_START
@@ -251,8 +256,8 @@ spec:
                   key: MINIO_ACCESS_KEY
             - name: AWS_SECRET_ACCESS_KEY
               valueFrom:
-                configMapKeyRef:
-                  name: services-config
+                secretKeyRef:
+                  name: minio-secret
                   key: MINIO_SECRET_KEY
             {{- end }}
             # SSO Configuration
@@ -274,7 +279,10 @@ spec:
             - name: GOOGLE_CLIENT_ID
               value: "{{ .Values.openWebUI.sso.google.clientId }}"
             - name: GOOGLE_CLIENT_SECRET
-              value: "{{ .Values.openWebUI.sso.google.clientSecret }}"
+              valueFrom:
+                secretKeyRef:
+                  name: openwebui-sso-secret
+                  key: GOOGLE_CLIENT_SECRET
             - name: GOOGLE_REDIRECT_URI
               value: "{{ .Values.openWebUI.sso.google.redirectUri }}"
             {{- else if eq .Values.openWebUI.sso.provider "microsoft" }}
@@ -282,7 +290,10 @@ spec:
             - name: MICROSOFT_CLIENT_ID
               value: "{{ .Values.openWebUI.sso.microsoft.clientId }}"
             - name: MICROSOFT_CLIENT_SECRET
-              value: "{{ .Values.openWebUI.sso.microsoft.clientSecret }}"
+              valueFrom:
+                secretKeyRef:
+                  name: openwebui-sso-secret
+                  key: MICROSOFT_CLIENT_SECRET
             - name: MICROSOFT_CLIENT_TENANT_ID
               value: "{{ .Values.openWebUI.sso.microsoft.tenantId }}"
             - name: MICROSOFT_REDIRECT_URI
@@ -292,13 +303,19 @@ spec:
             - name: GITHUB_CLIENT_ID
               value: "{{ .Values.openWebUI.sso.github.clientId }}"
             - name: GITHUB_CLIENT_SECRET
-              value: "{{ .Values.openWebUI.sso.github.clientSecret }}"
+              valueFrom:
+                secretKeyRef:
+                  name: openwebui-sso-secret
+                  key: GITHUB_CLIENT_SECRET
             {{- else if eq .Values.openWebUI.sso.provider "oidc" }}
             # Generic OIDC Configuration
             - name: OAUTH_CLIENT_ID
               value: "{{ .Values.openWebUI.sso.oauth.clientId }}"
             - name: OAUTH_CLIENT_SECRET
-              value: "{{ .Values.openWebUI.sso.oauth.clientSecret }}"
+              valueFrom:
+                secretKeyRef:
+                  name: openwebui-sso-secret
+                  key: OAUTH_CLIENT_SECRET
             - name: OPENID_PROVIDER_URL
               value: "{{ .Values.openWebUI.sso.oauth.providerUrl }}"
             - name: OAUTH_PROVIDER_NAME

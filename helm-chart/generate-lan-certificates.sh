@@ -82,10 +82,21 @@ if ! command_exists mkcert; then
         fi
     elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
         # Linux
-        echo -e "${BLUE}📥 Downloading mkcert for Linux...${NC}"
-        curl -JLO "https://dl.filippo.io/mkcert/latest?for=linux/amd64"
-        chmod +x mkcert-v*-linux-amd64
-        sudo mv mkcert-v*-linux-amd64 /usr/local/bin/mkcert
+        echo -e "${BLUE}📥 Downloading mkcert v1.4.4 for Linux...${NC}"
+        curl -JLO "https://dl.filippo.io/mkcert/v1.4.4?for=linux/amd64"
+        
+        # Verify SHA256 checksum
+        EXPECTED_SHA256="6d31c65b03972c6dc4a14ab429f2928300518b26503f58723e532d1b0a3bbb52"
+        echo "$EXPECTED_SHA256  mkcert-v1.4.4-linux-amd64" | sha256sum -c -
+        if [ $? -ne 0 ]; then
+            echo -e "${RED}❌ Checksum verification failed for mkcert!${NC}"
+            rm -f mkcert-v1.4.4-linux-amd64
+            exit 1
+        fi
+        echo -e "${GREEN}✅ Checksum verified successfully!${NC}"
+        
+        chmod +x mkcert-v1.4.4-linux-amd64
+        sudo mv mkcert-v1.4.4-linux-amd64 /usr/local/bin/mkcert
         
         if ! command_exists mkcert; then
             echo -e "${RED}❌ Failed to install mkcert${NC}"
@@ -231,10 +242,11 @@ execute_local() {
         echo -e "${BLUE}🍎 macOS (Homebrew):${NC}"
         echo "  brew install mkcert"
         echo ""
-        echo -e "${BLUE}🐧 Linux:${NC}"
-        echo "  curl -JLO \"https://dl.filippo.io/mkcert/latest?for=linux/amd64\""
-        echo "  chmod +x mkcert-v*-linux-amd64"
-        echo "  sudo mv mkcert-v*-linux-amd64 /usr/local/bin/mkcert"
+        echo -e "${BLUE}🐧 Linux (v1.4.4 with checksum verification):${NC}"
+        echo "  curl -JLO \"https://dl.filippo.io/mkcert/v1.4.4?for=linux/amd64\""
+        echo "  echo \"6d31c65b03972c6dc4a14ab429f2928300518b26503f58723e532d1b0a3bbb52  mkcert-v1.4.4-linux-amd64\" | sha256sum -c -"
+        echo "  chmod +x mkcert-v1.4.4-linux-amd64"
+        echo "  sudo mv mkcert-v1.4.4-linux-amd64 /usr/local/bin/mkcert"
         echo ""
         echo -e "${BLUE}🪟 Windows:${NC}"
         echo "  choco install mkcert"

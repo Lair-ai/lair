@@ -5,6 +5,106 @@
 # ============================================================================
 
 # Helper function to generate the complete YAML configuration
+lair_base64_encode_value() {
+  printf '%s' "$1" | base64 | tr -d '\n'
+}
+
+lair_base64_decode_value() {
+  local value=$1
+  printf '%s' "$value" | base64 --decode 2>/dev/null || printf '%s' "$value" | base64 -D 2>/dev/null
+}
+
+lair_url_encode_postgres_password() {
+  local value=$1
+  value=${value//%/%25}
+  value=${value//+/%2B}
+  value=${value//\//%2F}
+  value=${value//=/%3D}
+  printf '%s' "$value"
+}
+
+ensure_n8n_postgres_secret() {
+  local namespace=${1:-$NAMESPACE}
+  local release_name=${2:-${RELEASE_NAME:-lair}}
+  local secret_name="n8n-postgres-secret"
+  local existing_password_b64=""
+  local PG_PASSWORD=""
+  local PG_PASSWORD_URL=""
+  local PG_PASSWORD_B64=""
+  local PG_PASSWORD_URL_B64=""
+
+  if [ -z "$KUBECTL_CMD" ]; then
+    echo -e "${RED}❌ kubectl command not configured; cannot create PostgreSQL Secret${NC}"
+    return 1
+  fi
+
+  if [ -z "$namespace" ]; then
+    echo -e "${RED}❌ Namespace not configured; cannot create PostgreSQL Secret${NC}"
+    return 1
+  fi
+
+  if ! $KUBECTL_CMD get namespace "$namespace" &>/dev/null; then
+    echo -e "${RED}❌ Namespace '$namespace' does not exist; cannot create PostgreSQL Secret${NC}"
+    return 1
+  fi
+
+  existing_password_b64=$($KUBECTL_CMD get secret "$secret_name" -n "$namespace" -o jsonpath="{.data['postgres-password']}" 2>/dev/null || true)
+  if [ -n "$existing_password_b64" ]; then
+    PG_PASSWORD=$(lair_base64_decode_value "$existing_password_b64")
+    if [ -z "$PG_PASSWORD" ]; then
+      echo -e "${RED}❌ Unable to decode existing PostgreSQL Secret password${NC}"
+      return 1
+    fi
+    echo -e "${GREEN}🔐 Existing PostgreSQL Secret found; preserving password${NC}"
+  else
+    if ! command -v openssl >/dev/null 2>&1; then
+      echo -e "${RED}❌ openssl is required to generate the PostgreSQL password${NC}"
+      return 1
+    fi
+
+    PG_PASSWORD=$(openssl rand -base64 24)
+    if [ -z "$PG_PASSWORD" ]; then
+      echo -e "${RED}❌ Failed to generate PostgreSQL password${NC}"
+      return 1
+    fi
+    echo -e "${GREEN}🔐 Creating PostgreSQL Secret with generated password${NC}"
+  fi
+
+  PG_PASSWORD_URL=$(lair_url_encode_postgres_password "$PG_PASSWORD")
+  PG_PASSWORD_B64=$(lair_base64_encode_value "$PG_PASSWORD")
+  PG_PASSWORD_URL_B64=$(lair_base64_encode_value "$PG_PASSWORD_URL")
+
+  if $KUBECTL_CMD get secret "$secret_name" -n "$namespace" &>/dev/null; then
+    if ! $KUBECTL_CMD patch secret "$secret_name" -n "$namespace" --type merge -p "{\"data\":{\"postgres-password\":\"$PG_PASSWORD_B64\",\"postgres-password-url\":\"$PG_PASSWORD_URL_B64\"}}" >/dev/null; then
+      echo -e "${RED}❌ Failed to update PostgreSQL Secret${NC}"
+      return 1
+    fi
+  else
+    if ! $KUBECTL_CMD create secret generic "$secret_name" -n "$namespace" \
+      --from-literal=postgres-password="$PG_PASSWORD" \
+      --from-literal=postgres-password-url="$PG_PASSWORD_URL" >/dev/null; then
+      echo -e "${RED}❌ Failed to create PostgreSQL Secret${NC}"
+      return 1
+    fi
+  fi
+
+  if ! $KUBECTL_CMD label secret "$secret_name" -n "$namespace" \
+    "app.kubernetes.io/managed-by=Helm" --overwrite >/dev/null; then
+    echo -e "${RED}❌ Failed to label PostgreSQL Secret for Helm ownership${NC}"
+    return 1
+  fi
+
+  if ! $KUBECTL_CMD annotate secret "$secret_name" -n "$namespace" \
+    "meta.helm.sh/release-name=$release_name" \
+    "meta.helm.sh/release-namespace=$namespace" \
+    "helm.sh/resource-policy=keep" --overwrite >/dev/null; then
+    echo -e "${RED}❌ Failed to annotate PostgreSQL Secret for Helm ownership${NC}"
+    return 1
+  fi
+
+  echo -e "${GREEN}✅ PostgreSQL Secret ready: $secret_name${NC}"
+}
+
 generate_complete_yaml_configuration() {
   # Get cert-manager configuration based on access mode
   if [ "$ACCESS_MODE" = "lan" ]; then
@@ -444,7 +544,7 @@ EOF
 
   cat <<-EOF >> $CONFIG_FILE
   postgres:
-    password: "n8npassword"
+    # Password is generated with openssl and stored in Secret n8n-postgres-secret.
     user: "n8n"
     database: "n8n"
     persistence:
@@ -580,5 +680,22 @@ EOF
 EOF
     fi
 
+    # Add ingress basic auth configuration
+    if [ -n "$COMFYUI_AUTH_HASH" ]; then
+      cat <<-EOF >> $CONFIG_FILE
+  ingress:
+    auth:
+      enabled: true
+      username: "$COMFYUI_AUTH_USER"
+      hashedPassword: "$COMFYUI_AUTH_HASH"
+EOF
+    else
+      cat <<-EOF >> $CONFIG_FILE
+  ingress:
+    auth:
+      enabled: false
+EOF
+    fi
+
   fi
-} 
+}

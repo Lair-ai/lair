@@ -57,13 +57,13 @@ metadata:
 
     {{- if eq $mode "lan" }}
       {{- if $.Values.ingress.lan.enableTLS }}
-      nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
       {{- else }}
-      nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
       {{- end }}
     {{- else }}
-      cert-manager.io/cluster-issuer: {{ $.Values.certManager.clusterIssuer | quote }}
-      nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    cert-manager.io/cluster-issuer: {{ $.Values.certManager.clusterIssuer | quote }}
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
     {{- end }}
 
     {{- with $.Values.ingress.annotations }}

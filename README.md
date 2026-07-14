@@ -1,6 +1,12 @@
-# Lair — Private AI Infrastructure & Process Automation Platform
+<p align="center">
+  <img src="docs/assets/logo.png" alt="LAiR Logo" width="180">
+</p>
 
-> **Complete private AI infrastructure with automated process management on Kubernetes**
+<p align="center">
+  <strong>LAiR - Private AI Infrastructure & Process Automation Platform</strong><br>
+  LAiR is the complete private AI stack you self-host: models, automation and tools running entirely on your own servers. No big player, no lock-in.
+
+</p>
 
 [![License: GPL v3](https://img.shields.io/badge/License-GPL3.0-yellow.svg)](https://opensource.org/license/gpl-3.0)
 [![Platform](https://img.shields.io/badge/Platform-Ubuntu%2024.04-orange.svg)]()
@@ -16,11 +22,12 @@
 ## Table of Contents
 
 - [What is Lair?](#what-is-lair)
+- [Why Private AI Matters](#why-private-ai-matters)
 - [Architecture Overview](#architecture-overview)
 - [Quick Start](#quick-start)
 - [Installation Paths](#installation-paths)
 - [Edge AI & DGX Spark](#edge-ai--desktop-supercomputing-nvidia-jetson--dgx-spark)
-- [Use Case Examples](#use-case-examples)
+- [Deployment Scenarios](#deployment-scenarios)
 - [Platform Support & Smart Features](#platform-support--smart-features)
 - [Quick Commands](#quick-commands)
 - [Current Limitations](#current-limitations)
@@ -40,28 +47,87 @@
 
 Lair enables organizations to deploy **private AI infrastructure** with comprehensive **process automation capabilities** on Kubernetes. The default architecture is fully self-hosted for data sovereignty and control; optional external AI providers can be enabled when needed.
 
-### Key Use Cases
+---
 
-- **Private AI Infrastructure**: Run LLMs, AI models, and ML workloads on your machine or with the AI providers of your choice
-- **Company Authentication integration**: Integrate with your company's authentication system (e.g., SingleSignOn with Azure AD, Google, OIDC)
-- **Business Process Automation**: Workflow orchestration with a locally installed N8N and custom integrations
-- **Data Privacy Compliance**: RAG, documents, files, knowledge bases are stored locally, no data leaves your infrastructure
-- **Enterprise Integration**: Add AI capabilities to existing business systems using FastAPI and N8N
-- **Edge & Desktop AI**: Complete AI infrastructure on NVIDIA Jetson devices or a DGX Spark workstation — production-grade workflows at the edge and on the desk
-- **Backend for vibecoding**: By using a DGX Spark you can run an open‑source model (such as *Qwen3-Next-Coder*) and use it as a backend for vibecoding, without the hassle of tokens or time‑limited subscriptions, and your code and data remain on your device
+## Why Private AI Matters
 
-### What You See
+<p align="center">
+  <img src="docs/assets/private-ai-for-enterprise.png" alt="LAiR — Private AI Infrastructure for Enterprise" width="700">
+</p>
 
-Users get:
+When you use a Big closed AI provider, your data — documents, code, customer records — goes to someone else's servers. You can't control where it's stored or how it's used.
 
-- A **chat interface** with multiple features and customization options (powered by *OpenWebUI*)
-- The ability to choose between **local models** (via *Ollama*) and **open‑source AI providers** (e.g. OVH AI Endpoints)
-- The option to use major **cloud AI providers** (such as ChatGPT, Claude, Gemini) via API, without user profiling and with the ability to prevent data from being used for training
-- The ability to **upload documents** and use them as context for conversations (powered by *Tika*)
-- Local **image generation** (powered by *ComfyUI*, when a GPU is available)
-- A no‑code interface to **build and automate workflows** (powered by *N8N*)
+**LAiR changes that.** It gives you the same AI tools, but running on infrastructure you control. Privacy depends on how you deploy:
 
-### What You Get
+- **LAN / On-premises** (DGX Spark or PC with GPU) — Everything runs locally. Models, data, and automations stay on your hardware. Zero data leaves your network.
+- **Datacenter / Cloud** (VM or managed Kubernetes) — Your data stays within your controlled environment. If no GPU is available, LAiR can use external LLM providers for inference. In this case, choose providers carefully: **European providers** are recommended for GDPR compliance, and since multiple users share the same API endpoint, there is no individual profiling.
+
+### What do you need to do?
+
+Deploy LAiR on a server you control — a physical machine in your office, a VM in the cloud, an edge device, or even a desktop workstation like NVIDIA DGX Spark. See [Quick Start](#quick-start) for installation instructions.
+
+### What do you get?
+
+- **A private ChatGPT** — A web interface (OpenWebUI) where your team can chat with AI, upload documents, search knowledge bases, all running locally
+- **Local LLMs** — Open-source models served by Ollama on your own GPU, from small and fast to 200B+ parameters on DGX Spark
+- **External LLM support** — When no GPU is available, connect to open-source model providers (e.g. OVH AI Endpoints). Choose European providers for GDPR compliance. No user profiling — the API is shared, not tied to individual accounts.
+- **Workflow automation** — N8N with 400+ integrations to connect AI to your ERP, CRM, databases, email, and more
+- **Document intelligence** — Upload PDFs, Word files, spreadsheets. LAiR extracts and indexes them for AI-powered search (RAG)
+- **Image generation** — ComfyUI for AI-generated images, running on your GPU
+- **Your own SSO** — Log in with your company credentials (Azure AD, Google, OIDC)
+- **Full control** — Every component runs on your infrastructure. No vendor lock-in, no per-token billing.
+
+### Who is it for?
+
+| If you are... | LAiR helps you... |
+|---------------|-------------------|
+| A company handling sensitive data (healthcare, finance, legal, government) | Use AI without violating compliance rules or sending data outside |
+| A team that wants to automate internal processes | Build AI-powered workflows that connect to your existing systems |
+| An organization already running Kubernetes | Add a complete AI stack to your existing cluster |
+| Deploying at the edge (retail, manufacturing, IoT) | Run AI where your data is generated, not in a distant cloud |
+| Tired of unpredictable AI costs | Pay for hardware once, use AI unlimited — no per-token billing |
+
+### How do you use it?
+
+1. **Deploy** — Follow the [Quick Start](#quick-start) guide to install LAiR on your server.
+2. **Access** — Open the web UI at `ai.your-domain.local` (or your public domain). Log in with your company SSO or local credentials.
+3. **Chat** — Start talking to AI. Pick a model, upload documents, ask questions.
+4. **Automate** — Open N8N, build workflows that connect AI to your business tools — no coding required.
+5. **Scale** — Add more nodes, more GPUs, more models. LAiR grows with your needs.
+
+> **In short:** LAiR lets you run a complete AI platform on your own terms. Same power as cloud AI, but your data stays yours, your costs are predictable, and you're in full control.
+
+---
+
+## Architecture Overview
+
+### High-Level Overview 
+
+![alt text](docs/assets/architecture-overview.png "Lair Architecture Overview")
+
+Lair consists of three main components that work together to provide a complete AI infrastructure:
+
+### 1. Cluster Setup (`microk8s/` or `k8s-managed/`)
+- **MicroK8s Setup**: Install and configure Kubernetes clusters (single-node or multi-node) optimized for AI workloads
+- **Multi-Node Support**: Scale from single-node development to multi-node production clusters
+- **Managed K8s Setup**: Configure existing Kubernetes clusters (OVH MKS, EKS, GKE, AKS, etc.)
+- **Platform Detection**: Automatic optimization for x86_64, ARM64, and NVIDIA Jetson
+- **Network Configuration**: Smart dual-IP handling for Cloud vs On-Premises scenarios
+- **Storage & Backup**: Distributed Longhorn (multi-node) or Hostpath (Jetson), with Velero backup integration
+
+### 2. Application Deployment (`helm-chart/`)
+- **Interactive Configuration**: Guided setup with resource detection and optimization
+- **Multi-Access Modes**: LAN (`.local` domains) and Public (internet domains) with automatic TLS
+- **Resource Management**: Intelligent allocation based on available CPU, memory, and storage
+- **Component Selection**: Enable/disable services based on your needs and resources
+
+### 3. Access & Integration
+- **LAN Access**: `.local` domains with optional HTTPS via mkcert certificates
+- **Public Access**: Internet domains with automatic Let's Encrypt certificates
+- **API Integration**: All services expose APIs for custom integrations
+- **Backup & DR**: Automated backups to S3-compatible storage with Velero
+
+### Components
 
 #### Applications
 
@@ -97,36 +163,6 @@ Users get:
 
 ---
 
-## Architecture Overview
-
-### High-Level Overview 
-
-![alt text](https://dev.lair-ai.it/wp-content/uploads/2026/06/schema_ai.png "Lair Architecture Overview")
-
-Lair consists of three main components that work together to provide a complete AI infrastructure:
-
-### 1. Cluster Setup (`microk8s/` or `k8s-managed/`)
-- **MicroK8s Setup**: Install and configure Kubernetes clusters (single-node or multi-node) optimized for AI workloads
-- **Multi-Node Support**: Scale from single-node development to multi-node production clusters
-- **Managed K8s Setup**: Configure existing Kubernetes clusters (OVH MKS, EKS, GKE, AKS, etc.)
-- **Platform Detection**: Automatic optimization for x86_64, ARM64, and NVIDIA Jetson
-- **Network Configuration**: Smart dual-IP handling for Cloud vs On-Premises scenarios
-- **Storage & Backup**: Distributed Longhorn (multi-node) or Hostpath (Jetson), with Velero backup integration
-
-### 2. Application Deployment (`helm-chart/`)
-- **Interactive Configuration**: Guided setup with resource detection and optimization
-- **Multi-Access Modes**: LAN (`.local` domains) and Public (internet domains) with automatic TLS
-- **Resource Management**: Intelligent allocation based on available CPU, memory, and storage
-- **Component Selection**: Enable/disable services based on your needs and resources
-
-### 3. Access & Integration
-- **LAN Access**: `.local` domains with optional HTTPS via mkcert certificates
-- **Public Access**: Internet domains with automatic Let's Encrypt certificates
-- **API Integration**: All services expose APIs for custom integrations
-- **Backup & DR**: Automated backups to S3-compatible storage with Velero
-
----
-
 ## Quick Start
 
 ### Prerequisites
@@ -139,7 +175,7 @@ Lair consists of three main components that work together to provide a complete 
 | **Storage** | 100 GB free | 200+ GB free |
 | **Access** | Root/sudo | Root/sudo |
 
-> **Note**: Lair does not work on Windows, even with WSL2 or any Windows emulation layer. Use native Ubuntu 24.04 LTS only. On DGX Spark, DGX OS (Ubuntu-based) is the recommended and fully supported environment.
+> **8 GB RAM limitation:** The 8 GB tier is only supported if you disable local models (Ollama) and image generation (ComfyUI).
 
 ### Simplified Installation (Recommended)
 
@@ -152,6 +188,8 @@ cd lair
 sudo ./setup.sh
 ```
 
+> **WARNING:** The setup wizard performs system-level changes including installing Kubernetes, creating persistent volumes, and configuring networking. **Do not run this on a production system without first reviewing the scripts and understanding the impact.** Always test in a non-critical environment first. See [Current Limitations](#current-limitations) for known issues.
+
 **The setup wizard will:**
 - Welcome you and explain the process
 - Ask whether you want to setup a cluster or deploy Lair
@@ -160,6 +198,8 @@ sudo ./setup.sh
 - Handle the complete setup process step by step
 
 **That's it!** Your private AI infrastructure is ready with guided assistance.
+
+> **Backup & Restore:** LAiR includes [Velero](https://github.com/vmware-tanzu/velero) for automated backup and disaster recovery. Cluster resources and persistent volumes can be backed up to S3-compatible storage and restored when needed. See [Backup & Disaster Recovery](docs/maintenance/backup-restore.md) for details.
 
 ---
 
@@ -172,10 +212,16 @@ The unified setup wizard (`sudo ./setup.sh`) automatically detects your environm
    - **Multi-node**: Setup a primary node and secondary workers for production/high availability.
 2. **Managed Kubernetes (Enterprise)**
    - Deploy on existing clusters like OVH MKS, EKS, GKE, or AKS.
-3. **Helm-Only (Advanced)**
-   - Direct deployment to any pre-configured Kubernetes cluster.
 
 For advanced users who prefer manual execution or need granular control over each step, detailed guides and scripts are available in the [Installation Documentation](docs/installation/).
+
+<p align="center">
+  <img src="docs/assets/installation-paths.png" alt="LAiR Installation Paths" width="700">
+</p>
+
+> **Note 1:** The DGX Spark cost of approximately €5,000 is current as of June 2026.
+>
+> **Note 2:** When installing on a machine without a GPU, you will need to account for token costs from open-source model providers of your choice.
 ---
 
 ## How to evaluate Lair
@@ -187,7 +233,7 @@ Please, follow instructions in the [Tutorial to start](docs/Tutorial%20to%20Star
 
 ## Edge AI & Desktop Supercomputing: NVIDIA Jetson & DGX Spark
 
-Lair deploys a complete production-grade AI infrastructure on compact edge devices (NVIDIA Jetson) and desktop AI systems such as NVIDIA DGX Spark. It is a strong on-premises option for privacy, open-source control, and predictable costs, because models and data remain on your own hardware.
+LAiR runs on compact edge devices (NVIDIA Jetson) and desktop AI systems (NVIDIA DGX Spark), enabling production-grade AI workflows outside traditional datacenters.
 
 ### NVIDIA DGX Spark — Desktop AI Supercomputer
 
@@ -216,38 +262,29 @@ The DGX Spark is powered by the **NVIDIA GB10 Grace Blackwell Superchip** and br
 
 ### DGX Spark Quick Start
 
-Run the unified setup wizard (`sudo ./setup.sh`) directly on your DGX Spark (running DGX OS / Ubuntu 24.04 ARM64). The wizard will guide you through the same installation flow as any other supported Ubuntu host.
+Run the unified setup wizard directly on your DGX Spark (running DGX OS / Ubuntu 24.04 ARM64). The wizard will guide you through the same installation flow as any other supported Ubuntu host.
 
 ### NVIDIA Jetson — Edge AI
 
-For deployments at the network edge, Lair runs on all NVIDIA Jetson devices with automatic ARM64 optimizations.
-
-Run the unified setup wizard (`sudo ./setup.sh`) and choose "lan" when prompted. The hardware optimizations will be applied automatically.
+For deployments at the network edge, LAiR runs on all NVIDIA Jetson devices with automatic ARM64 optimizations.
 
 ### What Runs on Both Platforms
 
 | Component | Jetson | DGX Spark |
 |-----------|--------|-----------|
-| OpenWebUI (ChatGPT-like interface + RAG) | ✅ | ✅ |
-| N8N (workflow automation, 400+ integrations) | ✅ | ✅ |
-| Ollama (local LLM with GPU acceleration) | ✅ | ✅ *(up to 200B params)* |
-| ComfyUI (AI image generation) | ✅ | ✅ |
-| PostgreSQL (persistent storage) | ✅ | ✅ |
+| OpenWebUI | ✅ | ✅ |
+| N8N | ✅ | ✅ |
+| Ollama | ✅ | ✅ *(up to 200B params)* |
+| ComfyUI | ✅ | ✅ |
+| PostgreSQL | ✅ | ✅ |
 | Kubernetes (MicroK8s) | ✅ | ✅ |
-| Custom AI workflows | ✅ | ✅ |
 | Multi-node clustering | ❌ | ✅ *(via ConnectX)* |
-
-### Why This Matters
-- **Technical scope**: Production AI stack on ARM64 — from <60W Jetson devices to a 240W desktop system
-- **Data locality**: Run enterprise-grade AI directly where your data resides
-- **Privacy**: Process sensitive data locally with zero required cloud dependency
-- **Cost considerations**: DGX Spark can be cost-competitive with cloud A100 workloads for sustained, full-time use
 
 ---
 
-## Use Case Examples
+## Deployment Scenarios
 
-When running the unified setup wizard (`sudo ./setup.sh`), it will prompt you for configuration choices. Here are some common scenarios:
+Here are some common deployment scenarios and how to configure them:
 
 ### Private AI Development Lab (LAN Mode)
 - **Environment**: Office environments, internal development, secure networks, DGX Spark workstations.
@@ -301,7 +338,7 @@ microk8s status # Check system status
 kubectl get pods -n lair # View all services
 kubectl get ingress -n lair # Check service URLs
 kubectl logs -n lair deployment/openwebui # View logs
-sudo ./microk8s/teardown.sh # Complete cleanup
+sudo ./microk8s/teardown.sh # ⚠ DESTROYS all LAiR data, volumes, and namespaces — irreversible
 ```
 
 ### Managed Kubernetes Deployments
@@ -310,7 +347,7 @@ kubectl cluster-info # Check cluster status
 kubectl get pods -n lair # View all services
 kubectl get ingress -n lair # Check service URLs
 kubectl logs -n lair deployment/openwebui # View logs
-sudo ./k8s-managed/teardown.sh # Complete cleanup
+sudo ./k8s-managed/teardown.sh # ⚠ DESTROYS all LAiR data, volumes, and namespaces — irreversible
 ```
 
 ---
@@ -441,8 +478,9 @@ Distributed under the **GPL3.0 License**. See [LICENSE](LICENSE) for full detail
 
 ## About
 
-Lair is an open-source private AI framework born in 2024 as an internal tool by **[NEXiD s.r.l.](https://www.nexid.it)**, an Italian technology company.
-Built around data sovereignty from day one — models, automation and tools that run entirely on your own infrastructure, with no SaaS lock-in and no data egress.
+Lair is an open-source private AI framework born in 2024 as an internal tool by **[NEXiD s.r.l.](https://www.nexid.it)**, an Italian technology company. The project is released under the GPL 3.0 license — the core platform is free to use, modify, and self-host.
+
+NEXiD offers **optional enterprise support** for organizations that need professional installation, custom integration, training, or SLA-backed maintenance. This support is not required to use Lair; the platform is fully functional without it.
 
 Created by **[NEXiD s.r.l.](https://www.nexid.it)**
 

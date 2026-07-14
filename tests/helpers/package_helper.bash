@@ -48,13 +48,14 @@ package_exists() {
 }
 
 # Verify that a package belongs to main or universe section
-# Returns 0 if section is main or universe, 1 otherwise
+# Handles both "universe" and "universe/admin" formats
+# Returns 0 if section starts with main or universe, 1 otherwise
 package_in_main_or_universe() {
   local pkg="$1"
   local section
   section="$(apt-cache show "$pkg" 2>/dev/null | awk -F': ' '/^Section:/{print $2}')"
   case "$section" in
-    main|universe) return 0 ;;
+    main|main/*|universe|universe/*) return 0 ;;
     *) return 1 ;;
   esac
 }

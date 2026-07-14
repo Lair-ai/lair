@@ -47,15 +47,21 @@ package_exists() {
   apt-cache show "$pkg" >/dev/null 2>&1
 }
 
-# Verify that a package belongs to main or universe section
-# Handles both "universe" and "universe/admin" formats
-# Returns 0 if section starts with main or universe, 1 otherwise
+# Verify that a package belongs to the main or universe component of an APT repository.
+# Uses apt-cache policy to find repository lines ending with "Packages" and having
+# a suite/component field ending with "/main" or "/universe".
+# Returns 0 if found, 1 otherwise.
 package_in_main_or_universe() {
   local pkg="$1"
-  local section
-  section="$(apt-cache show "$pkg" 2>/dev/null | awk -F': ' '/^Section:/{print $2}')"
-  case "$section" in
-    main|main/*|universe|universe/*) return 0 ;;
-    *) return 1 ;;
-  esac
+  apt-cache policy "$pkg" 2>/dev/null | awk '
+    $NF == "Packages" {
+      for (i = 1; i <= NF; i++) {
+        if ($i ~ /\/(main|universe)$/) {
+          found = 1
+          exit
+        }
+      }
+    }
+    END { if (found) exit 0; else exit 1 }
+  '
 }

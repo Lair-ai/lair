@@ -52,7 +52,7 @@ Lair enables organizations to deploy **private AI infrastructure** with comprehe
 ## Why Private AI Matters
 
 <p align="center">
-  <img src="docs/assets/private-ai-for-enterprise.png" alt="LAiR — Private AI Infrastructure for Enterprise" width="700">
+  <img src="docs/assets/private-ai-for-enterprise.png" alt="LAiR — Private AI Infrastructure for Enterprise">
 </p>
 
 When you use a Big closed AI provider, your data — documents, code, customer records — goes to someone else's servers. You can't control where it's stored or how it's used.
@@ -216,7 +216,7 @@ The unified setup wizard (`sudo ./setup.sh`) automatically detects your environm
 For advanced users who prefer manual execution or need granular control over each step, detailed guides and scripts are available in the [Installation Documentation](docs/installation/).
 
 <p align="center">
-  <img src="docs/assets/installation-paths.png" alt="LAiR Installation Paths" width="700">
+  <img src="docs/assets/installation-paths.png" alt="LAiR Installation Paths">
 </p>
 
 > **Note 1:** The DGX Spark cost of approximately €5,000 is current as of June 2026.
@@ -402,6 +402,7 @@ helm upgrade lair . -n lair -f values.yaml -f values-yourname.yaml
 ### Getting Started
 - **[🚀 Practical Tutorial: Single-Node in Cloud](docs/Tutorial%20to%20Start.md)** — Step-by-step example of a real-world cloud installation
 - **[🚀 Practical Tutorial: Single-Node on PC with GPU](docs/Tutorial%20PC%20with%20GPU.md)** — Step-by-step example of a local LAN installation on a PC with GPU
+- **[🖼️ ComfyUI Image Generator Setup](docs/Tutorial_ComfyUI_Setup.md)** — Step-by-step guide to configuring ComfyUI for image generation in LAIR
 
 ### Installation & Setup
 - [Prerequisites & Requirements](docs/installation/requirements.md)

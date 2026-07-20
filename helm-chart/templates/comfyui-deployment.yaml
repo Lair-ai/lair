@@ -151,7 +151,7 @@ spec:
             - name: WANTED_GID
               value: "1000"
             - name: SECURITY_LEVEL
-              value: "normal"
+              value: "weak"
             {{- end }}
             {{- if .Values.comfyUI.gpuEnabled }}
             # GPU environment variables

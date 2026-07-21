@@ -6,6 +6,10 @@ mkdir -p "$DEBUG_DIR"
 echo "Collecting Lair debug information..."
 echo "Debug directory: $DEBUG_DIR"
 
+uname -a > "$DEBUG_DIR/system-info.txt" 2>&1
+cat /etc/os-release >> "$DEBUG_DIR/system-info.txt" 2>&1
+lsb_release -a >> "$DEBUG_DIR/system-info.txt" 2>&1 || true
+
 # Cluster information
 echo "=== Collecting cluster information ==="
 kubectl cluster-info > "$DEBUG_DIR/cluster-info.txt" 2>&1

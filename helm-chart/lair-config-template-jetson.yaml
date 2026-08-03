@@ -92,7 +92,7 @@ components:
     enabled: true
     gpuEnabled: true # Enable GPU for ComfyUI on Jetson
     # Use Jetson-optimized ComfyUI image with compatible GLIBC
-    image: "dustynv/comfyui:r36.3.0"
+    image: "dustynv/comfyui:r36.4.3"
     # Alternative options:
     # image: "ghcr.io/jemeyer/comfyui:latest"  # Multi-arch image supporting ARM64
     # image: "mmartial/comfyui-nvidia-docker:ubuntu24_cuda12.6.3-latest"  # If supports ARM64

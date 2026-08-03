@@ -195,7 +195,7 @@ ollama:
 comfyUI:
   image:
     repository: dustynv/comfyui
-    tag: r36.3.0
+    tag: r36.4.3
 
 # Apply configuration
 helm upgrade --install lair . -n lair -f values-config.yaml

@@ -164,7 +164,7 @@ comfyUI:
 comfyUI:
   image:
     repository: dustynv/comfyui
-    tag: r36.3.0  # JetPack version specific
+    tag: r36.4.3  # JetPack version specific
   
   # Jetson-optimized settings
   gpuEnabled: true

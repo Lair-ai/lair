@@ -166,7 +166,7 @@ comfyUI:
   # Jetson-specific optimization
   image:
     repository: dustynv/comfyui  # ARM64 optimized image
-    tag: r36.3.0
+    tag: r36.4.3
     
   # Memory optimization
   lowVram: true  # For memory-constrained environments

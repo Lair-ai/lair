@@ -4,6 +4,38 @@
 # COMFYUI.SH - ComfyUI Component Configuration
 # ============================================================================
 
+DGX_SPARK_COMFYUI_IMAGE="mmartial/comfyui-nvidia-docker:ubuntu24_cuda13.1-dgx-20260605"
+
+version_at_least() {
+  [ "$(printf '%s\n' "$1" "$2" | sort -V | head -1)" = "$2" ]
+}
+
+validate_dgx_spark_driver() {
+  local required_driver="$MIN_DGX_DRIVER_VERSION"
+
+  if [ "$IS_DGX_SPARK" != "y" ]; then
+    return 0
+  fi
+
+  if [[ "$COMFYUI_IMAGE" == *"cuda13.2-dgx"* ]]; then
+    required_driver="595.45"
+  fi
+
+  if [ -z "$NVIDIA_DRIVER_VERSION" ]; then
+    echo -e "${RED}❌ NVIDIA driver version is required for DGX Spark${NC}"
+    echo "   Required driver: $required_driver or newer"
+    return 1
+  fi
+
+  if ! version_at_least "$NVIDIA_DRIVER_VERSION" "$required_driver"; then
+    echo -e "${RED}❌ NVIDIA driver $NVIDIA_DRIVER_VERSION is insufficient for DGX Spark ComfyUI${NC}"
+    echo "   Required driver: $required_driver or newer"
+    return 1
+  fi
+
+  echo -e "${GREEN}✅ NVIDIA driver $NVIDIA_DRIVER_VERSION supports DGX Spark ComfyUI${NC}"
+}
+
 # Configure ComfyUI component (interactive mode)
 configure_comfyui() {
   echo ""
@@ -16,7 +48,7 @@ configure_comfyui() {
   IS_JETSON=${IS_JETSON:-"n"}
   
   # Check GPU requirements based on platform
-  if [ "$IS_JETSON" != "y" ] && [ "$IS_JETSON" != "Y" ] && [ "$HAS_GPU" != "y" ] && [ "$HAS_GPU" != "Y" ]; then
+  if [ "$IS_DGX_SPARK" != "y" ] && [ "$IS_JETSON" != "y" ] && [ "$IS_JETSON" != "Y" ] && [ "$HAS_GPU" != "y" ] && [ "$HAS_GPU" != "Y" ]; then
     echo -e "${YELLOW}⚠️  No GPU detected on non-Jetson system${NC}"
     echo -e "${YELLOW}   ComfyUI requires GPU acceleration and will be automatically disabled${NC}"
     echo -e "${YELLOW}   Platform: $([ "$IS_JETSON" = "y" ] && echo "Jetson" || echo "Standard") | GPU: $([ "$HAS_GPU" = "y" ] && echo "Available" || echo "Not detected")${NC}"
@@ -48,7 +80,10 @@ configure_comfyui() {
   fi
   
     # Ask if user wants to enable ComfyUI
-  if [ "$IS_JETSON" = "y" ] || [ "$IS_JETSON" = "Y" ]; then
+  if [ "$IS_DGX_SPARK" = "y" ]; then
+    echo -e "${GREEN}✅ DGX Spark platform detected with GB10 GPU support${NC}"
+    echo -e "${GREEN}   Total system memory: $(echo "scale=1; $TOTAL_MEMORY_MB/1024" | bc)GB${NC}"
+  elif [ "$IS_JETSON" = "y" ] || [ "$IS_JETSON" = "Y" ]; then
     echo -e "${GREEN}✅ Jetson platform detected with GPU support${NC}"
     echo -e "${GREEN}   Total system memory: $(echo "scale=1; $TOTAL_MEMORY_MB/1024" | bc)GB${NC}"
   else
@@ -118,7 +153,17 @@ configure_comfyui() {
     echo ""
     echo -e "${BLUE}🖼️  ComfyUI Image Configuration${NC}"
     
-    if [ "$IS_JETSON" = "y" ] || [ "$IS_JETSON" = "Y" ]; then
+    if [ "$IS_DGX_SPARK" = "y" ]; then
+      COMFYUI_IMAGE="$DGX_SPARK_COMFYUI_IMAGE"
+      read -p "Use experimental CUDA 13.2 DGX image? (y/n) [default: n]: " dgx_cuda13_2
+      if [[ "$dgx_cuda13_2" == "y" || "$dgx_cuda13_2" == "Y" ]]; then
+        COMFYUI_IMAGE="mmartial/comfyui-nvidia-docker:ubuntu24_cuda13.2-dgx-20260605"
+      fi
+      validate_dgx_spark_driver || return 1
+      echo "✅ Auto-selected DGX Spark image: $COMFYUI_IMAGE"
+      COMFYUI_LOW_VRAM=""
+      COMFYUI_MODELS_DOWNLOAD=""
+    elif [ "$IS_JETSON" = "y" ] || [ "$IS_JETSON" = "Y" ]; then
       echo "Jetson platform detected - using optimized image"
       COMFYUI_IMAGE="dustynv/comfyui:r36.4.3"
       echo "✅ Auto-selected Jetson-optimized image: $COMFYUI_IMAGE"
@@ -243,6 +288,11 @@ configure_comfyui_non_interactive() {
     
     echo "   💾 Storage: ${COMFYUI_STORAGE_GB}GB"
     echo "   🎮 GPU: $([ "$HAS_GPU" = "y" ] && echo "Enabled" || echo "Disabled")"
+
+    if [ "$IS_DGX_SPARK" = "y" ]; then
+      COMFYUI_IMAGE="${COMFYUI_IMAGE:-$DGX_SPARK_COMFYUI_IMAGE}"
+      validate_dgx_spark_driver || return 1
+    fi
     
     if [ -n "$COMFYUI_IMAGE" ]; then
       echo "   🖼️  Image: $COMFYUI_IMAGE"

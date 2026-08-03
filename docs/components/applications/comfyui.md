@@ -171,6 +171,19 @@ comfyUI:
   lowVram: true  # Memory optimization for Jetson
 ```
 
+#### **NVIDIA DGX Spark (ARM64 / GB10)**
+```yaml
+comfyUI:
+  image:
+    repository: mmartial/comfyui-nvidia-docker
+    tag: ubuntu24_cuda13.1-dgx-20260605
+  gpuEnabled: true
+```
+
+The DGX Spark image requires NVIDIA driver `590.44+`. CUDA 13.2 is available
+as `ubuntu24_cuda13.2-dgx-20260605`, but requires driver `595.45+` and should
+be treated as an explicit upgrade rather than the default.
+
 ### 📊 **Resource Configuration**
 
 #### **Standard Configuration**

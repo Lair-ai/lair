@@ -148,19 +148,28 @@ execute_application_configuration_phase() {
     echo "⚠️  File $CONFIG_FILE already exists, will be overwritten"
   fi
 
-  # Platform Detection (Jetson vs Standard)
+  # Platform Detection (DGX Spark vs Jetson vs Standard)
   echo ""
   echo -e "${GREEN}🔧 Platform Detection${NC}"
   echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
   
   if [ "$USE_CONFIG_FILE" = "true" ]; then
-    echo "✅ Platform from config: $PLATFORM_TYPE (Jetson: $IS_JETSON)"
+    echo "✅ Platform from config: $PLATFORM_TYPE (Jetson: $IS_JETSON, DGX Spark: $IS_DGX_SPARK)"
   else
-    read -p "Is this installation for NVIDIA Jetson? (y/n) [default: y]: " IS_JETSON
-    IS_JETSON=${IS_JETSON:-y}
+    if [ "$IS_DGX_SPARK" = "y" ]; then
+      echo "✅ DGX Spark detected automatically"
+    else
+      read -p "Is this installation for NVIDIA Jetson? (y/n) [default: y]: " IS_JETSON
+      IS_JETSON=${IS_JETSON:-y}
+    fi
   fi
 
-  if [[ "$IS_JETSON" == "y" || "$IS_JETSON" == "Y" ]]; then
+  if [ "$IS_DGX_SPARK" = "y" ]; then
+    PLATFORM_TYPE="dgx_spark"
+    IS_JETSON="n"
+    HAS_GPU="y"
+    echo "✅ DGX Spark platform: ARM64 GB10 GPU enabled"
+  elif [[ "$IS_JETSON" == "y" || "$IS_JETSON" == "Y" ]]; then
     PLATFORM_TYPE="jetson"
     HAS_GPU="y"  # Jetson always has GPU
     echo "✅ Jetson platform detected - GPU enabled by default"
@@ -236,7 +245,13 @@ execute_infrastructure_setup_phase() {
   # Safety check: ensure IS_JETSON is defined
   IS_JETSON=${IS_JETSON:-"n"}
 
-  if [ "$IS_JETSON" = "y" ]; then
+  if [ "$IS_DGX_SPARK" = "y" ]; then
+    echo "🔧 DGX Spark platform: Configuring Longhorn storage automatically"
+    echo "   📦 DGX Spark uses the standard distributed storage path"
+    CREATE_STORAGE_CLASS_ENABLED=true
+    STORAGE_CLASS_NAME="lair-storage"
+    echo "✅ StorageClass: $STORAGE_CLASS_NAME (Longhorn-based for DGX Spark)"
+  elif [ "$IS_JETSON" = "y" ]; then
     echo "🔧 Jetson platform: Configuring hostpath storage automatically"
     echo "   ⚠️  Longhorn not recommended for Jetson - using microk8s hostpath provisioner"
     CREATE_STORAGE_CLASS_ENABLED=true

@@ -188,7 +188,10 @@ load_configuration_from_file() {
   
   # Load platform configuration
   IS_JETSON=$(read_yaml_value "$config_file" ".platform.is_jetson" "false")
+  IS_DGX_SPARK=$(read_yaml_value "$config_file" ".platform.is_dgx_spark" "false")
   HAS_GPU=$(read_yaml_value "$config_file" ".platform.has_gpu" "false")
+  GPU_MODEL=$(read_yaml_value "$config_file" ".platform.gpu_model" "")
+  NVIDIA_DRIVER_VERSION=$(read_yaml_value "$config_file" ".platform.nvidia_driver_version" "")
   VRAM_PERCENTAGE=$(read_yaml_value "$config_file" ".platform.vram_percentage" "80")
   
   # Load access mode configuration
@@ -203,12 +206,21 @@ load_configuration_from_file() {
     IS_JETSON="n"
     PLATFORM_TYPE="standard"
   fi
+
+  if [ "$IS_DGX_SPARK" = "true" ] || [ "$IS_DGX_SPARK" = "True" ]; then
+    IS_DGX_SPARK="y"
+    PLATFORM_TYPE="dgx_spark"
+  else
+    IS_DGX_SPARK="n"
+  fi
   
   if [ "$HAS_GPU" = "true" ] || [ "$HAS_GPU" = "True" ]; then
     HAS_GPU="y"
   else
     HAS_GPU="n"
   fi
+
+  export GPU_MODEL NVIDIA_DRIVER_VERSION
   
   # Load email and access mode configurations
   CERT_EMAIL=$(read_yaml_value "$config_file" ".email.cert_email" "admin@example.com")
@@ -354,6 +366,14 @@ load_configuration_from_file() {
   COMFYUI_MODELS_DOWNLOAD=$(read_yaml_value "$config_file" ".components.comfyui.models_download" "")
   COMFYUI_AUTH_USER=$(read_yaml_value "$config_file" ".components.comfyui.auth_user" "admin")
   COMFYUI_AUTH_HASH=$(read_yaml_value "$config_file" ".components.comfyui.auth_hash" "")
+
+  # Keep generated configurations on the DGX path even when platform metadata
+  # was not present in an older configuration file.
+  if [[ "$COMFYUI_IMAGE" == *"-dgx-"* ]]; then
+    IS_DGX_SPARK="y"
+    IS_JETSON="n"
+    PLATFORM_TYPE="dgx_spark"
+  fi
   
   # Load Ollama configuration
   OLLAMA_IMAGE=$(read_yaml_value "$config_file" ".components.ollama.image" "")
@@ -642,4 +662,4 @@ ask_for_config_file_import() {
     echo "🔍 Debug: ask_for_config_file_import returning 1 (interactive mode)"
     return 1
   fi
-} 
+}

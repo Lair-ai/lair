@@ -18,6 +18,7 @@ manual_resources:
 # Platform Configuration
 platform:
   is_jetson: false # Standard platform
+  is_dgx_spark: false # NVIDIA DGX Spark uses the dedicated ARM64 template
   has_gpu: false # CPU-only configuration
   vram_percentage: 80
   system_hostname: "CHANGE_ME_HOSTNAME" # Hostname for LAN domains (subdomain.lair.local)

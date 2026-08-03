@@ -601,6 +601,25 @@ detect_gpu_from_cluster() {
   export HAS_GPU
 }
 
+# Detect NVIDIA DGX Spark without classifying generic ARM64 or Jetson hosts.
+detect_dgx_spark_platform() {
+  IS_DGX_SPARK="n"
+
+  if [[ "$(uname -m 2>/dev/null)" == "aarch64" || "$(uname -m 2>/dev/null)" == "arm64" ]]; then
+    if [ -f "/etc/dgx-release" ]; then
+      IS_DGX_SPARK="y"
+    elif command -v nvidia-smi >/dev/null 2>&1 && nvidia-smi --query-gpu=name --format=csv,noheader 2>/dev/null | grep -qi "GB10"; then
+      IS_DGX_SPARK="y"
+    fi
+  fi
+
+  if [ "$IS_DGX_SPARK" = "y" ]; then
+    echo -e "${GREEN}✅ NVIDIA DGX Spark detected (ARM64/GB10)${NC}"
+  fi
+
+  export IS_DGX_SPARK
+}
+
 # Function to detect GPU from local system
 detect_gpu_from_local() {
   echo -e "${BLUE}Detecting GPU resources from local system...${NC}"
@@ -635,9 +654,13 @@ detect_gpu_from_local() {
       
       if [ -n "$gpu_count" ] && [ "$gpu_count" -gt 0 ]; then
         HAS_GPU="y"
+        gpu_details=$(${TIMEOUT_CMD:-} nvidia-smi --query-gpu=name,driver_version --format=csv,noheader 2>/dev/null | head -1)
+        GPU_MODEL=$(printf '%s' "$gpu_details" | cut -d',' -f1 | sed 's/[[:space:]]*$//')
+        NVIDIA_DRIVER_VERSION=$(printf '%s' "$gpu_details" | cut -d',' -f2 | sed 's/^[[:space:]]*//')
         echo -e "${GREEN}🎮 NVIDIA GPU Detected on Local System${NC}"
         echo -e "${GREEN}   ✅ GPU Count: $gpu_count${NC}"
         echo -e "${GREEN}   ✅ GPU Models: $gpu_names${NC}"
+        echo -e "${GREEN}   ✅ NVIDIA Driver: ${NVIDIA_DRIVER_VERSION:-unknown}${NC}"
         echo -e "${GREEN}   ✅ AI workloads can use GPU acceleration${NC}"
       else
         echo -e "${YELLOW}ℹ️  nvidia-smi found but no GPUs detected${NC}"
@@ -694,13 +717,14 @@ detect_gpu_from_local() {
   fi
   
   # Export for other scripts
-  export HAS_GPU
+  export HAS_GPU GPU_MODEL NVIDIA_DRIVER_VERSION
 }
 
 # Unified function to detect GPU resources
 detect_gpu_resources() {
   echo -e "${BLUE}🎮 GPU Detection${NC}"
   echo "─────────────────────────────────────────────────────────────────────────────"
+  detect_dgx_spark_platform
   
   if [ "$DETECTION_CHOICE" = "1" ]; then
     # Local system detection

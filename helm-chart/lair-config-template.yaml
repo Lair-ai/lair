@@ -87,6 +87,9 @@ platform:
   # - Apply Jetson-specific optimizations
   is_jetson: false
 
+  # NVIDIA DGX Spark (GB10, ARM64) platform
+  is_dgx_spark: false
+
   # GPU availability for AI workloads (ignored if is_jetson: true)
   # - true: Enable GPU acceleration for Ollama
   # - false: CPU-only configuration

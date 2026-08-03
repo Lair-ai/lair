@@ -92,6 +92,11 @@ platform:
   # - false: CPU-only configuration
   has_gpu: false
 
+  # Automatically detected on standard NVIDIA systems. Optional when using a config file.
+  gpu_model: ""
+  gpu_family: "unknown" # turing, ampere, ada, blackwell, legacy, unknown
+  nvidia_driver_version: "" # Must be 570+ for standard GPU deployments
+
   # VRAM allocation percentage (only used if GPU is available)
   # Percentage of total GPU VRAM to allocate to AI models
   # Conservative values: 60-70%, Aggressive: 80-90%
@@ -369,14 +374,15 @@ components:
     # │  Jetson Platform:                                                           │
     # │  • dustynv/comfyui:r36.4.3                 - Auto-selected for Jetson      │
     # │                                                                             │
-    # │  Standard Platform with GPU:                                                │
-    # │  • mmartial/comfyui-nvidia-docker:ubuntu22_cuda12.3.2-latest              │
-    # │  • mmartial/comfyui-nvidia-docker:ubuntu22_cuda12.4.1-latest              │
-    # │  • mmartial/comfyui-nvidia-docker:ubuntu24_cuda12.5.1-latest              │
-    # │  • mmartial/comfyui-nvidia-docker:ubuntu24_cuda12.6.3-latest (default)    │
-    # │  • mmartial/comfyui-nvidia-docker:ubuntu24_cuda12.8-latest                │
-    # │  • mmartial/comfyui-nvidia-docker:ubuntu24_cuda12.9-latest                │
-    # │  • mmartial/comfyui-nvidia-docker:ubuntu24_cuda13.0-latest                │
+    # │  Standard Platform with GPU (NVIDIA Driver 570+):                         │
+     # │  • RTX 20xx/30xx/40xx/50xx: CUDA 12.8 (default)                           │
+     # │    mmartial/comfyui-nvidia-docker:ubuntu24_cuda12.8-20260605             │
+     # │  • Legacy GTX/Quadro/Tesla: CUDA 12.6.3                                  │
+     # │    mmartial/comfyui-nvidia-docker:ubuntu24_cuda12.6.3-20251228           │
+     # │  • CUDA 12.9: driver 575+                                                 │
+     # │    mmartial/comfyui-nvidia-docker:ubuntu24_cuda12.9-20260605             │
+     # │  • CUDA 13.0: driver 580+                                                 │
+     # │    mmartial/comfyui-nvidia-docker:ubuntu24_cuda13.0-20260605             │
     # │                                                                             │
     # │  Standard Platform without GPU: ComfyUI disabled automatically             │
     # └─────────────────────────────────────────────────────────────────────────────┘

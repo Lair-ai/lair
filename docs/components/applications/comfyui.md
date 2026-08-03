@@ -150,14 +150,26 @@ spec:
 ```yaml
 comfyUI:
   image:
-    repository: mmartial/comfyui
-    tag: latest
+    repository: mmartial/comfyui-nvidia-docker
+    tag: ubuntu24_cuda12.8-20260605 # Driver 570+
   
   # Alternative high-performance image
   image:
     repository: comfyui/comfyui
     tag: latest
 ```
+
+The automatic selection uses the following NVIDIA GPU policy:
+
+| GPU family | Recommended image | Minimum driver |
+|---|---|---:|
+| RTX 20xx (Turing) | `ubuntu24_cuda12.8-20260605` | 570.26 |
+| RTX 30xx (Ampere) | `ubuntu24_cuda12.8-20260605` | 570.26 |
+| RTX 40xx (Ada) | `ubuntu24_cuda12.8-20260605` | 570.26 |
+| RTX 50xx (Blackwell) | `ubuntu24_cuda12.8-20260605` | 570.26 |
+
+CUDA 12.9 requires driver 575.51 or newer; CUDA 13.0 requires driver 580.65 or newer.
+The dated tags are used instead of `latest` to keep deployments reproducible.
 
 #### **Jetson Platform (ARM64)**
 ```yaml

@@ -584,9 +584,15 @@ detect_gpu_from_cluster() {
 
     if [ -n "$gpu_nodes" ] && [ "$total_gpus" -gt 0 ]; then
       HAS_GPU="y"
+      GPU_MODEL=$($KUBECTL_CMD get nodes -o jsonpath='{.items[?(@.status.capacity."nvidia.com/gpu")].metadata.labels.nvidia\.com/gpu\.product}' 2>/dev/null | tr ' ' '\n' | head -1)
+      NVIDIA_DRIVER_VERSION=$($KUBECTL_CMD get nodes -o jsonpath='{.items[?(@.status.capacity."nvidia.com/gpu")].metadata.labels.nvidia\.com/gpu\.driver\.version}' 2>/dev/null | tr ' ' '\n' | head -1)
+      classify_nvidia_gpu "$GPU_MODEL"
       echo -e "${GREEN}🎮 GPU Resources Detected in Cluster${NC}"
       echo -e "${GREEN}   ✅ Nodes with GPU: $gpu_nodes${NC}"
       echo -e "${GREEN}   ✅ Total GPUs available: $total_gpus${NC}"
+      echo -e "${GREEN}   ✅ GPU Model: ${GPU_MODEL:-unknown}${NC}"
+      echo -e "${GREEN}   ✅ GPU Family: ${GPU_FAMILY:-unknown}${NC}"
+      echo -e "${GREEN}   ✅ NVIDIA Driver: ${NVIDIA_DRIVER_VERSION:-unknown}${NC}"
       echo -e "${GREEN}   ✅ AI workloads can use GPU acceleration${NC}"
     else
       echo -e "${YELLOW}ℹ️  No GPU resources detected in the cluster${NC}"
@@ -601,10 +607,43 @@ detect_gpu_from_cluster() {
   export HAS_GPU
 }
 
+# Classify common NVIDIA GPU generations for image selection.
+classify_nvidia_gpu() {
+  local model="${1:-}"
+  model="${model//-/ }"
+  model="${model//_/ }"
+
+  case "$model" in
+    *"Blackwell"*|*"RTX 50"[1-9][0-9]*)
+      GPU_FAMILY="blackwell"
+      ;;
+    *"RTX 40"*|*"RTX 4000 Ada"*|*"RTX 5000 Ada"*|*"Ada"*)
+      GPU_FAMILY="ada"
+      ;;
+    *"RTX 30"*|*"RTX A4"*|*"RTX A5"*|*"RTX A6"*)
+      GPU_FAMILY="ampere"
+      ;;
+    *"RTX 20"*)
+      GPU_FAMILY="turing"
+      ;;
+    *"GTX 10"*|*"GTX 16"*|*"Quadro"*|*"Tesla"*)
+      GPU_FAMILY="legacy"
+      ;;
+    *)
+      GPU_FAMILY="unknown"
+      ;;
+  esac
+
+  export GPU_FAMILY
+}
+
 # Function to detect GPU from local system
 detect_gpu_from_local() {
   echo -e "${BLUE}Detecting GPU resources from local system...${NC}"
   HAS_GPU="n"
+  GPU_MODEL=""
+  GPU_FAMILY="unknown"
+  NVIDIA_DRIVER_VERSION=""
   
   # Check if timeout command is available
   if command -v timeout &>/dev/null; then
@@ -635,9 +674,15 @@ detect_gpu_from_local() {
       
       if [ -n "$gpu_count" ] && [ "$gpu_count" -gt 0 ]; then
         HAS_GPU="y"
+        gpu_details=$(${TIMEOUT_CMD:-} nvidia-smi --query-gpu=name,driver_version --format=csv,noheader 2>/dev/null | head -1)
+        GPU_MODEL=$(printf '%s' "$gpu_details" | cut -d',' -f1 | sed 's/[[:space:]]*$//')
+        NVIDIA_DRIVER_VERSION=$(printf '%s' "$gpu_details" | cut -d',' -f2 | sed 's/^[[:space:]]*//')
+        classify_nvidia_gpu "$GPU_MODEL"
         echo -e "${GREEN}🎮 NVIDIA GPU Detected on Local System${NC}"
         echo -e "${GREEN}   ✅ GPU Count: $gpu_count${NC}"
         echo -e "${GREEN}   ✅ GPU Models: $gpu_names${NC}"
+        echo -e "${GREEN}   ✅ GPU Family: $GPU_FAMILY${NC}"
+        echo -e "${GREEN}   ✅ NVIDIA Driver: $NVIDIA_DRIVER_VERSION${NC}"
         echo -e "${GREEN}   ✅ AI workloads can use GPU acceleration${NC}"
       else
         echo -e "${YELLOW}ℹ️  nvidia-smi found but no GPUs detected${NC}"
@@ -694,7 +739,7 @@ detect_gpu_from_local() {
   fi
   
   # Export for other scripts
-  export HAS_GPU
+  export HAS_GPU GPU_MODEL GPU_FAMILY NVIDIA_DRIVER_VERSION
 }
 
 # Unified function to detect GPU resources

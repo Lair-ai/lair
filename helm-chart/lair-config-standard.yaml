@@ -19,6 +19,9 @@ manual_resources:
 platform:
   is_jetson: false # Standard platform
   has_gpu: false # CPU-only configuration
+  gpu_model: "" # Auto-detected by setup.sh when a GPU is present
+  gpu_family: "unknown" # turing, ampere, ada, blackwell, legacy, unknown
+  nvidia_driver_version: "" # NVIDIA Driver 570 or newer is required
   vram_percentage: 80
   system_hostname: "CHANGE_ME_HOSTNAME" # Hostname for LAN domains (subdomain.lair.local)
 

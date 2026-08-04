@@ -16,6 +16,6 @@ maintainers:
   - name: NEXID
     email: lair@nexid.it
     url: https://www.nexid.it
-- name: Lair-AI
-  email: hello@lair-ai.it
-  url: https://dev.lair-ai.it
+  - name: Lair-AI
+    email: hello@lair-ai.it
+    url: https://dev.lair-ai.it

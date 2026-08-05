@@ -210,7 +210,7 @@ MIN_CPU_REQ=10 # 10m
 MIN_MEM_REQ=16 # 16Mi
 
 # Percentage of system resources to allocate to Kubernetes for requests (overcommitment strategy)
-K8S_RESOURCE_ALLOCATION_PERCENTAGE=30
+K8S_RESOURCE_ALLOCATION_PERCENTAGE=60
 
 # Percentage of available storage to actually use for Lair (safety factor)
 STORAGE_SAFETY_PERCENTAGE=80

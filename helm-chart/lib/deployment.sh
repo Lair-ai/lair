@@ -257,6 +257,61 @@ run_helm_with_fallback() {
   fi
 }
 
+# Wait for Longhorn to attach application volumes and recover one stuck instance manager.
+wait_for_lair_startup() {
+  local namespace=${1:-$NAMESPACE}
+  local max_wait=600
+  local interval=10
+  local elapsed=0
+  local longhorn_restarted=false
+
+  if ! $KUBECTL_CMD get crd volumes.longhorn.io >/dev/null 2>&1; then
+    echo "ℹ️  Longhorn CRD not found; skipping storage recovery check."
+    return 0
+  fi
+
+  echo "⏳ Waiting for Longhorn volumes and Lair workloads (max ${max_wait}s)..."
+
+  while (( elapsed < max_wait )); do
+    local stuck_volumes
+    local pending_pods
+    stuck_volumes=$($KUBECTL_CMD get volumes.longhorn.io -n longhorn-system \
+      -o custom-columns=STATE:.status.state --no-headers 2>/dev/null | \
+      grep -c '^attaching$' || true)
+    pending_pods=$($KUBECTL_CMD get pods -n "$namespace" --no-headers 2>/dev/null | \
+      awk '$3 == "Completed" {next} {split($2, ready, "/"); if (ready[1] != ready[2]) count++} END {print count + 0}')
+
+    if (( stuck_volumes == 0 && pending_pods == 0 )); then
+      echo "✅ Longhorn volumes and Lair workloads are ready."
+      return 0
+    fi
+
+    # A freshly created single-node Longhorn instance manager can remain stale
+    # after the replicas are scheduled. Recreate it once, preserving all PVCs.
+    if [[ "$longhorn_restarted" == false && $elapsed -ge 60 && $stuck_volumes -gt 0 ]]; then
+      local instance_manager
+      instance_manager=$($KUBECTL_CMD get pods -n longhorn-system \
+        -l longhorn.io/component=instance-manager \
+        -o jsonpath='{.items[0].metadata.name}' 2>/dev/null || true)
+      if [ -n "$instance_manager" ]; then
+        echo "⚠️  Longhorn volumes are still attaching; restarting instance manager $instance_manager"
+        $KUBECTL_CMD delete pod -n longhorn-system "$instance_manager" --wait=false >/dev/null
+        longhorn_restarted=true
+      fi
+    fi
+
+    echo "   Longhorn attaching: $stuck_volumes | Lair pending: $pending_pods | elapsed: ${elapsed}s"
+    sleep "$interval"
+    elapsed=$((elapsed + interval))
+  done
+
+  echo "⚠️  Startup is still in progress after ${max_wait}s. Current status:"
+  $KUBECTL_CMD get pods -n "$namespace" || true
+  $KUBECTL_CMD get volumes.longhorn.io -n longhorn-system \
+    -o custom-columns=NAME:.metadata.name,STATE:.status.state,ROBUSTNESS:.status.robustness || true
+  return 0
+}
+
 # Proper implementation of verify_and_prepare_namespace
 verify_and_prepare_namespace() {
   local namespace=$1
@@ -446,6 +501,8 @@ execute_helm_deployment() {
       exit 1
     }
   fi
+
+  wait_for_lair_startup "$NAMESPACE"
   
   # Add monitoring suggestion after successful deployment
   echo ""

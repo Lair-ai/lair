@@ -152,6 +152,8 @@ spec:
               value: "1000"
             - name: SECURITY_LEVEL
               value: "weak"
+            - name: NETWORK_MODE
+              value: "personal_cloud"
             - name: USE_UV
               value: "true"
             {{- end }}

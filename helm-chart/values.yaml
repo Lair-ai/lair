@@ -232,6 +232,9 @@ comfyUI:
   # Special configuration for optimized images
   lowVram: "" # Reserved for future use
   modelsDownload: "" # Reserved for future use
+  manager:
+    securityLevel: normal
+    networkMode: personal_cloud
   persistence:
     enabled: true
     size: 10Gi

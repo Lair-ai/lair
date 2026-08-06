@@ -191,6 +191,7 @@ load_configuration_from_file() {
   IS_DGX_SPARK=$(read_yaml_value "$config_file" ".platform.is_dgx_spark" "false")
   HAS_GPU=$(read_yaml_value "$config_file" ".platform.has_gpu" "false")
   GPU_MODEL=$(read_yaml_value "$config_file" ".platform.gpu_model" "")
+  GPU_FAMILY=$(read_yaml_value "$config_file" ".platform.gpu_family" "unknown")
   NVIDIA_DRIVER_VERSION=$(read_yaml_value "$config_file" ".platform.nvidia_driver_version" "")
   VRAM_PERCENTAGE=$(read_yaml_value "$config_file" ".platform.vram_percentage" "80")
   
@@ -220,7 +221,11 @@ load_configuration_from_file() {
     HAS_GPU="n"
   fi
 
-  export GPU_MODEL NVIDIA_DRIVER_VERSION
+  if [ "$GPU_FAMILY" = "unknown" ] && [ -n "$GPU_MODEL" ] && declare -F classify_nvidia_gpu >/dev/null; then
+    classify_nvidia_gpu "$GPU_MODEL"
+  fi
+
+  export GPU_MODEL GPU_FAMILY NVIDIA_DRIVER_VERSION
   
   # Load email and access mode configurations
   CERT_EMAIL=$(read_yaml_value "$config_file" ".email.cert_email" "admin@example.com")

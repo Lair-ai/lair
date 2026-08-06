@@ -17,6 +17,7 @@ IS_JETSON=""
 IS_DGX_SPARK=""
 HAS_GPU=""
 GPU_MODEL=""
+GPU_FAMILY="unknown"
 NVIDIA_DRIVER_VERSION=""
 CONFIG_NAME=""
 CONFIG_FILE=""
@@ -26,6 +27,9 @@ ACCESS_MODE="lan"  # Default to LAN mode
 SYSTEM_HOSTNAME=""  # System hostname for LAN domain generation
 K8S_CLUSTER_ACCESSIBLE=false  # Track if cluster is accessible
 MIN_DGX_DRIVER_VERSION="590.44"
+
+# NVIDIA driver policy for standard GPU platforms
+MIN_NVIDIA_DRIVER_VERSION="570.26"
 
 # Configuration file variables
 USE_CONFIG_FILE=false
@@ -208,7 +212,7 @@ MIN_CPU_REQ=10 # 10m
 MIN_MEM_REQ=16 # 16Mi
 
 # Percentage of system resources to allocate to Kubernetes for requests (overcommitment strategy)
-K8S_RESOURCE_ALLOCATION_PERCENTAGE=30
+K8S_RESOURCE_ALLOCATION_PERCENTAGE=52
 
 # Percentage of available storage to actually use for Lair (safety factor)
 STORAGE_SAFETY_PERCENTAGE=80
@@ -255,6 +259,12 @@ MIN_MEM_REDIS=128          # 128MB - in-memory cache
 MIN_CPU_MINIO=200          # 200m - object storage I/O
 MIN_MEM_MINIO=512          # 512MB - object storage operations
 
+# Tika is always deployed and is not part of the component percentage split.
+CPU_TIKA=1500
+MEM_TIKA=1536
+CPU_TIKA_REQ=100
+MEM_TIKA_REQ=256
+
 # Export all variables to make them available to other modules
 export RED GREEN YELLOW BLUE NC
 export PLATFORM_TYPE IS_JETSON IS_DGX_SPARK HAS_GPU GPU_MODEL NVIDIA_DRIVER_VERSION CONFIG_NAME CONFIG_FILE N8N_KEY_FILE DETECTION_CHOICE ACCESS_MODE SYSTEM_HOSTNAME K8S_CLUSTER_ACCESSIBLE
@@ -291,3 +301,4 @@ export MIN_CPU_N8N MIN_MEM_N8N
 export MIN_CPU_POSTGRES MIN_MEM_POSTGRES
 export MIN_CPU_REDIS MIN_MEM_REDIS
 export MIN_CPU_MINIO MIN_MEM_MINIO
+export CPU_TIKA MEM_TIKA CPU_TIKA_REQ MEM_TIKA_REQ

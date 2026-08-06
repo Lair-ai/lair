@@ -149,7 +149,7 @@ components:
     enabled: true
     storage_size: "100Gi"
     gpu_enabled: true
-    image: "mmartial/comfyui-nvidia-docker:ubuntu24_cuda12.6.3-latest"
+    image: "mmartial/comfyui-nvidia-docker:ubuntu24_cuda12.8-20260605"
   
   minio:
     enabled: true

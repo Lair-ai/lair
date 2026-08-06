@@ -1,4 +1,6 @@
 {{- if .Values.comfyUI.enabled }}
+{{- $managerSecurityLevel := .Values.comfyUI.manager.securityLevel | default "normal" }}
+{{- $managerNetworkMode := .Values.comfyUI.manager.networkMode | default "personal_cloud" }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -44,10 +46,22 @@ spec:
               mkdir -p /comfy/mnt
               
               # Ensure basedir subdirectories exist
-              for d in models input output custom_nodes user; do
-                mkdir -p "/basedir/$d"
-              done
-              {{- end }}
+               for d in models input output custom_nodes user; do
+                 mkdir -p "/basedir/$d"
+               done
+
+               # Seed ComfyUI Manager configuration before the image init script runs.
+               # The image uses defaults when this file does not exist yet.
+               manager_config=/basedir/user/__manager/config.ini
+               if [ ! -f "$manager_config" ]; then
+                 mkdir -p "$(dirname "$manager_config")"
+                 printf '%s\n' \
+                   '[default]' \
+                   'security_level = {{ $managerSecurityLevel }}' \
+                   'network_mode = {{ $managerNetworkMode }}' \
+                   'use_uv = True' > "$manager_config"
+               fi
+               {{- end }}
 
               {{- if contains "dustynv/comfyui" .Values.comfyUI.image.repository }}
               # Dustynv/ComfyUI: Create complete symlinks for persistence
@@ -151,11 +165,13 @@ spec:
             - name: WANTED_GID
               value: "1000"
             - name: SECURITY_LEVEL
-              value: "weak"
-            {{- if contains "dgx" .Values.comfyUI.image.tag }}
-            # DGX Spark optimizations from the upstream image profile
+              value: "{{ $managerSecurityLevel }}"
+            - name: NETWORK_MODE
+              value: "{{ $managerNetworkMode }}"
             - name: USE_UV
               value: "true"
+            {{- if contains "dgx" .Values.comfyUI.image.tag }}
+            # DGX Spark optimizations from the upstream image profile
             - name: USE_NEW_MANAGER
               value: "true"
             - name: ENABLE_MANAGER_LEGACY_UI

@@ -397,37 +397,8 @@ execute_configuration_generation_phase() {
     COMFYUI_STORAGE_GB=0
   fi
   
-  # Calculate total allocated resources (including N8N workers)
-  # Build base resource calculations
-  BASE_CPU=$((CPU_OPENWEBUI + CPU_OLLAMA + CPU_N8N + (CPU_N8N_WORKER * N8N_WORKER_REPLICAS) + CPU_POSTGRES + CPU_REDIS))
-  BASE_MEMORY=$((MEM_OPENWEBUI + MEM_OLLAMA + MEM_N8N + (MEM_N8N_WORKER * N8N_WORKER_REPLICAS) + MEM_POSTGRES + MEM_REDIS))
-  BASE_CPU_REQ=$((CPU_OPENWEBUI_REQ + CPU_OLLAMA_REQ + CPU_N8N_REQ + (CPU_N8N_WORKER_REQ * N8N_WORKER_REPLICAS) + CPU_POSTGRES_REQ + CPU_REDIS_REQ))
-  BASE_MEMORY_REQ=$((MEM_OPENWEBUI_REQ + MEM_OLLAMA_REQ + MEM_N8N_REQ + (MEM_N8N_WORKER_REQ * N8N_WORKER_REPLICAS) + MEM_POSTGRES_REQ + MEM_REDIS_REQ))
-  BASE_STORAGE=$((OPENWEBUI_STORAGE_GB + OLLAMA_STORAGE_GB + N8N_STORAGE_GB + PG_STORAGE_GB + REDIS_STORAGE_GB))
-  
-  # Add MinIO if enabled
-  if [[ "$MINIO_ENABLED" == true && "$ENABLE_MINIO" == "y" ]]; then
-    BASE_CPU=$((BASE_CPU + CPU_MINIO))
-    BASE_MEMORY=$((BASE_MEMORY + MEM_MINIO))
-    BASE_CPU_REQ=$((BASE_CPU_REQ + CPU_MINIO_REQ))
-    BASE_MEMORY_REQ=$((BASE_MEMORY_REQ + MEM_MINIO_REQ))
-    BASE_STORAGE=$((BASE_STORAGE + MINIO_STORAGE_GB))
-  fi
-  
-  # Add ComfyUI if enabled
-  if [[ "$COMFYUI_ENABLED" == true && "$ENABLE_COMFYUI" == "y" ]]; then
-    TOTAL_ALLOCATED_CPU=$((BASE_CPU + CPU_COMFYUI))
-    TOTAL_ALLOCATED_MEMORY=$((BASE_MEMORY + MEM_COMFYUI))
-    TOTAL_ALLOCATED_CPU_REQ=$((BASE_CPU_REQ + CPU_COMFYUI_REQ))
-    TOTAL_ALLOCATED_MEMORY_REQ=$((BASE_MEMORY_REQ + MEM_COMFYUI_REQ))
-    TOTAL_ALLOCATED_STORAGE=$((BASE_STORAGE + COMFYUI_STORAGE_GB))
-  else
-    TOTAL_ALLOCATED_CPU=$BASE_CPU
-    TOTAL_ALLOCATED_MEMORY=$BASE_MEMORY
-    TOTAL_ALLOCATED_CPU_REQ=$BASE_CPU_REQ
-    TOTAL_ALLOCATED_MEMORY_REQ=$BASE_MEMORY_REQ
-    TOTAL_ALLOCATED_STORAGE=$BASE_STORAGE
-  fi
+  # Calculate totals from every deployed workload, including Tika and workers.
+  calculate_total_allocated_resources
   
   # Convert to readable units
   TOTAL_ALLOCATED_CPU_CORES=$(echo "scale=1; $TOTAL_ALLOCATED_CPU/1000" | bc)
@@ -445,6 +416,7 @@ execute_configuration_generation_phase() {
   printf "%-20s %-12s %-12s %-12s %-12s %-12s\n" "N8N Workers (x${N8N_WORKER_REPLICAS})" "$(echo "scale=1; $CPU_N8N_WORKER_REQ * $N8N_WORKER_REPLICAS/1000" | bc)" "$(echo "scale=1; $CPU_N8N_WORKER * $N8N_WORKER_REPLICAS/1000" | bc)" "$(echo "scale=1; $MEM_N8N_WORKER_REQ * $N8N_WORKER_REPLICAS/1024" | bc)G" "$(echo "scale=1; $MEM_N8N_WORKER * $N8N_WORKER_REPLICAS/1024" | bc)G" "-"
   printf "%-20s %-12s %-12s %-12s %-12s %-12s\n" "PostgreSQL" "$(echo "scale=1; $CPU_POSTGRES_REQ/1000" | bc)" "$(echo "scale=1; $CPU_POSTGRES/1000" | bc)" "$(echo "scale=1; $MEM_POSTGRES_REQ/1024" | bc)G" "$(echo "scale=1; $MEM_POSTGRES/1024" | bc)G" "${PG_STORAGE_GB}G"
   printf "%-20s %-12s %-12s %-12s %-12s %-12s\n" "Redis" "$(echo "scale=1; $CPU_REDIS_REQ/1000" | bc)" "$(echo "scale=1; $CPU_REDIS/1000" | bc)" "$(echo "scale=1; $MEM_REDIS_REQ/1024" | bc)G" "$(echo "scale=1; $MEM_REDIS/1024" | bc)G" "${REDIS_STORAGE_GB}G"
+  printf "%-20s %-12s %-12s %-12s %-12s %-12s\n" "Tika" "$(echo "scale=1; $CPU_TIKA_REQ/1000" | bc)" "$(echo "scale=1; $CPU_TIKA/1000" | bc)" "$(echo "scale=1; $MEM_TIKA_REQ/1024" | bc)G" "$(echo "scale=1; $MEM_TIKA/1024" | bc)G" "-"
   # Only show MinIO if it's enabled
   if [[ "$MINIO_ENABLED" == true && "$ENABLE_MINIO" == "y" ]]; then
     printf "%-20s %-12s %-12s %-12s %-12s %-12s\n" "MinIO" "$(echo "scale=1; $CPU_MINIO_REQ/1000" | bc)" "$(echo "scale=1; $CPU_MINIO/1000" | bc)" "$(echo "scale=1; $MEM_MINIO_REQ/1024" | bc)G" "$(echo "scale=1; $MEM_MINIO/1024" | bc)G" "${MINIO_STORAGE_GB}G"

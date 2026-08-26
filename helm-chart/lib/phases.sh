@@ -156,8 +156,12 @@ execute_application_configuration_phase() {
   if [ "$USE_CONFIG_FILE" = "true" ]; then
     echo "✅ Platform from config: $PLATFORM_TYPE (Jetson: $IS_JETSON)"
   else
-    read -p "Is this installation for NVIDIA Jetson? (y/n) [default: y]: " IS_JETSON
-    IS_JETSON=${IS_JETSON:-y}
+    detect_jetson_platform
+    if [ "$IS_JETSON" = "y" ]; then
+      echo "✅ NVIDIA Jetson detected automatically"
+    else
+      echo "✅ Standard platform detected automatically"
+    fi
   fi
 
   if [[ "$IS_JETSON" == "y" || "$IS_JETSON" == "Y" ]]; then

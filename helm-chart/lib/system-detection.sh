@@ -5,6 +5,21 @@
 # ============================================================================
 
 # Function to determine which kubectl and helm to use
+detect_jetson_platform() {
+  IS_JETSON="n"
+
+  for model_file in /proc/device-tree/model /sys/firmware/devicetree/base/model; do
+    if [ -r "$model_file" ] && tr -d '\0' < "$model_file" | grep -Eiq "jetson|xavier|nano|orin|agx"; then
+      IS_JETSON="y"
+      break
+    fi
+  done
+
+  if uname -r | grep -qi "tegra"; then
+    IS_JETSON="y"
+  fi
+}
+
 detect_commands() {
   echo "🔍 Debug: Starting detect_commands function"
   

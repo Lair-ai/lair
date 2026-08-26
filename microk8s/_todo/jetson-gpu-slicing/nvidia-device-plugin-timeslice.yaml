@@ -44,7 +44,7 @@ spec:
         effect: NoSchedule
       containers:
       - name: nvidia-device-plugin-ctr
-        image: nvcr.io/nvidia/k8s-device-plugin:v0.17.2
+        image: nvcr.io/nvidia/k8s-device-plugin:v0.20.0
         imagePullPolicy: IfNotPresent
         securityContext:
           privileged: true

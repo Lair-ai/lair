@@ -58,7 +58,7 @@ EOF"; then
     # Cert-Manager installation
     info "Installing Cert-Manager..."
     if helm repo add jetstack https://charts.jetstack.io && helm repo update; then
-        if run_cmd "helm install cert-manager jetstack/cert-manager --namespace cert-manager --create-namespace --version v1.12.0 --set installCRDs=true"; then
+        if run_cmd "helm install cert-manager jetstack/cert-manager --namespace cert-manager --create-namespace --version v1.21.1 --set installCRDs=true"; then
             ok "Cert-Manager installed successfully. Waiting for pods to be ready..."
             run_cmd "kubectl -n cert-manager rollout status deploy/cert-manager-webhook"
             ok "Cert-Manager is ready."

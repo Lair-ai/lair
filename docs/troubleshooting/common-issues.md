@@ -54,7 +54,7 @@ sudo systemctl enable --now snapd
 sudo snap refresh
 
 # 3. Alternative: Use snap from edge channel
-sudo snap install microk8s --classic --channel=1.32/edge
+sudo snap install microk8s --classic --channel=1.34/stable
 ```
 
 #### **MicroK8s Won't Start**

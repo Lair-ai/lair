@@ -257,7 +257,7 @@ credentials:
 deployNodeAgent: true
 initContainers:
   - name: velero-plugin-for-aws
-    image: velero/velero-plugin-for-aws:v1.9.2
+    image: velero/velero-plugin-for-aws:v1.14.2
     volumeMounts:
       - mountPath: /target
         name: plugins
@@ -275,6 +275,7 @@ EOF
   local helm_cmd="microk8s helm3 upgrade --install velero vmware-tanzu/velero \
     --namespace ${LAIR_VELERO_NAMESPACE} \
     --create-namespace \
+    --version 12.1.0 \
     -f $VELERO_TMP_VALUES \
     --wait --timeout=10m"
   

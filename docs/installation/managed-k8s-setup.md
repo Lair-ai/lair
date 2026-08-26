@@ -21,7 +21,7 @@ Network Config → Tools Setup → Cert-Manager   → App Deployment
 ```
 
 ### 📦 **What Gets Installed**
-- **🛠️ Helm (OS-level)**: Helm v3.14.0 for package management
+- **🛠️ Helm (OS-level)**: Helm v3.17.3 for package management
 - **💾 Longhorn**: Distributed block storage with replication
 - **🌐 Ingress-NGINX**: HTTP/HTTPS ingress controller with LoadBalancer
 - **🔐 Cert-Manager**: Automatic TLS certificate management
@@ -178,7 +178,7 @@ kubectl run connectivity-test --image=busybox --rm -it -- ping -c 3 google.com
 ```bash
 # What happens:
 - Architecture detection (amd64, arm64, arm)
-- Helm v3.14.0 download and installation
+- Helm v3.17.3 download and installation
 - Standard Helm repositories addition
 - Installation verification
 ```
@@ -237,7 +237,7 @@ spec:
 ```bash
 # What happens:
 - Jetstack Helm repository addition
-- Cert-Manager v1.12.0 installation with CRDs
+- Cert-Manager v1.21.1 installation with CRDs
 - Webhook deployment verification
 - Certificate issuer preparation
 ```

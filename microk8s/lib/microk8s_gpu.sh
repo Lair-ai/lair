@@ -589,7 +589,7 @@ info "NVIDIA/GPU addon already fully operational, skipping enablement"
                   ok "GPU addon enabled (deprecated, use nvidia in future)"
                 else
                   warn "GPU addon not available, installing manual device plugin..."
-                # Fallback to official NVIDIA device plugin v0.17.2 (multi-arch)
+                # Fallback to official NVIDIA device plugin v0.20.0 (multi-arch)
                 cat <<'EOF' | microk8s kubectl apply -f - || warn "Cannot install device plugin"
 apiVersion: apps/v1
 kind: DaemonSet
@@ -614,7 +614,7 @@ spec:
       priorityClassName: "system-node-critical"
       runtimeClassName: nvidia
       containers:
-      - image: nvcr.io/nvidia/k8s-device-plugin:v0.17.2
+       - image: nvcr.io/nvidia/k8s-device-plugin:v0.20.0
         name: nvidia-device-plugin-ctr
         env:
           - name: FAIL_ON_INIT_ERROR
@@ -686,7 +686,7 @@ spec:
       hostNetwork: true
       dnsPolicy: ClusterFirstWithHostNet
       containers:
-      - image: nvcr.io/nvidia/k8s-device-plugin:v0.17.2
+       - image: nvcr.io/nvidia/k8s-device-plugin:v0.20.0
         name: nvidia-device-plugin-ctr
         env:
           - name: PASS_DEVICE_SPECS

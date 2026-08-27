@@ -121,7 +121,7 @@ if ! $IS_JETSON; then
     info "Longhorn not found: installing"
 
     run_cmd "microk8s helm3 install longhorn longhorn/longhorn \
-             --namespace longhorn-system --create-namespace ${LH_VALUES}" \
+             --namespace longhorn-system --create-namespace --version 1.12.1 ${LH_VALUES}" \
              "Installing Longhorn"
     ok "Longhorn installed"
   fi

@@ -10,7 +10,7 @@
 
 [![License: GPL v3](https://img.shields.io/badge/License-GPL3.0-yellow.svg)](https://opensource.org/license/gpl-3.0)
 [![Platform](https://img.shields.io/badge/Platform-Ubuntu%2024.04-orange.svg)]()
-[![Kubernetes](https://img.shields.io/badge/Kubernetes-MicroK8s%201.32-blue.svg)]()
+[![Kubernetes](https://img.shields.io/badge/Kubernetes-MicroK8s%201.34-blue.svg)]()
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 [![GitHub Issues](https://img.shields.io/github/issues/Lair-ai/lair)](https://github.com/Lair-ai/lair/issues)
 [![GitHub Stars](https://img.shields.io/github/stars/Lair-ai/lair?style=social)](https://github.com/Lair-ai/lair/stargazers)

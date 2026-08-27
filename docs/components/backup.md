@@ -68,13 +68,13 @@ sudo ./k8s-managed/setup.sh
 #### **Manual Velero Installation**
 ```bash
 # Install Velero CLI
-curl -fsSL -o velero-v1.12.0-linux-amd64.tar.gz https://github.com/vmware-tanzu/velero/releases/download/v1.12.0/velero-v1.12.0-linux-amd64.tar.gz
-tar -xzf velero-v1.12.0-linux-amd64.tar.gz
-sudo mv velero-v1.12.0-linux-amd64/velero /usr/local/bin/
+curl -fsSL -o velero-v1.18.2-linux-amd64.tar.gz https://github.com/vmware-tanzu/velero/releases/download/v1.18.2/velero-v1.18.2-linux-amd64.tar.gz
+tar -xzf velero-v1.18.2-linux-amd64.tar.gz
+sudo mv velero-v1.18.2-linux-amd64/velero /usr/local/bin/
 
 # Install Velero server
 helm repo add vmware-tanzu https://vmware-tanzu.github.io/helm-charts
-helm install velero vmware-tanzu/velero -n velero --create-namespace -f velero-values.yaml
+helm install velero vmware-tanzu/velero -n velero --create-namespace --version 12.1.0 -f velero-values.yaml
 ```
 
 ### ⚙️ **Configuration**

@@ -25,7 +25,7 @@ Primary/Secondary → OS/DNS/NTP → IP Detection → Snap → Ingress → Longh
 ```
 
 ### 📦 **What Gets Installed**
-- **MicroK8s 1.32/stable**: Kubernetes cluster via Snap
+- **MicroK8s 1.34/stable**: Kubernetes cluster via Snap
 - **Core Addons**: Ingress (NGINX), Helm3, DNS, RBAC
 - **Storage**: Longhorn (distributed) or Hostpath (Jetson)
 - **Network**: Calico (standard) or Flannel (Jetson)
@@ -119,9 +119,9 @@ microk8s kubectl get nodes -o wide
 
 # Expected output:
 # NAME        STATUS   ROLES    AGE   VERSION   INTERNAL-IP
-# primary     Ready    <none>   10m   v1.32.0   192.168.1.100
-# secondary1  Ready    <none>   5m    v1.32.0   192.168.1.101
-# secondary2  Ready    <none>   3m    v1.32.0   192.168.1.102
+# primary     Ready    <none>   10m   v1.34.0   192.168.1.100
+# secondary1  Ready    <none>   5m    v1.34.0   192.168.1.101
+# secondary2  Ready    <none>   3m    v1.34.0   192.168.1.102
 ```
 
 ### 🔧 **Advanced Multi-Node Configuration**
@@ -354,7 +354,7 @@ The `microk8s/setup.sh` script orchestrates multiple modules in sequence:
 #### **Phase 7: MicroK8s Installation** (`lib/microk8s_install.sh`)
 ```bash
 # What happens:
-- Snap installation of MicroK8s 1.32/stable
+- Snap installation of MicroK8s 1.34/stable
 - User group configuration (microk8s group)
 - Kubeconfig export and permissions
 - kubectl wrapper creation

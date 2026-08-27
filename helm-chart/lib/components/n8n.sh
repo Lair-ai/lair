@@ -159,16 +159,26 @@ configure_n8n_key() {
     fi
   fi
 
-  # 3. Otherwise, generate a new key silently
+  # 3. Otherwise, generate a new key. Keep failures explicit because setup.sh
+  # runs with errexit enabled and a failed command substitution would be silent.
+  N8N_KEY=""
   if command -v openssl &>/dev/null; then
-    N8N_KEY=$(openssl rand -hex 16)
-  else
-    N8N_KEY=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1)
+    N8N_KEY=$(openssl rand -hex 16 2>/dev/null) || N8N_KEY=""
+  fi
+  if [ -z "$N8N_KEY" ]; then
+    N8N_KEY=$(tr -dc 'a-zA-Z0-9' </dev/urandom | head -c 32) || N8N_KEY=""
+  fi
+  if [ -z "$N8N_KEY" ]; then
+    echo -e "${RED}❌ Unable to generate the N8N encryption key${NC}" >&2
+    return 1
   fi
   echo "   ✅ Generated new N8N encryption key automatically"
   
   # Save key locally for consistency
-  echo "$N8N_KEY" > "$N8N_KEY_FILE"
+  if ! printf '%s\n' "$N8N_KEY" > "$N8N_KEY_FILE"; then
+    echo -e "${RED}❌ Unable to save the N8N encryption key to $N8N_KEY_FILE${NC}" >&2
+    return 1
+  fi
 }
 
 # Configure N8N SMTP settings
@@ -248,4 +258,4 @@ configure_n8n_admin_user() {
   if [[ "$N8N_ADMIN_EMAIL" == "admin@n8n.local" && "$N8N_ADMIN_PASSWORD" == "n8n123" ]]; then
     echo -e "   ${RED}⚠️  WARNING: Using default credentials (not recommended for production)${NC}"
   fi
-} 
+}

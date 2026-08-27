@@ -71,8 +71,9 @@ To set up a generator in LAIR, you need to create and export a flow in ComfyUI.
 
 2. Select the **Settings** entry at the top, and in the **Images** side menu, enter the following values:
    * **Image Generation Engine:** ComfyUI
-   * **ComfyUI Base URL:** `http://<ComfyUI_IP_address>:8188`
+   * **ComfyUI Base URL:** `http://lair-ollama.lair.svc.cluster.local`
    * **ComfyUI Workflow:** Upload the file exported from ComfyUI
+   * **ComfyUI Model:** `DreamShaper_8_pruned.safetensors`
 
 3. Finally, populate the following entries for the uploaded workflow by entering the node ID number for each (visible at the bottom left of the nodes in ComfyUI):
 

@@ -80,7 +80,7 @@ ingress:
 openWebUI:
   image:
     repository: ghcr.io/open-webui/open-webui
-    tag: "0.9.6"
+    tag: "latest"
   plugins: []
   auth:
     enabled: true

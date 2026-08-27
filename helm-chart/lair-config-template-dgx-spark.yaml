@@ -1,0 +1,95 @@
+# Lair Configuration for NVIDIA DGX Spark
+# Usage: sudo ./setup.sh --config lair-config-template-dgx-spark.yaml
+
+client_name: "CHANGE_ME_CLIENT_NAME"
+config_name: "CHANGE_ME_CONFIG_NAME"
+
+detection_choice: 1 # Local DGX Spark detection
+use_detected_resources: true
+
+manual_resources:
+  cpu_cores: 20
+  memory_gb: 128
+  storage_gb: 1000
+
+platform:
+  is_jetson: false
+  is_dgx_spark: true
+  has_gpu: true
+  gpu_model: "NVIDIA GB10"
+  gpu_family: "blackwell"
+  nvidia_driver_version: "" # Must be 590.44 or newer for CUDA 13.1
+  vram_percentage: 85
+  system_hostname: "CHANGE_ME_HOSTNAME"
+
+access:
+  lan:
+    enabled: true
+    tls: false
+  public:
+    enabled: false
+
+email:
+  cert_email: "CHANGE_ME_CERT_EMAIL"
+
+domains:
+  openwebui: ""
+  n8n: ""
+  comfyui: ""
+  minio: ""
+  ollama: ""
+  public:
+    openwebui: ""
+    n8n: ""
+    comfyui: ""
+    minio: ""
+    ollama: ""
+  lan:
+    openwebui: "ai.CHANGE_ME_HOSTNAME.local"
+    n8n: "n8n.CHANGE_ME_HOSTNAME.local"
+    comfyui: "images.CHANGE_ME_HOSTNAME.local"
+    minio: "storage.CHANGE_ME_HOSTNAME.local"
+    ollama: ""
+
+storage:
+  openwebui: 20
+  ollama_models: 200
+  n8n_workflows: 20
+  postgresql: 10
+  redis: 10
+  minio: 50
+  comfyui: 100
+
+components:
+  minio:
+    enabled: true
+    root_user: "CHANGE_ME_MINIO_ROOT_USER"
+    root_password: "CHANGE_ME_MINIO_ROOT_PASSWORD"
+    access_key: "CHANGE_ME_MINIO_ACCESS_KEY"
+    secret_key: "CHANGE_ME_MINIO_SECRET_KEY"
+  comfyui:
+    enabled: true
+    gpuEnabled: true
+    image: "mmartial/comfyui-nvidia-docker:ubuntu24_cuda13.1-dgx-20260605"
+    low_vram: ""
+    models_download: ""
+  ollama:
+    image: ""
+
+n8n:
+  encryption_key: "CHANGE_ME_N8N_ENCRYPTION_KEY"
+  worker:
+    enabled: true
+    replicas: 2
+  smtp:
+    enabled: false
+  adminUser:
+    email: "CHANGE_ME_N8N_ADMIN_EMAIL"
+    password: "CHANGE_ME_N8N_ADMIN_PASSWORD"
+    firstName: "CHANGE_ME_FIRST_NAME"
+    lastName: "CHANGE_ME_LAST_NAME"
+
+deployment:
+  auto_deploy: false
+  release_name: "lair"
+  new_install: true

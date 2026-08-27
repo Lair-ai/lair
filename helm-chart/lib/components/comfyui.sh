@@ -4,6 +4,90 @@
 # COMFYUI.SH - ComfyUI Component Configuration
 # ============================================================================
 
+DGX_SPARK_COMFYUI_IMAGE="mmartial/comfyui-nvidia-docker:ubuntu24_cuda13.1-dgx-20260605"
+
+version_at_least() {
+  [ "$(printf '%s\n' "$1" "$2" | sort -V | head -1)" = "$2" ]
+}
+
+validate_dgx_spark_driver() {
+  local required_driver="$MIN_DGX_DRIVER_VERSION"
+
+  if [ "$IS_DGX_SPARK" != "y" ]; then
+    return 0
+  fi
+
+  if [[ "$COMFYUI_IMAGE" == *"cuda13.2-dgx"* ]]; then
+    required_driver="595.45"
+  fi
+
+  if [ -z "$NVIDIA_DRIVER_VERSION" ]; then
+    echo -e "${RED}❌ NVIDIA driver version is required for DGX Spark${NC}"
+    echo "   Required driver: $required_driver or newer"
+    return 1
+  fi
+
+  if ! version_at_least "$NVIDIA_DRIVER_VERSION" "$required_driver"; then
+    echo -e "${RED}❌ NVIDIA driver $NVIDIA_DRIVER_VERSION is insufficient for DGX Spark ComfyUI${NC}"
+    echo "   Required driver: $required_driver or newer"
+    return 1
+  fi
+
+  echo -e "${GREEN}✅ NVIDIA driver $NVIDIA_DRIVER_VERSION supports DGX Spark ComfyUI${NC}"
+}
+
+# Select the default x86 image for the detected GPU generation.
+select_comfyui_image() {
+  local family="${GPU_FAMILY:-unknown}"
+
+  case "${family,,}" in
+    legacy)
+      # Keep the CUDA 12.6.3 image for older GPUs such as GTX 10xx.
+      COMFYUI_IMAGE="mmartial/comfyui-nvidia-docker:ubuntu24_cuda12.6.3-20251228"
+      ;;
+    turing|ampere|ada|blackwell|unknown)
+      # CUDA 12.8 is the common image for RTX GPUs and driver 570+.
+      COMFYUI_IMAGE="mmartial/comfyui-nvidia-docker:ubuntu24_cuda12.8-20260605"
+      ;;
+  esac
+}
+
+comfyui_required_driver_for_image() {
+  case "$1" in
+    *cuda12.9*) echo "575.51" ;;
+    *cuda13.0*) echo "580.65" ;;
+    *cuda13.1*) echo "590.44" ;;
+    *cuda13.2*) echo "595.45" ;;
+    *) echo "$MIN_NVIDIA_DRIVER_VERSION" ;;
+  esac
+}
+
+version_at_least() {
+  [ "$(printf '%s\n' "$1" "$2" | sort -V | head -1)" = "$2" ]
+}
+
+validate_comfyui_driver() {
+  local required_driver
+
+  if [ "$IS_JETSON" = "y" ] || [ "$IS_JETSON" = "Y" ] || { [ "$HAS_GPU" != "y" ] && [ "$HAS_GPU" != "Y" ]; }; then
+    return 0
+  fi
+
+  required_driver=$(comfyui_required_driver_for_image "$COMFYUI_IMAGE")
+  if [ -z "$NVIDIA_DRIVER_VERSION" ]; then
+    echo -e "${YELLOW}⚠️  NVIDIA driver version could not be detected; verify it is >= $required_driver${NC}"
+    return 0
+  fi
+
+  if ! version_at_least "$NVIDIA_DRIVER_VERSION" "$required_driver"; then
+    echo -e "${RED}❌ NVIDIA driver $NVIDIA_DRIVER_VERSION is insufficient for $COMFYUI_IMAGE${NC}"
+    echo -e "${RED}   Required driver: $required_driver or newer${NC}"
+    return 1
+  fi
+
+  echo -e "${GREEN}✅ NVIDIA driver $NVIDIA_DRIVER_VERSION supports $COMFYUI_IMAGE${NC}"
+}
+
 # Configure ComfyUI component (interactive mode)
 configure_comfyui() {
   echo ""
@@ -16,7 +100,7 @@ configure_comfyui() {
   IS_JETSON=${IS_JETSON:-"n"}
   
   # Check GPU requirements based on platform
-  if [ "$IS_JETSON" != "y" ] && [ "$IS_JETSON" != "Y" ] && [ "$HAS_GPU" != "y" ] && [ "$HAS_GPU" != "Y" ]; then
+  if [ "$IS_DGX_SPARK" != "y" ] && [ "$IS_JETSON" != "y" ] && [ "$IS_JETSON" != "Y" ] && [ "$HAS_GPU" != "y" ] && [ "$HAS_GPU" != "Y" ]; then
     echo -e "${YELLOW}⚠️  No GPU detected on non-Jetson system${NC}"
     echo -e "${YELLOW}   ComfyUI requires GPU acceleration and will be automatically disabled${NC}"
     echo -e "${YELLOW}   Platform: $([ "$IS_JETSON" = "y" ] && echo "Jetson" || echo "Standard") | GPU: $([ "$HAS_GPU" = "y" ] && echo "Available" || echo "Not detected")${NC}"
@@ -48,7 +132,10 @@ configure_comfyui() {
   fi
   
     # Ask if user wants to enable ComfyUI
-  if [ "$IS_JETSON" = "y" ] || [ "$IS_JETSON" = "Y" ]; then
+  if [ "$IS_DGX_SPARK" = "y" ]; then
+    echo -e "${GREEN}✅ DGX Spark platform detected with GB10 GPU support${NC}"
+    echo -e "${GREEN}   Total system memory: $(echo "scale=1; $TOTAL_MEMORY_MB/1024" | bc)GB${NC}"
+  elif [ "$IS_JETSON" = "y" ] || [ "$IS_JETSON" = "Y" ]; then
     echo -e "${GREEN}✅ Jetson platform detected with GPU support${NC}"
     echo -e "${GREEN}   Total system memory: $(echo "scale=1; $TOTAL_MEMORY_MB/1024" | bc)GB${NC}"
   else
@@ -118,7 +205,17 @@ configure_comfyui() {
     echo ""
     echo -e "${BLUE}🖼️  ComfyUI Image Configuration${NC}"
     
-    if [ "$IS_JETSON" = "y" ] || [ "$IS_JETSON" = "Y" ]; then
+    if [ "$IS_DGX_SPARK" = "y" ]; then
+      COMFYUI_IMAGE="$DGX_SPARK_COMFYUI_IMAGE"
+      read -p "Use experimental CUDA 13.2 DGX image? (y/n) [default: n]: " dgx_cuda13_2
+      if [[ "$dgx_cuda13_2" == "y" || "$dgx_cuda13_2" == "Y" ]]; then
+        COMFYUI_IMAGE="mmartial/comfyui-nvidia-docker:ubuntu24_cuda13.2-dgx-20260605"
+      fi
+      validate_dgx_spark_driver || return 1
+      echo "✅ Auto-selected DGX Spark image: $COMFYUI_IMAGE"
+      COMFYUI_LOW_VRAM=""
+      COMFYUI_MODELS_DOWNLOAD=""
+    elif [ "$IS_JETSON" = "y" ] || [ "$IS_JETSON" = "Y" ]; then
       echo "Jetson platform detected - using optimized image"
       COMFYUI_IMAGE="dustynv/comfyui:r36.4.3"
       echo "✅ Auto-selected Jetson-optimized image: $COMFYUI_IMAGE"
@@ -128,61 +225,30 @@ configure_comfyui() {
     else
       echo "Standard x86/x64 platform with GPU detected"
       echo -e "${GREEN}🚀 GPU detected: Using mmartial/comfyui-nvidia-docker optimized images${NC}"
+      echo "   GPU model: ${GPU_MODEL:-unknown}"
+      echo "   GPU family: ${GPU_FAMILY:-unknown}"
+      select_comfyui_image
+      echo "✅ Recommended image: $COMFYUI_IMAGE"
+      echo "   RTX 20xx/30xx/40xx/50xx: CUDA 12.8"
+      echo "   Legacy GTX/Quadro/Tesla: CUDA 12.6.3"
+      echo "   CUDA 12.9 requires driver 575+; CUDA 13.0 requires driver 580+"
       echo ""
-      echo "Available ComfyUI CUDA versions (mmartial/comfyui-nvidia-docker):"
-      echo "  1) ubuntu22_cuda12.3.2-latest - CUDA 12.3.2 on Ubuntu 22"
-      echo "  2) ubuntu22_cuda12.4.1-latest - CUDA 12.4.1 on Ubuntu 22"
-      echo "  3) ubuntu24_cuda12.5.1-latest - CUDA 12.5.1 on Ubuntu 24 (latest up to 20250320)"
-      echo "  4) ubuntu24_cuda12.6.3-latest - CUDA 12.6.3 on Ubuntu 24 (recommended for GTX 10xx)"
-      echo "  5) ubuntu24_cuda12.8-latest - CUDA 12.8 on Ubuntu 24 (minimum for Blackwell/RTX 50xx)"
-      echo "  6) ubuntu24_cuda12.9-latest - CUDA 12.9 on Ubuntu 24"
-      echo "  7) ubuntu24_cuda13.0-latest - CUDA 13.0 on Ubuntu 24 (untested)"
-      echo ""
-      echo -e "${BLUE}💡 Recommendations:${NC}"
-      echo "   • GTX 10xx series: Choose option 4 (CUDA 12.6.3)"
-      echo "   • RTX 20xx/30xx series: Choose option 3 or 4"
-      echo "   • RTX 40xx series: Choose option 4 or 5"
-      echo "   • RTX 50xx (Blackwell): Choose option 5 or higher"
-      echo ""
-      
-      read -p "Select ComfyUI CUDA version [1-7, default: 4]: " image_choice
-      image_choice=${image_choice:-4}
-      
-      case $image_choice in
-        1)
-          COMFYUI_IMAGE="mmartial/comfyui-nvidia-docker:ubuntu22_cuda12.3.2-latest"
-          echo "✅ Selected CUDA 12.3.2 on Ubuntu 22: $COMFYUI_IMAGE"
-          ;;
-        2)
-          COMFYUI_IMAGE="mmartial/comfyui-nvidia-docker:ubuntu22_cuda12.4.1-latest"
-          echo "✅ Selected CUDA 12.4.1 on Ubuntu 22: $COMFYUI_IMAGE"
-          ;;
-        3)
-          COMFYUI_IMAGE="mmartial/comfyui-nvidia-docker:ubuntu24_cuda12.5.1-latest"
-          echo "✅ Selected CUDA 12.5.1 on Ubuntu 24 (latest up to 20250320): $COMFYUI_IMAGE"
-          ;;
-        4)
-          COMFYUI_IMAGE="mmartial/comfyui-nvidia-docker:ubuntu24_cuda12.6.3-latest"
-          echo "✅ Selected CUDA 12.6.3 on Ubuntu 24 (recommended for GTX 10xx): $COMFYUI_IMAGE"
-          ;;
-        5)
-          COMFYUI_IMAGE="mmartial/comfyui-nvidia-docker:ubuntu24_cuda12.8-latest"
-          echo "✅ Selected CUDA 12.8 on Ubuntu 24 (minimum for Blackwell/RTX 50xx): $COMFYUI_IMAGE"
-          ;;
-        6)
-          COMFYUI_IMAGE="mmartial/comfyui-nvidia-docker:ubuntu24_cuda12.9-latest"
-          echo "✅ Selected CUDA 12.9 on Ubuntu 24: $COMFYUI_IMAGE"
-          ;;
-        7)
-          COMFYUI_IMAGE="mmartial/comfyui-nvidia-docker:ubuntu24_cuda13.0-latest"
-          echo "✅ Selected CUDA 13.0 on Ubuntu 24 (untested): $COMFYUI_IMAGE"
-          echo -e "${YELLOW}⚠️  Note: CUDA 13.0 is untested - use with caution${NC}"
-          ;;
-        *)
-          COMFYUI_IMAGE="mmartial/comfyui-nvidia-docker:ubuntu24_cuda12.6.3-latest"
-          echo "✅ Default selection (CUDA 12.6.3 - GTX 10xx recommended): $COMFYUI_IMAGE"
-          ;;
-      esac
+
+      read -p "Override recommended image? (y/n) [default: n]: " override_image
+      if [[ "$override_image" == "y" || "$override_image" == "Y" ]]; then
+        echo "  1) ubuntu24_cuda12.8-20260605 (driver 570+)"
+        echo "  2) ubuntu24_cuda12.9-20260605 (driver 575+)"
+        echo "  3) ubuntu24_cuda13.0-20260605 (driver 580+)"
+        echo "  4) ubuntu24_cuda12.6.3-20251228 (legacy GPUs)"
+        read -p "Select image [1-4]: " image_choice
+        case "$image_choice" in
+          2) COMFYUI_IMAGE="mmartial/comfyui-nvidia-docker:ubuntu24_cuda12.9-20260605" ;;
+          3) COMFYUI_IMAGE="mmartial/comfyui-nvidia-docker:ubuntu24_cuda13.0-20260605" ;;
+          4) COMFYUI_IMAGE="mmartial/comfyui-nvidia-docker:ubuntu24_cuda12.6.3-20251228" ;;
+          *) COMFYUI_IMAGE="mmartial/comfyui-nvidia-docker:ubuntu24_cuda12.8-20260605" ;;
+        esac
+      fi
+      validate_comfyui_driver || return 1
       
       # Reset additional variables for mmartial images
       COMFYUI_LOW_VRAM=""
@@ -243,6 +309,19 @@ configure_comfyui_non_interactive() {
     
     echo "   💾 Storage: ${COMFYUI_STORAGE_GB}GB"
     echo "   🎮 GPU: $([ "$HAS_GPU" = "y" ] && echo "Enabled" || echo "Disabled")"
+
+    if [ "$IS_DGX_SPARK" = "y" ]; then
+      COMFYUI_IMAGE="${COMFYUI_IMAGE:-$DGX_SPARK_COMFYUI_IMAGE}"
+      validate_dgx_spark_driver || return 1
+    fi
+
+    if [ "$IS_JETSON" = "y" ] || [ "$IS_JETSON" = "Y" ]; then
+      COMFYUI_IMAGE="${COMFYUI_IMAGE:-dustynv/comfyui:r36.4.3}"
+    elif [ -z "$COMFYUI_IMAGE" ]; then
+      select_comfyui_image
+    fi
+
+    validate_comfyui_driver || return 1
     
     if [ -n "$COMFYUI_IMAGE" ]; then
       echo "   🖼️  Image: $COMFYUI_IMAGE"

@@ -309,19 +309,28 @@ show_resource_summary() {
   echo ""
   echo -e "${GREEN}📊 Resource Allocation Summary${NC}"
   echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+  calculate_total_allocated_resources
   echo "Automatic resource allocation based on detected system resources:"
-  echo "   • Total Available: $K8S_CPU CPU cores, $((K8S_MEMORY_MB/1024)) GB RAM"
-  echo "   • OpenWebUI: $(echo "scale=1; $CPU_OPENWEBUI/1000" | bc) CPU, $((MEM_OPENWEBUI/1024)) GB RAM"
-  echo "   • Ollama: $(echo "scale=1; $CPU_OLLAMA/1000" | bc) CPU, $((MEM_OLLAMA/1024)) GB RAM"
-  echo "   • N8N: $(echo "scale=1; $CPU_N8N/1000" | bc) CPU, $((MEM_N8N/1024)) GB RAM"
-  echo "   • N8N Workers (x${N8N_WORKER_REPLICAS}): $(echo "scale=1; $CPU_N8N_WORKER * $N8N_WORKER_REPLICAS/1000" | bc) CPU, $(echo "scale=1; $MEM_N8N_WORKER * $N8N_WORKER_REPLICAS/1024" | bc) GB RAM"
-  echo "   • PostgreSQL: $(echo "scale=1; $CPU_POSTGRES/1000" | bc) CPU, $((MEM_POSTGRES/1024)) GB RAM"
-  echo "   • Redis: $(echo "scale=1; $CPU_REDIS/1000" | bc) CPU, $((MEM_REDIS/1024)) GB RAM"
+  echo "   • Budget: ${K8S_CPU} CPU cores, $((K8S_MEMORY_MB/1024)) GiB RAM (${K8S_RESOURCE_ALLOCATION_PERCENTAGE}%)"
+  echo "   • OpenWebUI: ${CPU_OPENWEBUI_REQ}m/${CPU_OPENWEBUI}m CPU, ${MEM_OPENWEBUI_REQ}Mi/${MEM_OPENWEBUI}Mi RAM (request/limit)"
+  echo "   • Ollama: ${CPU_OLLAMA_REQ}m/${CPU_OLLAMA}m CPU, ${MEM_OLLAMA_REQ}Mi/${MEM_OLLAMA}Mi RAM (request/limit)"
+  echo "   • N8N: ${CPU_N8N_REQ}m/${CPU_N8N}m CPU, ${MEM_N8N_REQ}Mi/${MEM_N8N}Mi RAM (request/limit)"
+  echo "   • N8N Workers (x${N8N_WORKER_REPLICAS}): ${CPU_N8N_WORKER_REQ}m/${CPU_N8N_WORKER}m CPU, ${MEM_N8N_WORKER_REQ}Mi/${MEM_N8N_WORKER}Mi RAM each (request/limit)"
+  echo "   • PostgreSQL: ${CPU_POSTGRES_REQ}m/${CPU_POSTGRES}m CPU, ${MEM_POSTGRES_REQ}Mi/${MEM_POSTGRES}Mi RAM (request/limit)"
+  echo "   • Redis: ${CPU_REDIS_REQ}m/${CPU_REDIS}m CPU, ${MEM_REDIS_REQ}Mi/${MEM_REDIS}Mi RAM (request/limit)"
+  echo "   • Tika: ${CPU_TIKA_REQ}m/${CPU_TIKA}m CPU, ${MEM_TIKA_REQ}Mi/${MEM_TIKA}Mi RAM (request/limit)"
   if [[ "$MINIO_ENABLED" == true ]]; then
-    echo "   • MinIO: $(echo "scale=1; $CPU_MINIO/1000" | bc) CPU, $((MEM_MINIO/1024)) GB RAM"
+    echo "   • MinIO: ${CPU_MINIO_REQ}m/${CPU_MINIO}m CPU, ${MEM_MINIO_REQ}Mi/${MEM_MINIO}Mi RAM (request/limit)"
   fi
   if [[ "$COMFYUI_ENABLED" == true ]]; then
-    echo "   • ComfyUI: $(echo "scale=1; $CPU_COMFYUI/1000" | bc) CPU, $((MEM_COMFYUI/1024)) GB RAM"
+    echo "   • ComfyUI: ${CPU_COMFYUI_REQ}m/${CPU_COMFYUI}m CPU, ${MEM_COMFYUI_REQ}Mi/${MEM_COMFYUI}Mi RAM (request/limit)"
+  fi
+  echo "   • TOTAL: ${TOTAL_ALLOCATED_CPU_REQ}m/${TOTAL_ALLOCATED_CPU}m CPU, ${TOTAL_ALLOCATED_MEMORY_REQ}Mi/${TOTAL_ALLOCATED_MEMORY}Mi RAM"
+  if (( TOTAL_ALLOCATED_MEMORY_REQ > K8S_MEMORY_MB )); then
+    echo "   ⚠️  RAM requests exceed the configured budget by $((TOTAL_ALLOCATED_MEMORY_REQ - K8S_MEMORY_MB))Mi"
+  fi
+  if (( $(echo "$TOTAL_ALLOCATED_CPU_REQ > ($K8S_CPU * 1000)" | bc -l) )); then
+    echo "   ⚠️  CPU requests exceed the configured budget"
   fi
   echo "✅ Resources automatically allocated using optimized percentages"
 }
@@ -357,4 +366,3 @@ configure_access_mode_and_email_non_interactive() {
   echo "  • Legacy access mode: $ACCESS_MODE"
 }
 
- 

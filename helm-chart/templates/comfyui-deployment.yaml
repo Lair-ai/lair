@@ -1,4 +1,6 @@
 {{- if .Values.comfyUI.enabled }}
+{{- $managerSecurityLevel := .Values.comfyUI.manager.securityLevel | default "normal" }}
+{{- $managerNetworkMode := .Values.comfyUI.manager.networkMode | default "personal_cloud" }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -44,10 +46,22 @@ spec:
               mkdir -p /comfy/mnt
               
               # Ensure basedir subdirectories exist
-              for d in models input output custom_nodes user; do
-                mkdir -p "/basedir/$d"
-              done
-              {{- end }}
+               for d in models input output custom_nodes user; do
+                 mkdir -p "/basedir/$d"
+               done
+
+               # Seed ComfyUI Manager configuration before the image init script runs.
+               # The image uses defaults when this file does not exist yet.
+               manager_config=/basedir/user/__manager/config.ini
+               if [ ! -f "$manager_config" ]; then
+                 mkdir -p "$(dirname "$manager_config")"
+                 printf '%s\n' \
+                   '[default]' \
+                   'security_level = {{ $managerSecurityLevel }}' \
+                   'network_mode = {{ $managerNetworkMode }}' \
+                   'use_uv = True' > "$manager_config"
+               fi
+               {{- end }}
 
               {{- if contains "dustynv/comfyui" .Values.comfyUI.image.repository }}
               # Dustynv/ComfyUI: Create complete symlinks for persistence
@@ -151,14 +165,33 @@ spec:
             - name: WANTED_GID
               value: "1000"
             - name: SECURITY_LEVEL
-              value: "normal"
+              value: "{{ $managerSecurityLevel }}"
+            - name: NETWORK_MODE
+              value: "{{ $managerNetworkMode }}"
+            - name: USE_UV
+              value: "true"
+            {{- if contains "dgx" .Values.comfyUI.image.tag }}
+            # DGX Spark optimizations from the upstream image profile
+            - name: USE_NEW_MANAGER
+              value: "true"
+            - name: ENABLE_MANAGER_LEGACY_UI
+              value: "true"
+            - name: CUDA_HOME
+              value: "/usr/local/cuda"
+            - name: CUDA_CACHE_MAXSIZE
+              value: "4294967296"
+            - name: NCCL_P2P_DISABLE
+              value: "1"
+            - name: COMFY_CMDLINE_EXTRA
+              value: "--use-sage-attention --bf16-unet --bf16-vae --bf16-text-enc"
+            {{- end }}
             {{- end }}
             {{- if .Values.comfyUI.gpuEnabled }}
             # GPU environment variables
             - name: NVIDIA_VISIBLE_DEVICES
               value: "all"
             - name: NVIDIA_DRIVER_CAPABILITIES
-              value: "compute,utility"
+              value: {{ if contains "dgx" .Values.comfyUI.image.tag }}"compute,utility,video"{{ else }}"compute,utility"{{ end }}
             {{- if contains "dustynv/comfyui" .Values.comfyUI.image.repository }}
             # Jetson-specific GPU library path
             - name: LD_LIBRARY_PATH
@@ -174,7 +207,11 @@ spec:
             limits:
               memory: "{{ .Values.comfyUI.resources.limits.memory | default "4Gi" }}"
               cpu: "{{ .Values.comfyUI.resources.limits.cpu | default "2000m" }}"
-              # Note: NO nvidia.com/gpu limit to allow GPU sharing
+              {{- if contains "dgx" .Values.comfyUI.image.tag }}
+              nvidia.com/gpu: "1"
+              {{- else }}
+              # Standard profiles intentionally allow GPU sharing.
+              {{- end }}
             requests:
               memory: "{{ .Values.comfyUI.resources.requests.memory | default "2Gi" }}"
               cpu: "{{ .Values.comfyUI.resources.requests.cpu | default "1000m" }}"

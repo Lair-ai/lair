@@ -3,6 +3,7 @@ name: lair
 description: "Helm chart for deploying the complete Lair AI & automation platform"
 version: 0.1.0
 appVersion: "1.0.0"
+icon: https://raw.githubusercontent.com/Lair-ai/lair/main/docs/assets/logo.png
 keywords:
   - AI
   - automation
@@ -14,3 +15,7 @@ sources:
 maintainers:
   - name: NEXID
     email: lair@nexid.it
+    url: https://www.nexid.it
+  - name: Lair-AI
+    email: hello@lair-ai.it
+    url: https://dev.lair-ai.it

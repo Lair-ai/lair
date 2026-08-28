@@ -658,7 +658,7 @@ EOF
       
       if [ "$IS_JETSON" = "y" ]; then
         # Auto-set Jetson image if platform is Jetson but no image specified
-        COMFYUI_IMAGE="dustynv/comfyui:r36.3.0"
+        COMFYUI_IMAGE="dustynv/comfyui:r36.4.3"
         cat <<-EOF >> $CONFIG_FILE
   image:
     repository: $(echo "$COMFYUI_IMAGE" | cut -d':' -f1)

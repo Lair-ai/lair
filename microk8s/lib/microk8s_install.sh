@@ -8,8 +8,8 @@ run_cmd "nproc"              "Available CPUs"
 
 # 2. Channel selection based on architecture
 ARCH=$(uname -m)             # x86_64 or aarch64 (Jetson)
-CHANNEL="1.32/stable"        # default
-[[ $ARCH == "aarch64" ]] && CHANNEL="1.32/stable"   # same channel but separated for clarity
+CHANNEL="1.34/stable"        # default
+[[ $ARCH == "aarch64" ]] && CHANNEL="1.34/stable"   # same channel but separated for clarity
 
 info "Installing MicroK8s (channel ${CHANNEL})..."
 if run_cmd "snap install microk8s --classic --channel=${CHANNEL}" "MicroK8s installation"; then

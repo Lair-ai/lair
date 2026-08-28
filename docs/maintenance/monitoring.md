@@ -77,132 +77,13 @@ kubectl describe pvc -n lair
 #### **Real-time Monitoring Scripts**
 ```bash
 # Create comprehensive monitoring script
-cat > /usr/local/bin/lair-monitor.sh << 'EOF'
-#!/bin/bash
-
-echo "=== LAIR SYSTEM MONITORING REPORT ==="
-echo "Generated: $(date)"
-echo
-
-echo "=== CLUSTER STATUS ==="
-kubectl cluster-info --request-timeout=10s
-echo
-
-echo "=== NODE STATUS ==="
-kubectl get nodes -o wide
-echo
-
-echo "=== RESOURCE USAGE ==="
-kubectl top nodes 2>/dev/null || echo "Metrics server not available"
-echo
-
-echo "=== LAIR PODS STATUS ==="
-kubectl get pods -n lair -o wide
-echo
-
-echo "=== LAIR SERVICES ==="
-kubectl get services -n lair
-echo
-
-echo "=== INGRESS STATUS ==="
-kubectl get ingress -n lair
-echo
-
-echo "=== PERSISTENT VOLUMES ==="
-kubectl get pvc -n lair
-echo
-
-echo "=== RECENT EVENTS ==="
-kubectl get events -n lair --sort-by='.lastTimestamp' | tail -10
-echo
-
-echo "=== STORAGE USAGE ==="
-df -h | grep -E "(Filesystem|/var|/mnt)"
-echo
-
-echo "=== MEMORY USAGE ==="
-free -h
-echo
-
-echo "=== LOAD AVERAGE ==="
-uptime
-echo
-
-echo "Report completed at $(date)"
-EOF
-
-chmod +x /usr/local/bin/lair-monitor.sh
+./misc/monitoring/lair-monitor.sh
 ```
 
 #### **Automated Health Checks**
 ```bash
 # Create health check script
-cat > /usr/local/bin/lair-health-check.sh << 'EOF'
-#!/bin/bash
-
-HEALTH_STATUS="HEALTHY"
-ISSUES=()
-
-# Check cluster connectivity
-if ! kubectl cluster-info --request-timeout=10s >/dev/null 2>&1; then
-    HEALTH_STATUS="CRITICAL"
-    ISSUES+=("Cluster connectivity failed")
-fi
-
-# Check node status
-NOTREADY_NODES=$(kubectl get nodes --no-headers | grep -v Ready | wc -l)
-if [ $NOTREADY_NODES -gt 0 ]; then
-    HEALTH_STATUS="WARNING"
-    ISSUES+=("$NOTREADY_NODES nodes not ready")
-fi
-
-# Check Lair pods
-FAILED_PODS=$(kubectl get pods -n lair --no-headers | grep -v Running | grep -v Completed | wc -l)
-if [ $FAILED_PODS -gt 0 ]; then
-    HEALTH_STATUS="CRITICAL"
-    ISSUES+=("$FAILED_PODS Lair pods not running")
-fi
-
-# Check PVC status
-PENDING_PVCS=$(kubectl get pvc -n lair --no-headers | grep Pending | wc -l)
-if [ $PENDING_PVCS -gt 0 ]; then
-    HEALTH_STATUS="WARNING"
-    ISSUES+=("$PENDING_PVCS PVCs pending")
-fi
-
-# Check disk usage
-DISK_USAGE=$(df / | tail -1 | awk '{print $5}' | sed 's/%//')
-if [ $DISK_USAGE -gt 90 ]; then
-    HEALTH_STATUS="CRITICAL"
-    ISSUES+=("Disk usage: ${DISK_USAGE}%")
-elif [ $DISK_USAGE -gt 80 ]; then
-    HEALTH_STATUS="WARNING"
-    ISSUES+=("Disk usage: ${DISK_USAGE}%")
-fi
-
-# Check memory usage
-MEMORY_USAGE=$(free | grep Mem | awk '{printf "%.0f", $3/$2 * 100.0}')
-if [ $MEMORY_USAGE -gt 90 ]; then
-    HEALTH_STATUS="WARNING"
-    ISSUES+=("Memory usage: ${MEMORY_USAGE}%")
-fi
-
-# Output results
-echo "HEALTH_STATUS: $HEALTH_STATUS"
-if [ ${#ISSUES[@]} -gt 0 ]; then
-    echo "ISSUES:"
-    printf '%s\n' "${ISSUES[@]}"
-fi
-
-# Exit with appropriate code
-case $HEALTH_STATUS in
-    "HEALTHY") exit 0 ;;
-    "WARNING") exit 1 ;;
-    "CRITICAL") exit 2 ;;
-esac
-EOF
-
-chmod +x /usr/local/bin/lair-health-check.sh
+./misc/monitoring/lair-health-check.sh
 ```
 
 ### 📱 **K9s - Terminal UI for Kubernetes**
@@ -653,38 +534,7 @@ send_discord_alert() {
 #### **Continuous Resource Monitoring**
 ```bash
 # Create resource monitoring script
-cat > /usr/local/bin/lair-resource-monitor.sh << 'EOF'
-#!/bin/bash
-
-LOG_FILE="/var/log/lair-resources.log"
-INTERVAL=60  # seconds
-
-while true; do
-    TIMESTAMP=$(date '+%Y-%m-%d %H:%M:%S')
-    
-    # System resources
-    CPU_USAGE=$(top -bn1 | grep "Cpu(s)" | awk '{print $2}' | awk -F'%' '{print $1}')
-    MEMORY_USAGE=$(free | grep Mem | awk '{printf "%.1f", $3/$2 * 100.0}')
-    DISK_USAGE=$(df / | tail -1 | awk '{print $5}' | sed 's/%//')
-    LOAD_AVG=$(uptime | awk -F'load average:' '{print $2}' | awk '{print $1}' | sed 's/,//')
-    
-    # Kubernetes resources
-    if kubectl top nodes >/dev/null 2>&1; then
-        K8S_CPU=$(kubectl top nodes --no-headers | awk '{sum+=$3} END {print sum}')
-        K8S_MEMORY=$(kubectl top nodes --no-headers | awk '{sum+=$5} END {print sum}')
-    else
-        K8S_CPU="N/A"
-        K8S_MEMORY="N/A"
-    fi
-    
-    # Log metrics
-    echo "$TIMESTAMP,CPU:$CPU_USAGE,Memory:$MEMORY_USAGE,Disk:$DISK_USAGE,Load:$LOAD_AVG,K8s_CPU:$K8S_CPU,K8s_Memory:$K8S_MEMORY" >> "$LOG_FILE"
-    
-    sleep $INTERVAL
-done
-EOF
-
-chmod +x /usr/local/bin/lair-resource-monitor.sh
+./misc/monitoring/lair-resource-monitor.sh 
 ```
 
 #### **Performance Benchmarking**

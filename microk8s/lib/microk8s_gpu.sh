@@ -228,9 +228,9 @@ else
         info "NVIDIA driver functional: version $CURRENT_DRIVER"
         DRIVER_VERSION_MAJOR=$(echo "$CURRENT_DRIVER" | cut -d. -f1)
         
-        # Check if driver version is compatible (>= 535)
-        if [ "$DRIVER_VERSION_MAJOR" -ge 535 ]; then
-          info "Driver version $DRIVER_VERSION_MAJOR is compatible (>= 535)"
+        # Check if driver version is compatible (>= 570)
+        if [ "$DRIVER_VERSION_MAJOR" -ge 570 ]; then
+          info "Driver version $DRIVER_VERSION_MAJOR is compatible (>= 570)"
           
           # Install only container toolkit if not already present
           if ! command -v nvidia-container-runtime >/dev/null 2>&1; then
@@ -244,7 +244,7 @@ else
           fi
           DRIVER_INSTALLED=true
         else
-          info "Driver version $DRIVER_VERSION_MAJOR < 535, upgrade recommended"
+          info "Driver version $DRIVER_VERSION_MAJOR < 570, upgrade recommended"
           # Will proceed with driver installation below
         fi
       else
@@ -255,9 +255,9 @@ else
     
     # Install/upgrade driver only if not already compatible and no mismatch detected
     if [ "$DRIVER_INSTALLED" != "true" ] && ! $DRIVER_MISMATCH; then
-      info "Installing/upgrading to NVIDIA driver 535..."
+      info "Installing/upgrading to NVIDIA driver 570..."
       
-      if run_cmd "DEBIAN_FRONTEND=noninteractive apt-get install -y nvidia-driver-535-server nvidia-container-toolkit nvidia-container-runtime" \
+      if run_cmd "DEBIAN_FRONTEND=noninteractive apt-get install -y nvidia-driver-570-server nvidia-container-toolkit nvidia-container-runtime" \
               "Install NVIDIA driver and container runtime"; then
         ok "NVIDIA driver packages installed"
         
@@ -589,7 +589,7 @@ info "NVIDIA/GPU addon already fully operational, skipping enablement"
                   ok "GPU addon enabled (deprecated, use nvidia in future)"
                 else
                   warn "GPU addon not available, installing manual device plugin..."
-                # Fallback to official NVIDIA device plugin v0.17.2 (multi-arch)
+                # Fallback to official NVIDIA device plugin v0.20.0 (multi-arch)
                 cat <<'EOF' | microk8s kubectl apply -f - || warn "Cannot install device plugin"
 apiVersion: apps/v1
 kind: DaemonSet
@@ -614,7 +614,7 @@ spec:
       priorityClassName: "system-node-critical"
       runtimeClassName: nvidia
       containers:
-      - image: nvcr.io/nvidia/k8s-device-plugin:v0.17.2
+       - image: nvcr.io/nvidia/k8s-device-plugin:v0.20.0
         name: nvidia-device-plugin-ctr
         env:
           - name: FAIL_ON_INIT_ERROR
@@ -686,7 +686,7 @@ spec:
       hostNetwork: true
       dnsPolicy: ClusterFirstWithHostNet
       containers:
-      - image: nvcr.io/nvidia/k8s-device-plugin:v0.17.2
+       - image: nvcr.io/nvidia/k8s-device-plugin:v0.20.0
         name: nvidia-device-plugin-ctr
         env:
           - name: PASS_DEVICE_SPECS

@@ -49,7 +49,7 @@ install_helm_os() {
     info "Downloading Helm for $os-$arch..."
     
     # Latest stable version URL
-    local helm_url="https://get.helm.sh/helm-v3.14.0-$os-$arch.tar.gz"
+    local helm_url="https://get.helm.sh/helm-v3.17.3-$os-$arch.tar.gz"
     
     if command -v curl &>/dev/null; then
         curl -fsSL "$helm_url" -o "$temp_dir/helm.tar.gz" || {
@@ -170,4 +170,4 @@ setup_helm_os() {
     install_helm_os || return 1
     
     ok "Helm OS setup completed successfully"
-} 
+}

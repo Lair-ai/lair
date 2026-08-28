@@ -352,7 +352,7 @@ comfyUI:
   lowVram: true
   image:
     repository: dustynv/comfyui
-    tag: r36.3.0
+    tag: r36.4.3
 ```
 
 #### **Jetson Orin Nano (8GB)**

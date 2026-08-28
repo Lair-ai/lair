@@ -215,7 +215,7 @@ sudo microk8s version
 sudo snap refresh microk8s --classic
 
 # Or update to specific version
-sudo snap refresh microk8s --channel=1.29/stable --classic
+sudo snap refresh microk8s --channel=1.34/stable --classic
 
 # Verify update
 sudo microk8s status --wait-ready
@@ -251,13 +251,13 @@ sudo microk8s helm3 upgrade velero vmware-tanzu/velero -n velero
 #### **Cluster Updates**
 ```bash
 # For AWS EKS
-aws eks update-cluster-version --name lair-cluster --kubernetes-version 1.29
+aws eks update-cluster-version --name lair-cluster --kubernetes-version 1.34
 
 # For Google GKE
-gcloud container clusters upgrade lair-cluster --master --cluster-version 1.29
+gcloud container clusters upgrade lair-cluster --master --cluster-version 1.34
 
 # For Azure AKS
-az aks upgrade --resource-group lair-rg --name lair-cluster --kubernetes-version 1.29
+az aks upgrade --resource-group lair-rg --name lair-cluster --kubernetes-version 1.34
 ```
 
 #### **Node Group Updates**

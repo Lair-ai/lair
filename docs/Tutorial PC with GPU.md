@@ -159,11 +159,12 @@ Once all pods show the `Running` status, you must immediately secure your instan
    - Go to **Admin Settings** → **Connections** → **API OpenAI**
    - Choose **Add Connection**
    - Write in the URL field: `https://oai.endpoints.kepler.ai.cloud.ovh.net/v1`
+   - Choose "Chat Completions" in field "API Type"
    - Write the API Key you just created in the API Key field
 
    For image generation:
    - Go to **Admin Settings** → **Images** → **Create Image**
-   - Write in Model field: `stable-diffusion-xl-1024-v1-0`
+   - Write in Model field: `stable-diffusion-xl-base-v1-0`
    - Write in Image Size: `1024x1024`
    - Write in Image Generation Engine: `OpenAI`
    - Write in URL field: `https://oai.endpoints.kepler.ai.cloud.ovh.net/v1`

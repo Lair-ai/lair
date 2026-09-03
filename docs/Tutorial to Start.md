@@ -264,6 +264,7 @@ Once all pods show the `Running` status, you must immediately secure your instan
    - Go to **Admin Settings** → **Connections** → **API OpenAI**
    - Choose **Add Connection**
    - Write in the URL field: `https://oai.endpoints.kepler.ai.cloud.ovh.net/v1`
+   - Choose "Chat Completions" in field "API Type"
    - Write the API Key you just created in the API Key field
 
    To show only some models in Chat menu:

@@ -613,8 +613,8 @@ EOF
 minio:
   enabled: true
   image:
-    repository: minio/minio
-    tag: latest
+    repository: alpine/minio
+    tag: RELEASE.2025-10-15T17-29-55Z
   rootUser: $MINIO_ROOT_USER
   rootPassword: $MINIO_ROOT_PASSWORD
   storage:

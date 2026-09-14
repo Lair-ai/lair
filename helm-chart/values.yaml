@@ -337,8 +337,8 @@ redis:
 minio:
   enabled: true
   image:
-    repository: minio/minio
-    tag: latest
+    repository: alpine/minio
+    tag: RELEASE.2025-10-15T17-29-55Z
   # Root user credentials provide both administrative AND S3 API access
   # These are used for all MinIO operations (console, API, bucket management)
   rootUser: minioadmin

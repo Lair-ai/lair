@@ -120,7 +120,7 @@ spec:
     spec:
       containers:
       - name: minio
-        image: minio/minio:latest
+        image: alpine/minio:RELEASE.2025-10-15T17-29-55Z
         args:
         - server
         - /data

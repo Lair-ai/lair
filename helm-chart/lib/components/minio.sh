@@ -89,9 +89,18 @@ configure_minio() {
     echo ""
     read -p "🔑 Root username [default: minioadmin]: " MINIO_ROOT_USER
     MINIO_ROOT_USER=${MINIO_ROOT_USER:-minioadmin}
-    read -s -p "🔑 Root password [default: minioadmin] (hidden): " MINIO_ROOT_PASSWORD
-    echo ""
-    MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD:-minioadmin}
+    
+    while true; do
+      read -s -p "🔑 Root password [default: minioadmin] (min 8 chars, hidden): " MINIO_ROOT_PASSWORD
+      echo ""
+      MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD:-minioadmin}
+      
+      if [ ${#MINIO_ROOT_PASSWORD} -ge 8 ]; then
+        break
+      else
+        echo -e "${RED}❌ Errore: La password deve contenere almeno 8 caratteri. Riprova.${NC}"
+      fi
+    done
     
     # Show security warning for default credentials
     if [[ "$MINIO_ROOT_USER" == "minioadmin" && "$MINIO_ROOT_PASSWORD" == "minioadmin" ]]; then

@@ -418,6 +418,8 @@ ollama:
   vramPercentage: $VRAM_PERCENTAGE
   persistence:
     size: $OLLAMA_STORAGE_SIZE
+  memoryRequest: ${MEM_OLLAMA_REQ}
+  memoryLimit: ${MEM_OLLAMA}
   resources:
     limits:
       memory: ${MEM_OLLAMA}Mi

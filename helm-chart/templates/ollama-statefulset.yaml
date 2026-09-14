@@ -71,9 +71,23 @@ spec:
             # Note: NO nvidia.com/gpu limit to allow GPU sharing
             {{- end }}
             requests:
+              {{- if and .Values.ollama.resources .Values.ollama.resources.requests .Values.ollama.resources.requests.memory }}
+              memory: "{{ .Values.ollama.resources.requests.memory }}"
+              {{- else if .Values.ollama.memoryRequest }}
               memory: "{{ .Values.ollama.memoryRequest }}Mi"
+              {{- end }}
+              {{- if and .Values.ollama.resources .Values.ollama.resources.requests .Values.ollama.resources.requests.cpu }}
+              cpu: "{{ .Values.ollama.resources.requests.cpu }}"
+              {{- end }}
             limits:
+              {{- if and .Values.ollama.resources .Values.ollama.resources.limits .Values.ollama.resources.limits.memory }}
+              memory: "{{ .Values.ollama.resources.limits.memory }}"
+              {{- else if .Values.ollama.memoryLimit }}
               memory: "{{ .Values.ollama.memoryLimit }}Mi"
+              {{- end }}
+              {{- if and .Values.ollama.resources .Values.ollama.resources.limits .Values.ollama.resources.limits.cpu }}
+              cpu: "{{ .Values.ollama.resources.limits.cpu }}"
+              {{- end }}
           ports:
             - containerPort: 11434
           readinessProbe:

@@ -72,16 +72,15 @@ install_helm_os() {
     info "Extracting and installing..."
     
     # Extract the archive
-    cd "$temp_dir"
-    tar -zxf helm.tar.gz || {
+    tar -zxf "$temp_dir/helm.tar.gz" -C "$temp_dir" || {
         err "Failed to extract Helm"
         rm -rf "$temp_dir"
         return 1
     }
     
     # Move binary to system directory
-    if [[ -f "$os-$arch/helm" ]]; then
-        sudo mv "$os-$arch/helm" /usr/local/bin/helm || {
+    if [[ -f "$temp_dir/$os-$arch/helm" ]]; then
+        sudo mv "$temp_dir/$os-$arch/helm" /usr/local/bin/helm || {
             err "Failed to install Helm in /usr/local/bin/"
             rm -rf "$temp_dir"
             return 1

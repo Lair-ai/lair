@@ -40,7 +40,7 @@ spec:
         {{- if .Values.minio.enabled }}
         # Init container to create MinIO bucket for OpenWebUI
         - name: minio-bucket-setup
-          image: minio/mc:latest
+          image: "{{ .Values.minio.mcImage.repository | default "quay.io/minio/mc" }}:{{ .Values.minio.mcImage.tag | default "latest" }}"
           env:
             - name: MINIO_ENDPOINT
               value: "http://{{ .Values.namespace }}-minio.{{ .Values.namespace }}.svc.cluster.local:{{ .Values.minio.port }}"

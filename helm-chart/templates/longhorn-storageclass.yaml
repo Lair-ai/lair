@@ -1,4 +1,4 @@
-{{- if and .Values.createStorageClass (eq .Values.global.platform "standard") }}
+{{- if and .Values.createStorageClass (or (eq .Values.global.platform "standard") (eq .Values.global.platform "dgx_spark")) }}
 allowVolumeExpansion: true
 apiVersion: storage.k8s.io/v1
 kind: StorageClass
@@ -6,7 +6,7 @@ metadata:
   name: {{ .Values.global.storageClass }}-longhorn
   labels:
     app.kubernetes.io/managed-by: Helm
-    lair.io/platform: standard
+    lair.io/platform: {{ .Values.global.platform }}
   annotations:
     meta.helm.sh/release-name: {{ .Release.Name }}
     meta.helm.sh/release-namespace: {{ .Values.namespace }}
@@ -28,14 +28,14 @@ reclaimPolicy: Delete                  # Delete volume on PVC release
 volumeBindingMode: Immediate           # Immediate volume binding to PVC
 {{- end }}
 ---
-{{- if and .Values.createStorageClass (eq .Values.global.platform "standard") }}
+{{- if and .Values.createStorageClass (or (eq .Values.global.platform "standard") (eq .Values.global.platform "dgx_spark")) }}
 apiVersion: storage.k8s.io/v1
 kind: StorageClass
 metadata:
   name: {{ .Values.global.storageClass }}-longhorn-rwx
   labels:
     app.kubernetes.io/managed-by: Helm
-    lair.io/platform: standard
+    lair.io/platform: {{ .Values.global.platform }}
   annotations:
     meta.helm.sh/release-name: {{ .Release.Name }}
     meta.helm.sh/release-namespace: {{ .Values.namespace }}
@@ -52,14 +52,14 @@ reclaimPolicy: Delete
 volumeBindingMode: Immediate 
 {{- end }}
 ---
-{{- if and .Values.createStorageClass (eq .Values.global.platform "standard") }}
+{{- if and .Values.createStorageClass (or (eq .Values.global.platform "standard") (eq .Values.global.platform "dgx_spark")) }}
 apiVersion: storage.k8s.io/v1
 kind: StorageClass
 metadata:
   name: {{ .Values.global.storageClass }}-hostpath
   labels:
     app.kubernetes.io/managed-by: Helm
-    lair.io/platform: standard
+    lair.io/platform: {{ .Values.global.platform }}
   annotations:
     meta.helm.sh/release-name: {{ .Release.Name }}
     meta.helm.sh/release-namespace: {{ .Values.namespace }}

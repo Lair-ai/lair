@@ -375,4 +375,4 @@ velero:
 
 global:
   storageClass: lair-storage # Base name - will become lair-storage-longhorn (standard) or lair-hostpath (jetson)
-  platform: "standard" # Options: "standard" (x86/x64 with Longhorn), "jetson" (ARM with hostpath)
+  platform: "standard" # Options: "standard" (x86/x64 with Longhorn), "jetson" (ARM with hostpath), "dgx_spark" (ARM64 with Longhorn)

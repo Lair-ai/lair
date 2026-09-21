@@ -110,6 +110,11 @@ spec:
                 secretKeyRef:
                   name: {{ .Values.openWebUI.auth.secretName }}
                   key: WEBUI_SECRET_KEY
+            # Cache optimization for models
+            - name: DEFAULT_MODEL_METADATA
+              value: "{\"capabilities\":{\file_context\":false,\"citations\":true}}"
+            - name: ENABLE_MEMORY_SYSTEM_CONTEXT
+              value: "false"
             # RAG Configuration - Persistent
             - name: CONTENT_EXTRACTION_ENGINE
               value: "{{ .Values.openWebUI.rag.contentExtractionEngine | default "tika" }}"

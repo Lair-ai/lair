@@ -112,7 +112,7 @@ spec:
                   key: WEBUI_SECRET_KEY
             # Cache optimization for models
             - name: DEFAULT_MODEL_METADATA
-              value: "{\"capabilities\":{\file_context\":false,\"citations\":true}}"
+              value: "{\"capabilities\":{\file_context\":false,\"citations\":false}}"
             - name: ENABLE_MEMORY_SYSTEM_CONTEXT
               value: "false"
             # RAG Configuration - Persistent

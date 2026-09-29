@@ -27,10 +27,10 @@
 # - OpenWebUI:     External 80/443 → Internal 8080  (main chat interface)
 # - N8N:           External 80/443 → Internal 5678  (workflow automation)  
 # - Ollama:        External 80/443 → Internal 11434 (LLM API server)
-# - MinIO Console: External 80/443 → Internal 9001  (storage web interface)
+# - RustFS Console: External 80/443 → Internal 9001  (storage web interface)
 # - ComfyUI:       External 80/443 → Internal 8188  (AI image generation)
 #
-# IMPORTANT: MinIO uses port 9001 for web console, port 9000 for S3 API
+# IMPORTANT: RustFS uses port 9001 for web console, port 9000 for S3 API
 # ComfyUI automatically disables Cloudflare tunnels for direct access
 # TLS certificates are automatically managed by cert-manager with Let's Encrypt
 
@@ -188,7 +188,7 @@ domains:
     openwebui: "CHANGE_ME_OPENWEBUI_LAN_DOMAIN" # OpenWebUI - Main chat interface (subdomain: ai)
     n8n: "CHANGE_ME_N8N_LAN_DOMAIN" # N8N - Workflow automation (subdomain: n8n)
     comfyui: "CHANGE_ME_COMFYUI_LAN_DOMAIN" # ComfyUI - AI image generation (subdomain: images)
-    minio: "CHANGE_ME_MINIO_LAN_DOMAIN" # MinIO - S3-compatible storage (subdomain: storage)
+    rustfs: "CHANGE_ME_RUSTFS_LAN_DOMAIN" # RustFS - S3-compatible storage (subdomain: storage)
     ollama: "" # Ollama - Leave empty for internal-only access
 
   # Public (Internet) domains - used when access.public.enabled: true
@@ -198,16 +198,16 @@ domains:
     openwebui: "CHANGE_ME_OPENWEBUI_PUBLIC_DOMAIN" # OpenWebUI - Main chat interface
     n8n: "CHANGE_ME_N8N_PUBLIC_DOMAIN" # N8N - Workflow automation
     comfyui: "CHANGE_ME_COMFYUI_PUBLIC_DOMAIN" # ComfyUI - AI image generation
-    minio: "CHANGE_ME_MINIO_PUBLIC_DOMAIN" # MinIO - S3-compatible storage
+    rustfs: "CHANGE_ME_RUSTFS_PUBLIC_DOMAIN" # RustFS - S3-compatible storage
     ollama: "" # Ollama - Leave empty for internal-only access
 
 # DOMAIN CONFIGURATION BEHAVIOR:
 # During interactive setup, the system auto-detects hostname and asks for subdomains:
 #
 # IF LAN ACCESS IS ENABLED:
-# - "🌐 Sottodominio OpenWebUI LAN [default: ai]: " → ai.hostname.local
-# - "🌐 Sottodominio N8N LAN [default: n8n]: " → n8n.hostname.local
-# - "🌐 Sottodominio ComfyUI LAN [default: images] (lascia vuoto per accesso solo interno): "
+# - "🌐 Sottodorustfs OpenWebUI LAN [default: ai]: " → ai.hostname.local
+# - "🌐 Sottodorustfs N8N LAN [default: n8n]: " → n8n.hostname.local
+# - "🌐 Sottodorustfs ComfyUI LAN [default: images] (lascia vuoto per accesso solo interno): "
 # - etc.
 #
 # IF PUBLIC ACCESS IS ENABLED:
@@ -222,13 +222,13 @@ domains:
 #   * OpenWebUI: lair-openwebui.lair.svc.cluster.local:8080
 #   * N8N: lair-n8n.lair.svc.cluster.local:5678
 #   * Ollama: lair-ollama.lair.svc.cluster.local:11434
-#   * MinIO Console: lair-minio.lair.svc.cluster.local:9001
-#   * MinIO S3 API: lair-minio.lair.svc.cluster.local:9000
+#   * RustFS Console: lair-rustfs.lair.svc.cluster.local:9001
+#   * RustFS S3 API: lair-rustfs.lair.svc.cluster.local:9000
 #   * ComfyUI: lair-comfyui.lair.svc.cluster.local:8188
 #
 # SECURITY RECOMMENDATIONS:
 # - Keep Ollama internal-only (empty domain) for security
-# - Use strong MinIO credentials for production
+# - Use strong RustFS credentials for production
 # - Enable HTTPS-only access for public domains
 
 # ============================================================================
@@ -243,7 +243,7 @@ storage:
   n8n_workflows: 10 # Workflow definitions, execution history
   postgresql: 5 # N8N database, user accounts, metadata
   redis: 5 # Cache, session data, temporary storage
-  minio: 20 # Object storage (only used if MinIO enabled)
+  rustfs: 20 # Object storage (only used if RustFS enabled)
   comfyui: 15 # ComfyUI models and generated images
 
 # ============================================================================
@@ -355,13 +355,13 @@ openwebui:
       # ============================================================================
 
 components:
-  # MinIO - S3-compatible object storage
-  minio:
+  # RustFS - S3-compatible object storage
+  rustfs:
     enabled: true # Recommended for file storage and backups
-    root_user: "CHANGE_ME_MINIO_ROOT_USER" # Root username (provides both admin AND S3 API access)
-    root_password: "CHANGE_ME_MINIO_ROOT_PASSWORD" # Root password (change for production!)
+    root_user: "CHANGE_ME_RUSTFS_ROOT_USER" # Root username (provides both admin AND S3 API access)
+    root_password: "CHANGE_ME_RUSTFS_ROOT_PASSWORD" # Root password (change for production!)
     # SECURITY WARNING: Change these credentials for production deployments!
-    # Root credentials provide full access to MinIO (console + S3 API)
+    # Root credentials provide full access to RustFS (console + S3 API)
 
     # ComfyUI - AI image generation interface
   comfyui:
@@ -469,7 +469,7 @@ deployment:
 # - use_detected_resources: true
 # - is_jetson: false, has_gpu: true (if available)
 # - access.lan.enabled: false, access.public.enabled: true
-# - Strong passwords for minio credentials
+# - Strong passwords for rustfs credentials
 # - auto_deploy: false (review before deploy)
 #
 # DEVELOPMENT/STAGING:
@@ -497,7 +497,7 @@ deployment:
 #   * OpenWebUI LAN domain AND OpenWebUI public domain
 #   * N8N LAN domain AND N8N public domain
 #   * ComfyUI LAN domain AND ComfyUI public domain
-#   * MinIO LAN domain AND MinIO public domain
+#   * RustFS LAN domain AND RustFS public domain
 #   * Ollama LAN domain AND Ollama public domain
 #
 # RESOURCE ALLOCATION NOTES:

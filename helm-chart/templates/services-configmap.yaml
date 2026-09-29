@@ -8,14 +8,14 @@ data:
   REDIS_HOST: "{{ .Values.namespace }}-redis.{{ .Values.namespace }}.svc.cluster.local"
   REDIS_PORT: "6379"
   
-  # MinIO 
-  {{- if .Values.minio.enabled }}
-  MINIO_HOST: "{{ .Values.namespace }}-minio.{{ .Values.namespace }}.svc.cluster.local"
-  MINIO_PORT: "{{ .Values.minio.port }}"
-  MINIO_CONSOLE_PORT: "{{ .Values.minio.consolePort }}"
-  MINIO_ACCESS_KEY: "{{ .Values.minio.rootUser }}"
-  MINIO_ENDPOINT: "http://{{ .Values.namespace }}-minio.{{ .Values.namespace }}.svc.cluster.local:{{ .Values.minio.port }}"
-  MINIO_CONSOLE_ENDPOINT: "http://{{ .Values.namespace }}-minio.{{ .Values.namespace }}.svc.cluster.local:9001"
+  # RustFS (S3-compatible object storage)
+  {{- if .Values.rustfs.enabled }}
+  RUSTFS_HOST: "{{ .Values.namespace }}-rustfs.{{ .Values.namespace }}.svc.cluster.local"
+  RUSTFS_PORT: "{{ .Values.rustfs.port }}"
+  RUSTFS_CONSOLE_PORT: "{{ .Values.rustfs.consolePort }}"
+  RUSTFS_ACCESS_KEY: "{{ .Values.rustfs.rootUser }}"
+  RUSTFS_ENDPOINT: "http://{{ .Values.namespace }}-rustfs.{{ .Values.namespace }}.svc.cluster.local:{{ .Values.rustfs.port }}"
+  RUSTFS_CONSOLE_ENDPOINT: "http://{{ .Values.namespace }}-rustfs.{{ .Values.namespace }}.svc.cluster.local:{{ .Values.rustfs.consolePort }}"
   {{- end }}
   
   # Ollama

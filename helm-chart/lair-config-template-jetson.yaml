@@ -40,7 +40,7 @@ domains:
   openwebui: "CHANGE_ME_OPENWEBUI_LAN_DOMAIN"
   n8n: "CHANGE_ME_N8N_LAN_DOMAIN"
   comfyui: "" # Internal-only access for Jetson: lair-comfyui.lair.svc.cluster.local:80
-  minio: "" # Internal-only access for Jetson: lair-minio.lair.svc.cluster.local
+  rustfs: "" # Internal-only access for Jetson: lair-rustfs.lair.svc.cluster.local
   ollama: "" # Internal-only access (recommended for security)
 
   # LAN domains (for dual access mode)
@@ -48,7 +48,7 @@ domains:
     openwebui: "CHANGE_ME_OPENWEBUI_LAN_DOMAIN"
     n8n: "CHANGE_ME_N8N_LAN_DOMAIN"
     comfyui: "" # Internal-only access
-    minio: "" # Internal-only access
+    rustfs: "" # Internal-only access
     ollama: "" # Internal-only access
 
   # Public domains (not used when access.public.enabled: false)
@@ -56,7 +56,7 @@ domains:
     openwebui: ""
     n8n: ""
     comfyui: ""
-    minio: ""
+    rustfs: ""
     ollama: ""
 
 # Component Storage Configuration (in GB) - Smaller for Jetson
@@ -66,7 +66,7 @@ storage:
   n8n_workflows: 5
   postgresql: 3
   redis: 2
-  minio: 10
+  rustfs: 10
   comfyui: 10
 
 # OpenWebUI SSO Configuration (disabled by default)
@@ -102,12 +102,12 @@ components:
     low_vram: "" # Not used for Jetson images
     models_download: "" # Not used for Jetson images
 
-  minio:
+  rustfs:
     enabled: true
-    root_user: "CHANGE_ME_MINIO_ROOT_USER" # Root/admin username (change for production!)
-    root_password: "CHANGE_ME_MINIO_ROOT_PASSWORD" # Root/admin password (change for production!)
-    access_key: "CHANGE_ME_MINIO_ACCESS_KEY"
-    secret_key: "CHANGE_ME_MINIO_SECRET_KEY"
+    root_user: "CHANGE_ME_RUSTFS_ROOT_USER" # Root/admin username (change for production!)
+    root_password: "CHANGE_ME_RUSTFS_ROOT_PASSWORD" # Root/admin password (change for production!)
+    access_key: "CHANGE_ME_RUSTFS_ACCESS_KEY"
+    secret_key: "CHANGE_ME_RUSTFS_SECRET_KEY"
 
 # N8N Configuration
 n8n:

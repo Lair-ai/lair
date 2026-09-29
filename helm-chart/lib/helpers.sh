@@ -129,7 +129,7 @@ ask_storage_gb() {
     "N8N workflows") recommended_gb=10 ;;
     "PostgreSQL"*) recommended_gb=5 ;;
     "Redis") recommended_gb=5 ;;
-    "MinIO") recommended_gb=20 ;;
+    "RustFS") recommended_gb=20 ;;
     *) recommended_gb=$default_gb ;;
   esac
   
@@ -187,7 +187,7 @@ prompt_and_calculate_resource_allocations() {
     REDISTRIBUTED_PERCENTAGE_OLLAMA=$((PERCENTAGE_OLLAMA * 125 / 100))        # 35 * 1.25 = 43.75%
     REDISTRIBUTED_PERCENTAGE_N8N=$((PERCENTAGE_N8N * 125 / 100))              # 5 * 1.25 = 6.25%
     REDISTRIBUTED_PERCENTAGE_POSTGRES=$((PERCENTAGE_POSTGRES * 125 / 100))    # 5 * 1.25 = 6.25%
-    REDISTRIBUTED_PERCENTAGE_MINIO=$((PERCENTAGE_MINIO * 125 / 100))          # 7 * 1.25 = 8.75%
+    REDISTRIBUTED_PERCENTAGE_RUSTFS=$((PERCENTAGE_RUSTFS * 125 / 100))          # 7 * 1.25 = 8.75%
     REDISTRIBUTED_PERCENTAGE_REDIS=$((PERCENTAGE_REDIS * 125 / 100))          # 3 * 1.25 = 3.75%
     REDISTRIBUTED_PERCENTAGE_COMFYUI=0                                        # 0% when disabled
     
@@ -196,7 +196,7 @@ prompt_and_calculate_resource_allocations() {
     EFFECTIVE_PERCENTAGE_OLLAMA=$REDISTRIBUTED_PERCENTAGE_OLLAMA
     EFFECTIVE_PERCENTAGE_N8N=$REDISTRIBUTED_PERCENTAGE_N8N
     EFFECTIVE_PERCENTAGE_POSTGRES=$REDISTRIBUTED_PERCENTAGE_POSTGRES
-    EFFECTIVE_PERCENTAGE_MINIO=$REDISTRIBUTED_PERCENTAGE_MINIO
+    EFFECTIVE_PERCENTAGE_RUSTFS=$REDISTRIBUTED_PERCENTAGE_RUSTFS
     EFFECTIVE_PERCENTAGE_REDIS=$REDISTRIBUTED_PERCENTAGE_REDIS
     EFFECTIVE_PERCENTAGE_COMFYUI=$REDISTRIBUTED_PERCENTAGE_COMFYUI
     
@@ -205,7 +205,7 @@ prompt_and_calculate_resource_allocations() {
     echo "   • Ollama: ${EFFECTIVE_PERCENTAGE_OLLAMA}% (was ${PERCENTAGE_OLLAMA}%)"
     echo "   • N8N: ${EFFECTIVE_PERCENTAGE_N8N}% (was ${PERCENTAGE_N8N}%)"
     echo "   • PostgreSQL: ${EFFECTIVE_PERCENTAGE_POSTGRES}% (was ${PERCENTAGE_POSTGRES}%)"
-    echo "   • MinIO: ${EFFECTIVE_PERCENTAGE_MINIO}% (was ${PERCENTAGE_MINIO}%)"
+    echo "   • RustFS: ${EFFECTIVE_PERCENTAGE_RUSTFS}% (was ${PERCENTAGE_RUSTFS}%)"
     echo "   • Redis: ${EFFECTIVE_PERCENTAGE_REDIS}% (was ${PERCENTAGE_REDIS}%)"
     echo "   • ComfyUI: ${EFFECTIVE_PERCENTAGE_COMFYUI}% (disabled)"
   else
@@ -214,7 +214,7 @@ prompt_and_calculate_resource_allocations() {
     EFFECTIVE_PERCENTAGE_OLLAMA=$PERCENTAGE_OLLAMA
     EFFECTIVE_PERCENTAGE_N8N=$PERCENTAGE_N8N
     EFFECTIVE_PERCENTAGE_POSTGRES=$PERCENTAGE_POSTGRES
-    EFFECTIVE_PERCENTAGE_MINIO=$PERCENTAGE_MINIO
+    EFFECTIVE_PERCENTAGE_RUSTFS=$PERCENTAGE_RUSTFS
     EFFECTIVE_PERCENTAGE_REDIS=$PERCENTAGE_REDIS
     EFFECTIVE_PERCENTAGE_COMFYUI=$PERCENTAGE_COMFYUI
     
@@ -224,7 +224,7 @@ prompt_and_calculate_resource_allocations() {
     echo "   • ComfyUI: ${EFFECTIVE_PERCENTAGE_COMFYUI}%"
     echo "   • N8N: ${EFFECTIVE_PERCENTAGE_N8N}%"
     echo "   • PostgreSQL: ${EFFECTIVE_PERCENTAGE_POSTGRES}%"
-    echo "   • MinIO: ${EFFECTIVE_PERCENTAGE_MINIO}%"
+    echo "   • RustFS: ${EFFECTIVE_PERCENTAGE_RUSTFS}%"
     echo "   • Redis: ${EFFECTIVE_PERCENTAGE_REDIS}%"
   fi
   
@@ -236,7 +236,7 @@ prompt_and_calculate_resource_allocations() {
   CPU_N8N_REQ=$(echo "$K8S_CPU * $EFFECTIVE_PERCENTAGE_N8N * 10" | bc | awk '{print int($1)}')
   CPU_POSTGRES_REQ=$(echo "$K8S_CPU * $EFFECTIVE_PERCENTAGE_POSTGRES * 10" | bc | awk '{print int($1)}')
   CPU_REDIS_REQ=$(echo "$K8S_CPU * $EFFECTIVE_PERCENTAGE_REDIS * 10" | bc | awk '{print int($1)}')
-  CPU_MINIO_REQ=$(echo "$K8S_CPU * $EFFECTIVE_PERCENTAGE_MINIO * 10" | bc | awk '{print int($1)}')
+  CPU_RUSTFS_REQ=$(echo "$K8S_CPU * $EFFECTIVE_PERCENTAGE_RUSTFS * 10" | bc | awk '{print int($1)}')
   CPU_COMFYUI_REQ=$(echo "$K8S_CPU * $EFFECTIVE_PERCENTAGE_COMFYUI * 10" | bc | awk '{print int($1)}')
   
   # REQUESTS: Memory in MB, distributed as percentages of cluster resources
@@ -245,7 +245,7 @@ prompt_and_calculate_resource_allocations() {
   MEM_N8N_REQ=$((K8S_MEMORY_MB * EFFECTIVE_PERCENTAGE_N8N / 100))
   MEM_POSTGRES_REQ=$((K8S_MEMORY_MB * EFFECTIVE_PERCENTAGE_POSTGRES / 100))
   MEM_REDIS_REQ=$((K8S_MEMORY_MB * EFFECTIVE_PERCENTAGE_REDIS / 100))
-  MEM_MINIO_REQ=$((K8S_MEMORY_MB * EFFECTIVE_PERCENTAGE_MINIO / 100))
+  MEM_RUSTFS_REQ=$((K8S_MEMORY_MB * EFFECTIVE_PERCENTAGE_RUSTFS / 100))
   MEM_COMFYUI_REQ=$((K8S_MEMORY_MB * EFFECTIVE_PERCENTAGE_COMFYUI / 100))
 
   # Ensure component-specific minimums are respected for REQUESTS
@@ -278,9 +278,9 @@ prompt_and_calculate_resource_allocations() {
   [[ $CPU_REDIS_REQ -lt $MIN_CPU_REDIS ]] && CPU_REDIS_REQ=$MIN_CPU_REDIS
   [[ $MEM_REDIS_REQ -lt $MIN_MEM_REDIS ]] && MEM_REDIS_REQ=$MIN_MEM_REDIS
   
-  # MinIO minimums for requests
-  [[ $CPU_MINIO_REQ -lt $MIN_CPU_MINIO ]] && CPU_MINIO_REQ=$MIN_CPU_MINIO
-  [[ $MEM_MINIO_REQ -lt $MIN_MEM_MINIO ]] && MEM_MINIO_REQ=$MIN_MEM_MINIO
+  # RustFS minimums for requests
+  [[ $CPU_RUSTFS_REQ -lt $MIN_CPU_RUSTFS ]] && CPU_RUSTFS_REQ=$MIN_CPU_RUSTFS
+  [[ $MEM_RUSTFS_REQ -lt $MIN_MEM_RUSTFS ]] && MEM_RUSTFS_REQ=$MIN_MEM_RUSTFS
 
   # LIMITS: Calculate as multiplier of requests for intelligent overcommit
   echo ""
@@ -292,7 +292,7 @@ prompt_and_calculate_resource_allocations() {
   CPU_N8N=$(echo "$CPU_N8N_REQ * $LIMIT_MULTIPLIER_N8N" | bc | awk '{print int($1)}')
   CPU_POSTGRES=$(echo "$CPU_POSTGRES_REQ * $LIMIT_MULTIPLIER_POSTGRES" | bc | awk '{print int($1)}')
   CPU_REDIS=$(echo "$CPU_REDIS_REQ * $LIMIT_MULTIPLIER_REDIS" | bc | awk '{print int($1)}')
-  CPU_MINIO=$(echo "$CPU_MINIO_REQ * $LIMIT_MULTIPLIER_MINIO" | bc | awk '{print int($1)}')
+  CPU_RUSTFS=$(echo "$CPU_RUSTFS_REQ * $LIMIT_MULTIPLIER_RUSTFS" | bc | awk '{print int($1)}')
   CPU_COMFYUI=$(echo "$CPU_COMFYUI_REQ * $LIMIT_MULTIPLIER_COMFYUI" | bc | awk '{print int($1)}')
   
   # Memory Limits (use bc for decimal multiplication)  
@@ -301,7 +301,7 @@ prompt_and_calculate_resource_allocations() {
   MEM_N8N=$(echo "$MEM_N8N_REQ * $LIMIT_MULTIPLIER_N8N" | bc | awk '{print int($1)}')
   MEM_POSTGRES=$(echo "$MEM_POSTGRES_REQ * $LIMIT_MULTIPLIER_POSTGRES" | bc | awk '{print int($1)}')
   MEM_REDIS=$(echo "$MEM_REDIS_REQ * $LIMIT_MULTIPLIER_REDIS" | bc | awk '{print int($1)}')
-  MEM_MINIO=$(echo "$MEM_MINIO_REQ * $LIMIT_MULTIPLIER_MINIO" | bc | awk '{print int($1)}')
+  MEM_RUSTFS=$(echo "$MEM_RUSTFS_REQ * $LIMIT_MULTIPLIER_RUSTFS" | bc | awk '{print int($1)}')
   MEM_COMFYUI=$(echo "$MEM_COMFYUI_REQ * $LIMIT_MULTIPLIER_COMFYUI" | bc | awk '{print int($1)}')
   
   # Determine N8N worker replicas based on available memory and nodes
@@ -354,7 +354,7 @@ prompt_and_calculate_resource_allocations() {
   echo "   • N8N: ${CPU_N8N}m CPU / ${MEM_N8N}MB RAM"
   echo "   • N8N Workers (x${N8N_WORKER_REPLICAS}): ${CPU_N8N_WORKER}m CPU / ${MEM_N8N_WORKER}MB RAM each"
   echo "   • PostgreSQL: ${CPU_POSTGRES}m CPU / ${MEM_POSTGRES}MB RAM"
-  echo "   • MinIO: ${CPU_MINIO}m CPU / ${MEM_MINIO}MB RAM"
+  echo "   • RustFS: ${CPU_RUSTFS}m CPU / ${MEM_RUSTFS}MB RAM"
   echo "   • Redis: ${CPU_REDIS}m CPU / ${MEM_REDIS}MB RAM"
   
   # Ensure K8S_CPU_FORMATTED exists for resource calculations
@@ -369,12 +369,12 @@ calculate_total_allocated_resources() {
   BASE_MEMORY_REQ=$((MEM_OPENWEBUI_REQ + MEM_OLLAMA_REQ + MEM_N8N_REQ + (MEM_N8N_WORKER_REQ * N8N_WORKER_REPLICAS) + MEM_POSTGRES_REQ + MEM_REDIS_REQ + MEM_TIKA_REQ))
   BASE_STORAGE=$((OPENWEBUI_STORAGE_GB + OLLAMA_STORAGE_GB + N8N_STORAGE_GB + PG_STORAGE_GB + REDIS_STORAGE_GB))
 
-  if [[ "$MINIO_ENABLED" == true && "$ENABLE_MINIO" == "y" ]]; then
-    BASE_CPU=$((BASE_CPU + CPU_MINIO))
-    BASE_MEMORY=$((BASE_MEMORY + MEM_MINIO))
-    BASE_CPU_REQ=$((BASE_CPU_REQ + CPU_MINIO_REQ))
-    BASE_MEMORY_REQ=$((BASE_MEMORY_REQ + MEM_MINIO_REQ))
-    BASE_STORAGE=$((BASE_STORAGE + MINIO_STORAGE_GB))
+  if [[ "$RUSTFS_ENABLED" == true && "$ENABLE_RUSTFS" == "y" ]]; then
+    BASE_CPU=$((BASE_CPU + CPU_RUSTFS))
+    BASE_MEMORY=$((BASE_MEMORY + MEM_RUSTFS))
+    BASE_CPU_REQ=$((BASE_CPU_REQ + CPU_RUSTFS_REQ))
+    BASE_MEMORY_REQ=$((BASE_MEMORY_REQ + MEM_RUSTFS_REQ))
+    BASE_STORAGE=$((BASE_STORAGE + RUSTFS_STORAGE_GB))
   fi
 
   if [[ "$COMFYUI_ENABLED" == true && "$ENABLE_COMFYUI" == "y" ]]; then

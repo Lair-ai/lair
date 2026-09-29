@@ -50,7 +50,7 @@ ingress:
         serviceName: comfyui
         servicePort: 80
       - host: storage.hostname.local
-        serviceName: minio
+        serviceName: rustfs
         servicePort: 80
 ```
 
@@ -175,7 +175,7 @@ ingress:
         serviceName: comfyui
         servicePort: 80
       - host: storage.example.com
-        serviceName: minio
+        serviceName: rustfs
         servicePort: 80
 
 certManager:
@@ -329,7 +329,7 @@ ingress:
       
       # Storage
       - host: files.company.com
-        serviceName: minio
+        serviceName: rustfs
 ```
 
 #### **Path-Based Routing**
@@ -346,7 +346,7 @@ ingress:
           - path: /images
             serviceName: comfyui
           - path: /storage
-            serviceName: minio
+            serviceName: rustfs
 ```
 
 ### 🔒 **Security Configuration**

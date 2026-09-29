@@ -32,7 +32,7 @@ Lair backup and disaster recovery involves multiple layers of data protection, f
 │                  💾 STORAGE DESTINATIONS                        │
 │  ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────┐  │
 │  │   S3 Storage    │  │  Local Storage  │  │  Cloud Storage  │  │
-│  │ (AWS/MinIO/OVH) │  │ (External HDD)  │  │ (Multi-Region)  │  │
+│  │ (AWS/RustFS/OVH) │  │ (External HDD)  │  │ (Multi-Region)  │  │
 │  └─────────────────┘  └─────────────────┘  └─────────────────┘  │
 └─────────────────────────────────────────────────────────────────┘
 ```

@@ -160,11 +160,11 @@ EOF
 EOF
     fi
 
-    # Add MinIO LAN ingress only if domain is specified
-    if [ -n "$MINIO_DOMAIN_LAN" ] && [ "$MINIO_DOMAIN_LAN" != "" ]; then
+    # Add RustFS LAN ingress only if domain is specified
+    if [ -n "$RUSTFS_DOMAIN_LAN" ] && [ "$RUSTFS_DOMAIN_LAN" != "" ]; then
       cat <<-EOF >> $CONFIG_FILE
-      - host: $MINIO_DOMAIN_LAN
-        serviceName: minio
+      - host: $RUSTFS_DOMAIN_LAN
+        serviceName: rustfs
         servicePort: 80
         paths:
           - path: /
@@ -222,11 +222,11 @@ EOF
 EOF
     fi
 
-    # Add MinIO public ingress only if domain is specified
-    if [ -n "$MINIO_DOMAIN_PUBLIC" ] && [ "$MINIO_DOMAIN_PUBLIC" != "" ]; then
+    # Add RustFS public ingress only if domain is specified
+    if [ -n "$RUSTFS_DOMAIN_PUBLIC" ] && [ "$RUSTFS_DOMAIN_PUBLIC" != "" ]; then
       cat <<-EOF >> $CONFIG_FILE
-      - host: $MINIO_DOMAIN_PUBLIC
-        serviceName: minio
+      - host: $RUSTFS_DOMAIN_PUBLIC
+        serviceName: rustfs
         servicePort: 80
         paths:
           - path: /
@@ -281,11 +281,11 @@ EOF
 EOF
   fi
 
-  # Add legacy MinIO ingress only if domain is specified
-  if [ -n "$MINIO_DOMAIN" ] && [ "$MINIO_DOMAIN" != "" ]; then
+  # Add legacy RustFS ingress only if domain is specified
+  if [ -n "$RUSTFS_DOMAIN" ] && [ "$RUSTFS_DOMAIN" != "" ]; then
     cat <<-EOF >> $CONFIG_FILE
-    - host: $MINIO_DOMAIN
-      serviceName: minio
+    - host: $RUSTFS_DOMAIN
+      serviceName: rustfs
       servicePort: 80
       paths:
         - path: /
@@ -606,24 +606,24 @@ velero:
 EOF
   fi
 
-  # MinIO configuration (conditional)
-  if [[ "$ENABLE_MINIO" == "y" || "$ENABLE_MINIO" == "Y" ]]; then
+  # RustFS configuration (conditional)
+  if [[ "$ENABLE_RUSTFS" == "y" || "$ENABLE_RUSTFS" == "Y" ]]; then
     cat <<-EOF >> $CONFIG_FILE
 
-minio:
+rustfs:
   enabled: true
   image:
-    repository: quay.io/minio/minio
-    tag: RELEASE.2025-09-07T16-13-09Z
-  rootUser: $MINIO_ROOT_USER
-  rootPassword: $MINIO_ROOT_PASSWORD
+    repository: rustfs/rustfs
+    tag: "1.0.0"
+  rootUser: $RUSTFS_ROOT_USER
+  rootPassword: $RUSTFS_ROOT_PASSWORD
   storage:
-    size: $MINIO_STORAGE_SIZE
+    size: $RUSTFS_STORAGE_SIZE
 EOF
   else
     cat <<-EOF >> $CONFIG_FILE
 
-minio:
+rustfs:
   enabled: false
 EOF
   fi

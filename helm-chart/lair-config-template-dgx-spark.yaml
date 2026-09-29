@@ -36,19 +36,19 @@ domains:
   openwebui: ""
   n8n: ""
   comfyui: ""
-  minio: ""
+  rustfs: ""
   ollama: ""
   public:
     openwebui: ""
     n8n: ""
     comfyui: ""
-    minio: ""
+    rustfs: ""
     ollama: ""
   lan:
     openwebui: "ai.CHANGE_ME_HOSTNAME.local"
     n8n: "n8n.CHANGE_ME_HOSTNAME.local"
     comfyui: "images.CHANGE_ME_HOSTNAME.local"
-    minio: "storage.CHANGE_ME_HOSTNAME.local"
+    rustfs: "storage.CHANGE_ME_HOSTNAME.local"
     ollama: ""
 
 storage:
@@ -57,16 +57,16 @@ storage:
   n8n_workflows: 20
   postgresql: 10
   redis: 10
-  minio: 50
+  rustfs: 50
   comfyui: 100
 
 components:
-  minio:
+  rustfs:
     enabled: true
-    root_user: "CHANGE_ME_MINIO_ROOT_USER"
-    root_password: "CHANGE_ME_MINIO_ROOT_PASSWORD"
-    access_key: "CHANGE_ME_MINIO_ACCESS_KEY"
-    secret_key: "CHANGE_ME_MINIO_SECRET_KEY"
+    root_user: "CHANGE_ME_RUSTFS_ROOT_USER"
+    root_password: "CHANGE_ME_RUSTFS_ROOT_PASSWORD"
+    access_key: "CHANGE_ME_RUSTFS_ACCESS_KEY"
+    secret_key: "CHANGE_ME_RUSTFS_SECRET_KEY"
   comfyui:
     enabled: true
     gpuEnabled: true

@@ -24,7 +24,7 @@ N8N serves as the automation backbone of Lair, connecting AI capabilities with e
 - **OpenWebUI**: Trigger workflows from chat interactions
 - **PostgreSQL**: Persistent workflow and execution storage
 - **Redis**: Queue management for scalable execution
-- **MinIO**: File storage and processing workflows
+- **RustFS**: File storage and processing workflows
 - **External APIs**: 400+ pre-built connectors
 
 ---
@@ -105,7 +105,7 @@ n8n:
 ┌─────────────────────────────────────────────────────────────────┐
 │                     💾 PERSISTENCE LAYER                        │
 │  ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────┐  │
-│  │   PostgreSQL    │  │  File Storage   │  │   MinIO S3      │  │
+│  │   PostgreSQL    │  │  File Storage   │  │   RustFS S3      │  │
 │  │ (Workflows/Data)│  │ (User Files)    │  │ (Large Files)   │  │
 │  └─────────────────┘  └─────────────────┘  └─────────────────┘  │
 └─────────────────────────────────────────────────────────────────┘
@@ -772,4 +772,4 @@ n8n:
 
 ---
 
-**🎯 Ready to automate your processes?** Continue with [ComfyUI Image Generation](comfyui.md) or explore [MinIO Object Storage](minio.md)!
+**🎯 Ready to automate your processes?** Continue with [ComfyUI Image Generation](comfyui.md) or explore [RustFS Object Storage](rustfs.md)!

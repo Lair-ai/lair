@@ -97,9 +97,9 @@ Answer the wizard prompts to configure Lair:
 - **ComfyUI LAN subdomain [default: images] (leave empty for internal-only access):** `images`
 - **ComfyUI models and outputs storage in GB (recommended: \<x\>GB, available: \<x\>GB) [default: \<x\>]:** `30`
 - **ComfyUI image:** automatic selection by GPU family (RTX uses CUDA 12.8; NVIDIA Driver 570+ required)
-- **Enable MinIO object storage? (y/n) [default: y]:** `<Press Enter>`
-- **MinIO public domain (leave empty for internal-only access):** `<Press Enter>`
-- **MinIO object storage storage in GB (recommended: \<x\>GB, available: \<x\>GB) [default: \<x\>]:** `<Press Enter>`
+- **Enable RustFS object storage? (y/n) [default: y]:** `<Press Enter>`
+- **RustFS public domain (leave empty for internal-only access):** `<Press Enter>`
+- **RustFS object storage storage in GB (recommended: \<x\>GB, available: \<x\>GB) [default: \<x\>]:** `<Press Enter>`
 - **Root username:** `<Choose an admin username>`
 - **Root password:** `<Choose a strong password>`
 - **PostgreSQL database storage in GB (recommended: \<x\>GB, available: \<x\>GB) [default: \<x\>]:** `<Press Enter>`

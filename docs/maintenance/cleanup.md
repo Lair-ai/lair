@@ -413,9 +413,9 @@ df -h | grep -E "(/$|/var|longhorn)"
 echo ""
 echo "=== Container Images ==="
 if command -v microk8s &>/dev/null; then
-    microk8s ctr images list | grep -E "(lair|ollama|openwebui|n8n|comfyui|minio)" | wc -l | xargs echo "Lair images:"
+    microk8s ctr images list | grep -E "(lair|ollama|openwebui|n8n|comfyui|rustfs)" | wc -l | xargs echo "Lair images:"
 elif command -v crictl &>/dev/null; then
-    crictl images | grep -E "(lair|ollama|openwebui|n8n|comfyui|minio)" | wc -l | xargs echo "Lair images:"
+    crictl images | grep -E "(lair|ollama|openwebui|n8n|comfyui|rustfs)" | wc -l | xargs echo "Lair images:"
 fi
 
 # Network resources
@@ -479,9 +479,9 @@ fi
 echo ""
 echo "=== Checking Container Images ==="
 if command -v microk8s &>/dev/null; then
-    LAIR_IMAGES=$(microk8s ctr images list | grep -E "(lair|ollama|openwebui|n8n|comfyui|minio)" | wc -l)
+    LAIR_IMAGES=$(microk8s ctr images list | grep -E "(lair|ollama|openwebui|n8n|comfyui|rustfs)" | wc -l)
 elif command -v crictl &>/dev/null; then
-    LAIR_IMAGES=$(crictl images | grep -E "(lair|ollama|openwebui|n8n|comfyui|minio)" | wc -l)
+    LAIR_IMAGES=$(crictl images | grep -E "(lair|ollama|openwebui|n8n|comfyui|rustfs)" | wc -l)
 else
     LAIR_IMAGES=0
 fi

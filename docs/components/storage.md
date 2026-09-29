@@ -43,7 +43,7 @@ Lair uses different storage strategies based on the deployment platform to optim
 | Platform | Primary Storage | Backup Storage | Replication | Use Case |
 |----------|----------------|----------------|-------------|----------|
 | **Standard x86_64** | Longhorn | Cloud/S3 | 1-3 replicas | Production, Development |
-| **NVIDIA Jetson** | Hostpath | S3/MinIO | None | Edge Computing |
+| **NVIDIA Jetson** | Hostpath | S3/RustFS | None | Edge Computing |
 | **Cloud Managed** | Cloud + Longhorn | Cloud Native | 1-3 replicas | Enterprise |
 
 ---
@@ -661,7 +661,7 @@ parameters:
 ├── n8n-workflows/           # N8N workflow data
 ├── postgresql-data/         # Database files
 ├── redis-data/              # Redis persistence
-└── minio-data/              # MinIO object storage (if enabled)
+└── rustfs-data/              # RustFS object storage (if enabled)
 ```
 
 #### **Performance Tuning**

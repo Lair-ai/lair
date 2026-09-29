@@ -43,7 +43,7 @@ done
 
 # Load all component modules
 echo "📦 Loading component modules..."
-component_modules=("openwebui.sh" "ollama.sh" "n8n.sh" "comfyui.sh" "minio.sh" "postgresql.sh" "redis.sh")
+component_modules=("openwebui.sh" "ollama.sh" "n8n.sh" "comfyui.sh" "rustfs.sh" "postgresql.sh" "redis.sh")
 
 for component in "${component_modules[@]}"; do
     component_path="$LIB_DIR/components/$component"

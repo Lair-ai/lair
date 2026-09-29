@@ -44,7 +44,7 @@ domains:
   openwebui: "CHANGE_ME_OPENWEBUI_PUBLIC_DOMAIN"
   n8n: "CHANGE_ME_N8N_PUBLIC_DOMAIN"
   comfyui: "" # Internal-only access: lair-comfyui.lair.svc.cluster.local:80
-  minio: "CHANGE_ME_MINIO_PUBLIC_DOMAIN" # External access enabled
+  rustfs: "CHANGE_ME_RUSTFS_PUBLIC_DOMAIN" # External access enabled
   ollama: "" # Strictly internal-only access for security reasons
 
   # Public domains (for dual access mode)
@@ -52,7 +52,7 @@ domains:
     openwebui: "CHANGE_ME_OPENWEBUI_PUBLIC_DOMAIN"
     n8n: "CHANGE_ME_N8N_PUBLIC_DOMAIN"
     comfyui: "" # Internal-only access
-    minio: "CHANGE_ME_MINIO_PUBLIC_DOMAIN"
+    rustfs: "CHANGE_ME_RUSTFS_PUBLIC_DOMAIN"
     ollama: "" # Strictly internal-only access for security reasons
 
   # LAN domains (not used when access.lan.enabled: false)
@@ -60,7 +60,7 @@ domains:
     openwebui: ""
     n8n: ""
     comfyui: ""
-    minio: ""
+    rustfs: ""
     ollama: ""
 
 # Component Storage Configuration (in GB)
@@ -70,7 +70,7 @@ storage:
   n8n_workflows: 10
   postgresql: 5
   redis: 5
-  minio: 20
+  rustfs: 20
   comfyui: 15
 
 # OpenWebUI SSO Configuration (disabled by default)
@@ -82,12 +82,12 @@ openwebui:
 # Component Enablement
 components:
 
-  minio:
+  rustfs:
     enabled: true
-    root_user: "CHANGE_ME_MINIO_ROOT_USER" # Root/admin username (change for production!)
-    root_password: "CHANGE_ME_MINIO_ROOT_PASSWORD" # Root/admin password (change for production!)
-    access_key: "CHANGE_ME_MINIO_ACCESS_KEY"
-    secret_key: "CHANGE_ME_MINIO_SECRET_KEY"
+    root_user: "CHANGE_ME_RUSTFS_ROOT_USER" # Root/admin username (change for production!)
+    root_password: "CHANGE_ME_RUSTFS_ROOT_PASSWORD" # Root/admin password (change for production!)
+    access_key: "CHANGE_ME_RUSTFS_ACCESS_KEY"
+    secret_key: "CHANGE_ME_RUSTFS_SECRET_KEY"
 
   comfyui:
     enabled: true

@@ -305,8 +305,8 @@ kubectl exec -n lair deployment/lair-openwebui -- ping lair-ollama
 ```bash
 # Symptom: Helm upgrade/apply fails when a PVC request size is smaller than the existing PVC size
 # Error example:
-# Error: UPGRADE FAILED: cannot patch "minio-pvc" with kind PersistentVolumeClaim:
-# PersistentVolumeClaim "minio-pvc" is invalid:
+# Error: UPGRADE FAILED: cannot patch "rustfs-pvc" with kind PersistentVolumeClaim:
+# PersistentVolumeClaim "rustfs-pvc" is invalid:
 # spec.resources.requests.storage: Forbidden: field can not be less than status.capacity
 #
 # Cause:
@@ -314,8 +314,8 @@ kubectl exec -n lair deployment/lair-openwebui -- ping lair-ollama
 #
 # Fix (recommended):
 # 1) Check current PVC size
-kubectl get pvc -n lair minio-pvc
-kubectl get pvc -n lair minio-pvc -o jsonpath='{.status.capacity.storage}{"\n"}'
+kubectl get pvc -n lair rustfs-pvc
+kubectl get pvc -n lair rustfs-pvc -o jsonpath='{.status.capacity.storage}{"\n"}'
 #
 # 2) Ensure your values file requests >= the current size (e.g., keep 50Gi or increase to 100Gi)
 # 3) Re-apply with Helm using your (updated) values file

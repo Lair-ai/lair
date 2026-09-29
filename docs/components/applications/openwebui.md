@@ -25,13 +25,13 @@ OpenWebUI serves as the main entry point for users to interact with AI models th
 - **Ollama**: LLM serving and model management
 - **Tika**: Document text extraction and processing
 - **PostgreSQL**: User data and conversation storage
-- **MinIO**: **Primary file storage backend** (automatic S3 storage when MinIO is enabled)
+- **RustFS**: **Primary file storage backend** (automatic S3 storage when RustFS is enabled)
 
 ---
 
 ## 🚀 Getting Started
 
-> **✨ Note**: When MinIO is enabled during Lair installation, **OpenWebUI automatically uses it as the storage backend** instead of local filesystem. This provides better scalability, performance, and no size limitations for file uploads and RAG documents.
+> **✨ Note**: When RustFS is enabled during Lair installation, **OpenWebUI automatically uses it as the storage backend** instead of local filesystem. This provides better scalability, performance, and no size limitations for file uploads and RAG documents.
 
 ### 🌐 **Accessing OpenWebUI**
 
@@ -499,20 +499,20 @@ openWebUI:
 #### **Storage Backends**
 OpenWebUI supports two storage backends:
 
-1. **Local Filesystem** (default when MinIO is disabled)
+1. **Local Filesystem** (default when RustFS is disabled)
    - Files stored on persistent volume (PVC)
    - Simple setup, no external dependencies
    - Limited by PVC size
 
-2. **S3/MinIO Storage** (automatic when MinIO is enabled)
+2. **S3/RustFS Storage** (automatic when RustFS is enabled)
    - Scalable object storage
    - Better performance for large files
-   - No size limitations (depends on MinIO capacity)
-   - **Automatically configured** when MinIO is enabled
+   - No size limitations (depends on RustFS capacity)
+   - **Automatically configured** when RustFS is enabled
 
 #### **Local Filesystem Storage**
 ```yaml
-# Default configuration (when MinIO is disabled)
+# Default configuration (when RustFS is disabled)
 openWebUI:
   persistence:
     enabled: true
@@ -520,58 +520,59 @@ openWebUI:
     enablePersistentConfig: true  # Persist configuration changes
 ```
 
-#### **S3/MinIO Storage (Automatic)**
+#### **S3/RustFS Storage (Automatic)**
 ```yaml
-# Automatic configuration when MinIO is enabled
-minio:
-  enabled: true                   # Enable MinIO
-  accessKey: "minio"              # S3 access credentials
-  secretKey: "minio123"           # S3 secret credentials
+# Automatic configuration when RustFS is enabled
+rustfs:
+  enabled: true                   # Enable RustFS
+  accessKey: "rustfs"              # S3 access credentials
+  secretKey: "rustfs123"           # S3 secret credentials
   storage:
-    size: 50Gi                    # MinIO storage capacity
+    size: 50Gi                    # RustFS storage capacity
 
 openWebUI:
   s3:
-    enabled: true                 # Auto-enabled when minio.enabled: true
+    enabled: true                 # Auto-enabled when rustfs.enabled: true
     bucketName: "openwebui-storage"  # S3 bucket name (auto-created)
-    region: "us-east-1"           # MinIO default region
-    addressingStyle: "path"       # Path-style addressing for MinIO
+    region: "us-east-1"           # RustFS default region
+    addressingStyle: "path"       # Path-style addressing for RustFS
 
 # Environment variables (automatically configured):
 # STORAGE_PROVIDER: "s3"
-# S3_ENDPOINT_URL: "http://lair-minio.lair.svc.cluster.local:9000"
+# S3_ENDPOINT_URL: "http://lair-rustfs.lair.svc.cluster.local:9000"
 # S3_BUCKET_NAME: "openwebui-storage"
-# AWS_ACCESS_KEY_ID: "<from MinIO config>"
-# AWS_SECRET_ACCESS_KEY: "<from MinIO config>"
+# AWS_ACCESS_KEY_ID: "<from RustFS config>"
+# AWS_SECRET_ACCESS_KEY: "<from RustFS config>"
 ```
 
 #### **Storage Migration**
 ```bash
-# Migrate from local filesystem to MinIO:
+# Migrate from local filesystem to RustFS:
 
 # 1. Backup current data
 kubectl cp lair/lair-openwebui-xxx:/app/backend/data ./openwebui-backup
 
-# 2. Enable MinIO in values-config.yaml
-# minio:
+# 2. Enable RustFS in values-config.yaml
+# rustfs:
 #   enabled: true
 
 # 3. Upgrade deployment
 helm upgrade --install lair . -n lair -f values-config.yaml
  
 
-# 4. (Optional) Migrate existing files to MinIO
-kubectl exec -n lair deployment/lair-openwebui -- mc mirror /app/backend/data minio/openwebui-storage
+# 4. (Optional) Migrate existing files to RustFS (from the local backup created in step 1)
+rc alias set rustfs http://lair-rustfs.lair.svc.cluster.local:9000 <access-key> <secret-key>
+rc mirror ./openwebui-backup rustfs/openwebui-storage
 ```
 
 #### **Storage Features**
 ```bash
-# When using MinIO storage:
+# When using RustFS storage:
 ✅ Automatic bucket creation
 ✅ Automatic credential configuration
 ✅ Better concurrent access performance
 ✅ No PVC size limitations
-✅ Centralized backup with MinIO
+✅ Centralized backup with RustFS
 ✅ Version control support
 ✅ Scalable storage capacity
 ```
@@ -650,34 +651,37 @@ kubectl exec -n lair deployment/lair-openwebui -- env | grep STORAGE_PROVIDER
 kubectl get pvc -n lair openwebui-pvc
 kubectl exec -n lair deployment/lair-openwebui -- df -h
 
-# For MinIO/S3 storage:
-kubectl exec -n lair deployment/lair-openwebui -- curl http://lair-minio:9000
-kubectl exec -n lair deployment/lair-minio -- mc ls minio/openwebui-storage
+# For RustFS/S3 storage:
+kubectl exec -n lair deployment/lair-openwebui -- curl http://lair-rustfs:9000
+
+# List the bucket from inside the cluster (one-shot pod with the RustFS CLI client)
+kubectl run rc-tmp -n lair --rm -it --image=rustfs/rc:latest --restart=Never -- \
+  sh -c "rc alias set rustfs http://lair-rustfs.lair.svc.cluster.local:9000 <access-key> <secret-key> && rc ls rustfs/openwebui-storage"
 ```
 
-#### **MinIO Storage Issues**
+#### **RustFS Storage Issues**
 ```bash
-# Issue: Files not uploading to MinIO
+# Issue: Files not uploading to RustFS
 # Check S3 configuration
 kubectl exec -n lair deployment/lair-openwebui -- env | grep -E "S3_|AWS_"
 
-# Verify MinIO connectivity
-kubectl exec -n lair deployment/lair-openwebui -- curl -v http://lair-minio:9000
+# Verify RustFS connectivity
+kubectl exec -n lair deployment/lair-openwebui -- curl -v http://lair-rustfs:9000
 
 # Check bucket exists
-kubectl exec -n lair deployment/lair-minio -- mc ls minio/ | grep openwebui-storage
+kubectl run rc-tmp -n lair --rm -it --image=rustfs/rc:latest --restart=Never -- \
+  sh -c "rc alias set rustfs http://lair-rustfs.lair.svc.cluster.local:9000 <access-key> <secret-key> && rc ls rustfs/" | grep openwebui-storage
 
 # View bucket creation logs
-kubectl logs -n lair deployment/lair-openwebui -c minio-bucket-setup
+kubectl logs -n lair deployment/lair-openwebui -c rustfs-bucket-setup
 
 # Recreate bucket manually if needed
-kubectl exec -n lair deployment/lair-minio -- mc mb minio/openwebui-storage
+kubectl run rc-tmp -n lair --rm -it --image=rustfs/rc:latest --restart=Never -- \
+  sh -c "rc alias set rustfs http://lair-rustfs.lair.svc.cluster.local:9000 <access-key> <secret-key> && rc mb rustfs/openwebui-storage"
 
 # Test S3 credentials
-kubectl exec -n lair deployment/lair-minio -- mc alias set test \
-  http://localhost:9000 \
-  $(kubectl get configmap -n lair services-config -o jsonpath='{.data.MINIO_ACCESS_KEY}') \
-  $(kubectl get secret -n lair minio-secret -o jsonpath='{.data.MINIO_SECRET_KEY}' | base64 --decode)
+kubectl run rc-tmp -n lair --rm -it --image=rustfs/rc:latest --restart=Never -- \
+  sh -c "rc alias set test http://lair-rustfs.lair.svc.cluster.local:9000 $(kubectl get configmap -n lair services-config -o jsonpath='{.data.RUSTFS_ACCESS_KEY}') $(kubectl get secret -n lair rustfs-secret -o jsonpath='{.data.RUSTFS_SECRET_KEY}' | base64 --decode) && rc ready test"
 ```
 
 #### **Performance Issues**

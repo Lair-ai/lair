@@ -254,7 +254,7 @@ configure_all_components() {
   source "${lib_dir}/components/ollama.sh"
   source "${lib_dir}/components/n8n.sh"
   source "${lib_dir}/components/comfyui.sh"
-  source "${lib_dir}/components/minio.sh"
+  source "${lib_dir}/components/rustfs.sh"
   source "${lib_dir}/components/postgresql.sh"
   source "${lib_dir}/components/redis.sh"
   source "${lib_dir}/components/velero.sh"
@@ -263,7 +263,7 @@ configure_all_components() {
   configure_ollama
   configure_n8n
   configure_comfyui
-  configure_minio
+  configure_rustfs
   configure_postgresql
   configure_redis
   configure_velero
@@ -287,7 +287,7 @@ configure_all_components_non_interactive() {
   source "${lib_dir}/components/ollama.sh"
   source "${lib_dir}/components/n8n.sh"
   source "${lib_dir}/components/comfyui.sh"
-  source "${lib_dir}/components/minio.sh"
+  source "${lib_dir}/components/rustfs.sh"
   source "${lib_dir}/components/postgresql.sh"
   source "${lib_dir}/components/redis.sh"
   source "${lib_dir}/components/velero.sh"
@@ -296,7 +296,7 @@ configure_all_components_non_interactive() {
   configure_ollama_non_interactive
   configure_n8n_non_interactive
   configure_comfyui_non_interactive
-  configure_minio_non_interactive
+  configure_rustfs_non_interactive
   configure_postgresql_non_interactive
   configure_redis_non_interactive
   configure_velero_non_interactive
@@ -319,8 +319,8 @@ show_resource_summary() {
   echo "   • PostgreSQL: ${CPU_POSTGRES_REQ}m/${CPU_POSTGRES}m CPU, ${MEM_POSTGRES_REQ}Mi/${MEM_POSTGRES}Mi RAM (request/limit)"
   echo "   • Redis: ${CPU_REDIS_REQ}m/${CPU_REDIS}m CPU, ${MEM_REDIS_REQ}Mi/${MEM_REDIS}Mi RAM (request/limit)"
   echo "   • Tika: ${CPU_TIKA_REQ}m/${CPU_TIKA}m CPU, ${MEM_TIKA_REQ}Mi/${MEM_TIKA}Mi RAM (request/limit)"
-  if [[ "$MINIO_ENABLED" == true ]]; then
-    echo "   • MinIO: ${CPU_MINIO_REQ}m/${CPU_MINIO}m CPU, ${MEM_MINIO_REQ}Mi/${MEM_MINIO}Mi RAM (request/limit)"
+  if [[ "$RUSTFS_ENABLED" == true ]]; then
+    echo "   • RustFS: ${CPU_RUSTFS_REQ}m/${CPU_RUSTFS}m CPU, ${MEM_RUSTFS_REQ}Mi/${MEM_RUSTFS}Mi RAM (request/limit)"
   fi
   if [[ "$COMFYUI_ENABLED" == true ]]; then
     echo "   • ComfyUI: ${CPU_COMFYUI_REQ}m/${CPU_COMFYUI}m CPU, ${MEM_COMFYUI_REQ}Mi/${MEM_COMFYUI}Mi RAM (request/limit)"

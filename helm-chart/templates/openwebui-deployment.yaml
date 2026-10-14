@@ -37,49 +37,49 @@ spec:
                 echo "Waiting for Postgres...";
                 sleep 2;
               done
-        {{- if .Values.minio.enabled }}
-        # Init container to create MinIO bucket for OpenWebUI
-        - name: minio-bucket-setup
-          image: "{{ .Values.minio.mcImage.repository | default "quay.io/minio/mc" }}:{{ .Values.minio.mcImage.tag | default "latest" }}"
+        {{- if .Values.rustfs.enabled }}
+        # Init container to create RustFS bucket for OpenWebUI
+        - name: rustfs-bucket-setup
+          image: "{{ .Values.rustfs.rcImage.repository | default "rustfs/rc" }}:{{ .Values.rustfs.rcImage.tag | default "latest" }}"
           env:
-            - name: MINIO_ENDPOINT
-              value: "http://{{ .Values.namespace }}-minio.{{ .Values.namespace }}.svc.cluster.local:{{ .Values.minio.port }}"
-            - name: MINIO_ACCESS_KEY
+            - name: RUSTFS_ENDPOINT
+              value: "http://{{ .Values.namespace }}-rustfs.{{ .Values.namespace }}.svc.cluster.local:{{ .Values.rustfs.port }}"
+            - name: RUSTFS_ACCESS_KEY
               valueFrom:
                 configMapKeyRef:
                   name: services-config
-                  key: MINIO_ACCESS_KEY
-            - name: MINIO_SECRET_KEY
+                  key: RUSTFS_ACCESS_KEY
+            - name: RUSTFS_SECRET_KEY
               valueFrom:
                 secretKeyRef:
-                  name: minio-secret
-                  key: MINIO_SECRET_KEY
+                  name: rustfs-secret
+                  key: RUSTFS_SECRET_KEY
             - name: BUCKET_NAME
               value: "{{ .Values.openWebUI.s3.bucketName | default "openwebui-storage" }}"
           command: ["sh", "-c"]
           args:
             - |
-              echo "Waiting for MinIO to be ready..."
-              until mc alias set minio "$MINIO_ENDPOINT" "$MINIO_ACCESS_KEY" "$MINIO_SECRET_KEY" 2>/dev/null; do
-                echo "MinIO not ready, waiting..."
+              echo "Waiting for RustFS to be ready..."
+              until rc alias set rustfs "$RUSTFS_ENDPOINT" "$RUSTFS_ACCESS_KEY" "$RUSTFS_SECRET_KEY" 2>/dev/null; do
+                echo "RustFS not ready, waiting..."
                 sleep 2
               done
-              echo "MinIO is ready!"
-              
+              echo "RustFS is ready!"
+
               # Create bucket if it doesn't exist
-              if mc ls minio/"$BUCKET_NAME" 2>/dev/null; then
+              if rc ls rustfs/"$BUCKET_NAME" 2>/dev/null; then
                 echo "Bucket $BUCKET_NAME already exists"
               else
                 echo "Creating bucket $BUCKET_NAME"
-                mc mb minio/"$BUCKET_NAME"
+                rc mb rustfs/"$BUCKET_NAME"
                 echo "Bucket $BUCKET_NAME created successfully"
               fi
-              
+
               # Set public policy for the bucket (optional, adjust as needed)
               # Uncomment the line below if you want public read access
-              # mc anonymous set download minio/"$BUCKET_NAME"
-              
-              echo "MinIO setup completed!"
+              # rc anonymous set download rustfs/"$BUCKET_NAME"
+
+              echo "RustFS setup completed!"
         {{- end }}
       containers:
         - name: openwebui
@@ -227,13 +227,13 @@ spec:
               value: "{{ .Values.openWebUI.models.filterList | default "" }}"
             - name: ENABLE_LITELLM_LOGGING
               value: "false"
-            # S3 Storage Configuration (MinIO Integration)
-            {{- if .Values.minio.enabled }}
-            # When MinIO is enabled, OpenWebUI uses S3-compatible storage instead of local filesystem
+            # S3 Storage Configuration (RustFS Integration)
+            {{- if .Values.rustfs.enabled }}
+            # When RustFS is enabled, OpenWebUI uses S3-compatible storage instead of local filesystem
             - name: STORAGE_PROVIDER
               value: "s3"
             - name: S3_ENDPOINT_URL
-              value: "http://{{ .Values.namespace }}-minio.{{ .Values.namespace }}.svc.cluster.local:{{ .Values.minio.port }}"
+              value: "http://{{ .Values.namespace }}-rustfs.{{ .Values.namespace }}.svc.cluster.local:{{ .Values.rustfs.port }}"
             - name: S3_BUCKET_NAME
               value: "{{ .Values.openWebUI.s3.bucketName | default "openwebui-storage" }}"
             - name: S3_REGION_NAME
@@ -248,17 +248,17 @@ spec:
             - name: S3_KEY_PREFIX
               value: "{{ .Values.openWebUI.s3.keyPrefix }}"
             {{- end }}
-            # S3 Credentials from MinIO configuration
+            # S3 Credentials from RustFS configuration
             - name: AWS_ACCESS_KEY_ID
               valueFrom:
                 configMapKeyRef:
                   name: services-config
-                  key: MINIO_ACCESS_KEY
+                  key: RUSTFS_ACCESS_KEY
             - name: AWS_SECRET_ACCESS_KEY
               valueFrom:
                 secretKeyRef:
-                  name: minio-secret
-                  key: MINIO_SECRET_KEY
+                  name: rustfs-secret
+                  key: RUSTFS_SECRET_KEY
             {{- end }}
             # SSO Configuration
             {{- if .Values.openWebUI.sso.enabled }}

@@ -21,7 +21,7 @@ Lair deploys a comprehensive suite of applications that work together to provide
 ┌─────────────────────────────────────────────────────────────────┐
 │                   🤖 AI & PROCESSING                            │
 │  ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────┐ │
-│  │     Ollama      │  │      Tika       │  │     MinIO       │ │
+│  │     Ollama      │  │      Tika       │  │     RustFS       │ │
 │  │   (LLM API)     │  │ (Doc Parser)    │  │  (S3 Storage)   │ │
 │  │ Port: 11434     │  │ Port: 9998      │  │ Port: 9000/9001 │ │
 │  └─────────────────┘  └─────────────────┘  └─────────────────┘ │
@@ -244,7 +244,7 @@ tika:
 
 ---
 
-### 💾 **MinIO** - S3-Compatible Object Storage
+### 💾 **RustFS** - S3-Compatible Object Storage
 > **High-performance object storage with S3 API compatibility**
 
 **Purpose**: Scalable object storage for files, models, and data
@@ -264,21 +264,21 @@ tika:
 **Default Access**:
 - **LAN Console**: `https://storage.hostname.local`
 - **Public Console**: `https://storage.example.com`
-- **S3 API**: `lair-minio.lair.svc.cluster.local:9000`
-- **Console**: `lair-minio.lair.svc.cluster.local:9001`
+- **S3 API**: `lair-rustfs.lair.svc.cluster.local:9000`
+- **Console**: `lair-rustfs.lair.svc.cluster.local:9001`
 
 **Configuration**:
 ```yaml
-minio:
+rustfs:
   enabled: true  # Enabled by default
   
   # Administrative credentials
-  rootUser: minioadmin
-  rootPassword: minioadmin
+  rootUser: rustfsadmin
+  rootPassword: rustfsadmin
   
   # S3 API credentials
-  accessKey: minio
-  secretKey: minio123
+  accessKey: rustfs
+  secretKey: rustfs123
   
   storage:
     size: 20Gi  # Automatically calculated
@@ -388,7 +388,7 @@ N8N ←→ All Services (workflow automation)
     ↓
 N8N ←→ Redis (queue management)
     ↓
-All Apps ←→ MinIO (file storage)
+All Apps ←→ RustFS (file storage)
 ```
 
 ### 🔌 **API Integration Points**
@@ -442,7 +442,7 @@ Content-Type: application/pdf
 2. N8N → Tika: Process attached documents
 3. N8N → Ollama: Analyze content with AI
 4. N8N → PostgreSQL: Store results
-5. N8N → MinIO: Archive processed files
+5. N8N → RustFS: Archive processed files
 6. N8N → External API: Send notifications
 ```
 
@@ -460,7 +460,7 @@ Content-Type: application/pdf
 | **N8N + Workers** | 10% | 15% | Low (workflows) | None |
 | **PostgreSQL** | 5% | 5% | High (data) | None |
 | **Redis** | 3% | 3% | Low (cache) | None |
-| **MinIO** | 7% | 7% | High (objects) | None |
+| **RustFS** | 7% | 7% | High (objects) | None |
 | **Tika** | 2% | 2% | None | None |
 
 ### 🎯 **Performance Optimization**

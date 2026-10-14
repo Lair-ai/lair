@@ -24,7 +24,7 @@ System Detection → Resource Planning → Component Config → YAML Generation 
 - **⚡ N8N**: Workflow automation platform with workers
 - **🧠 Ollama**: Local LLM serving platform with GPU support
 - **🎨 ComfyUI**: AI image generation interface (optional)
-- **💾 MinIO**: S3-compatible object storage (optional)
+- **💾 RustFS**: S3-compatible object storage (optional)
 - **📄 Tika**: Document processing and text extraction
 - **🗄️ PostgreSQL**: Database with pgvector for embeddings
 - **⚡ Redis**: Cache and queue system
@@ -52,7 +52,7 @@ System Detection → Resource Planning → Component Config → YAML Generation 
 | **PostgreSQL** | 0.1 cores | 256MB | 5GB | No |
 | **Redis** | 0.1 cores | 128MB | 5GB | No |
 | **ComfyUI** | 1.0 cores | 2GB | 10GB | Recommended |
-| **MinIO** | 0.2 cores | 512MB | 10GB | No |
+| **RustFS** | 0.2 cores | 512MB | 10GB | No |
 | **Tika** | 0.1 cores | 256MB | - | No |
 | **Total Minimum** | **3.3 cores** | **7.6GB** | **70GB** | - |
 
@@ -137,7 +137,7 @@ N8N: 5% → 0.3 cores, 0.6GB RAM
 ComfyUI: 20% → 1.1 cores, 2.2GB RAM
 PostgreSQL: 5% → 0.3 cores, 0.6GB RAM
 Redis: 3% → 0.2 cores, 0.3GB RAM
-MinIO: 7% → 0.4 cores, 0.8GB RAM
+RustFS: 7% → 0.4 cores, 0.8GB RAM
 ```
 
 ### 🏗️ **Phase 2: Platform & Application Configuration**
@@ -179,9 +179,9 @@ Is this installation for NVIDIA Jetson? (y/n) [default: y]:
 ```bash
 # Interactive Component Configuration:
 
-📦 MinIO Object Storage
-Enable MinIO for S3-compatible storage? (y/n) [default: y]:
-✅ MinIO enabled - S3 API for file storage
+📦 RustFS Object Storage
+Enable RustFS for S3-compatible storage? (y/n) [default: y]:
+✅ RustFS enabled - S3 API for file storage
 
 🎨 ComfyUI Image Generation  
 Enable ComfyUI for AI image generation? (y/n) [default: y]:
@@ -437,7 +437,7 @@ lair-n8n-xxx                 1/1     Running   0
 lair-n8n-worker-xxx          1/1     Running   0
 lair-postgresql-0            1/1     Running   0
 lair-redis-xxx               1/1     Running   0
-lair-minio-xxx               1/1     Running   0
+lair-rustfs-xxx               1/1     Running   0
 lair-comfyui-xxx             1/1     Running   0
 lair-tika-xxx                1/1     Running   0
 ```
@@ -600,7 +600,7 @@ ollama:
 comfyUI:
   enabled: false
 
-minio:
+rustfs:
   enabled: false
 ```
 

@@ -30,7 +30,7 @@ Lair's architecture is designed as a **complete private AI infrastructure stack*
 ┌─────────────────────────────────────────────────────────────────┐
 │                    🤖 AI APPLICATION LAYER                       │
 │  ┌─────────────┐ ┌─────────────┐ ┌─────────────┐ ┌───────────┐  │
-│  │  OpenWebUI  │ │     N8N     │ │   ComfyUI   │ │   MinIO   │  │
+│  │  OpenWebUI  │ │     N8N     │ │   ComfyUI   │ │   RustFS   │  │
 │  │ (AI Chat)   │ │(Automation) │ │ (AI Images) │ │ (Storage) │  │
 │  │   + RAG     │ │ 400+ APIs   │ │ Stable Diff │ │ S3 API    │  │
 │  └─────────────┘ └─────────────┘ └─────────────┘ └───────────┘  │
@@ -207,7 +207,7 @@ Internet/LAN → MetalLB → NGINX Ingress → Services → Pods
          │  ├─ ai.*        │ → OpenWebUI Service
          │  ├─ n8n.*       │ → N8N Service  
          │  ├─ images.*    │ → ComfyUI Service
-         │  └─ storage.*   │ → MinIO Service
+         │  └─ storage.*   │ → RustFS Service
          └─────────────────┘
 ```
 
@@ -256,7 +256,7 @@ Total System Resources (100%)
     ├─ ComfyUI (20%) [optional]
     ├─ PostgreSQL (5%)
     ├─ Redis (3%)
-    └─ MinIO (7%) [optional]
+    └─ RustFS (7%) [optional]
 ```
 
 ### 💾 **Storage Allocation Strategy**
@@ -268,7 +268,7 @@ Total Available Storage (100%)
     ├─ OpenWebUI Data (15-20%)
     ├─ ComfyUI Models (15-20%) [optional]
     ├─ N8N Workflows (10%)
-    ├─ MinIO Objects (10-15%) [optional]
+    ├─ RustFS Objects (10-15%) [optional]
     ├─ PostgreSQL Data (5%)
     └─ Redis Cache (2-3%)
 ```
@@ -334,7 +334,7 @@ System Detection → Resource Calculation → Component Configuration → YAML G
 │  │   Master    │ │   Worker 1  │ │   Worker 2  │          │
 │  │ Control     │ │ AI Workloads│ │ Data Layer  │          │
 │  │ Plane       │ │ (Ollama,    │ │ (PostgreSQL,│          │
-│  │ (etcd, API) │ │  ComfyUI)   │ │  MinIO)     │          │
+│  │ (etcd, API) │ │  ComfyUI)   │ │  RustFS)     │          │
 │  └─────────────┘ └─────────────┘ └─────────────┘          │
 └─────────────────────────────────────────────────────────────┘
 ```

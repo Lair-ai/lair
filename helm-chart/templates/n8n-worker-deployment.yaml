@@ -78,22 +78,22 @@ spec:
             # Worker deve solo processare, non gestire webhook
             - name: N8N_DISABLE_UI
               value: "true"
-            {{- if .Values.minio.enabled }}
+            {{- if .Values.rustfs.enabled }}
             - name: N8N_FILESYSTEM_ALIAS_S3_ENDPOINT
               valueFrom:
                 configMapKeyRef:
                   name: services-config
-                  key: MINIO_ENDPOINT
+                  key: RUSTFS_ENDPOINT
             - name: N8N_FILESYSTEM_ALIAS_S3_ACCESS_KEY_ID
               valueFrom:
                 configMapKeyRef:
                   name: services-config
-                  key: MINIO_ACCESS_KEY
+                  key: RUSTFS_ACCESS_KEY
             - name: N8N_FILESYSTEM_ALIAS_S3_SECRET_ACCESS_KEY
               valueFrom:
                 secretKeyRef:
-                  name: minio-secret
-                  key: MINIO_SECRET_KEY
+                  name: rustfs-secret
+                  key: RUSTFS_SECRET_KEY
             {{- end }}
             {{- if .Values.n8n.extraEnv }}
             {{- range .Values.n8n.extraEnv }}

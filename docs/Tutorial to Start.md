@@ -224,9 +224,9 @@ Answer the wizard prompts to configure Lair:
 - **Sender Email:** `<Press Enter>`
 - **Use SSL/TLS? (y/n) [default: y]:** `<Press Enter>`
 - **Use STARTTLS? (y/n) [default: y]:** `<Press Enter>`
-- **Enable MinIO object storage? (y/n) [default: y]:** `<Press Enter>`
-- **MinIO public domain (leave empty for internal-only access):** `<Press Enter>`
-- **MinIO object storage storage in GB:** `<Press Enter>`
+- **Enable RustFS object storage? (y/n) [default: y]:** `<Press Enter>`
+- **RustFS public domain (leave empty for internal-only access):** `<Press Enter>`
+- **RustFS object storage storage in GB:** `<Press Enter>`
 - **Root username:** `<Choose an admin username>`
 - **Root password:** `<Choose a strong password>`
 - **PostgreSQL database storage in GB:** `<Press Enter>`

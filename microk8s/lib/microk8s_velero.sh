@@ -29,7 +29,7 @@ ask_velero_settings() {
     # Provider (fixed to aws for all S3-compatible providers like OVH)
     LAIR_VELERO_PROVIDER="aws"
     export LAIR_VELERO_PROVIDER
-    echo "✅ Using provider: aws (compatible with OVH, AWS, MinIO, and other S3 storage)"
+    echo "✅ Using provider: aws (compatible with OVH, AWS, RustFS, and other S3 storage)"
     
     # S3 Configuration
     echo ""

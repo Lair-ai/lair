@@ -24,7 +24,7 @@ Each `component.sh` file contains:
 | **Ollama** | `ollama.sh` | Local AI model server (always enabled) |
 | **N8N** | `n8n.sh` | Workflow automation platform (always enabled) |
 | **ComfyUI** | `comfyui.sh` | AI image generation interface (optional) |
-| **MinIO** | `minio.sh` | S3-compatible object storage (optional) |
+| **RustFS** | `rustfs.sh` | S3-compatible object storage (optional) |
 | **PostgreSQL** | `postgresql.sh` | Primary database (always enabled) |
 | **Redis** | `redis.sh` | Cache and message broker (always enabled) |
 
@@ -46,7 +46,7 @@ Each `component.sh` file contains:
 - **OpenWebUI**: `ai` → `ai.hostname.local`
 - **N8N**: `n8n` → `n8n.hostname.local`
 - **ComfyUI**: `images` → `images.hostname.local`
-- **MinIO**: `storage` → `storage.hostname.local`
+- **RustFS**: `storage` → `storage.hostname.local`
 - **Ollama**: Optional (internal-only by default)
 
 ### **🔧 Cross-Component Integration**

@@ -21,7 +21,7 @@ ComfyUI serves as the visual AI image generation platform in Lair, offering a no
 
 ### 🔗 **Integration Points**
 - **N8N**: Automated image generation workflows
-- **MinIO**: Storage for generated images and models
+- **RustFS**: Storage for generated images and models
 - **OpenWebUI**: Potential integration for AI-powered image requests
 - **API Access**: REST API for programmatic image generation
 
@@ -847,4 +847,4 @@ result = generate_image("a beautiful sunset over mountains")
 
 ---
 
-**🎯 Ready to create amazing AI art?** Continue with [MinIO Object Storage](minio.md) or explore [PostgreSQL Database](../services-overview.md)!
+**🎯 Ready to create amazing AI art?** Continue with [RustFS Object Storage](rustfs.md) or explore [PostgreSQL Database](../services-overview.md)!

@@ -31,7 +31,7 @@ Velero provides Kubernetes-native backup and restore capabilities for Lair, enab
 ┌─────────────────────────────────────────────────────────────────┐
 │                     🗄️ STORAGE BACKENDS                         │
 │  ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────┐  │
-│  │      AWS S3     │  │   OVH Cloud     │  │     MinIO       │  │
+│  │      AWS S3     │  │   OVH Cloud     │  │     RustFS       │  │
 │  │   (Cloud)       │  │   (Europe)      │  │   (Local)       │  │
 │  └─────────────────┘  └─────────────────┘  └─────────────────┘  │
 └─────────────────────────────────────────────────────────────────┘
@@ -346,19 +346,19 @@ velero:
 
 ### 🏠 **Local Storage Backends**
 
-#### **MinIO Configuration**
+#### **RustFS Configuration**
 ```yaml
-# Local MinIO backend
+# Local RustFS backend
 velero:
   configuration:
     provider: aws
     backupStorageLocation:
       bucket: lair-backups
       config:
-        region: minio
-        s3Url: http://lair-minio:9000
+        region: rustfs
+        s3Url: http://lair-rustfs:9000
         s3ForcePathStyle: true
-        publicUrl: http://lair-minio:9000
+        publicUrl: http://lair-rustfs:9000
 ```
 
 #### **NFS Storage**

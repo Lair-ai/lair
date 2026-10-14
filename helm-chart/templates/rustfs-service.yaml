@@ -1,0 +1,18 @@
+{{- if .Values.rustfs.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.namespace }}-rustfs
+  namespace: {{ .Values.namespace }}
+spec:
+  selector:
+    app: rustfs
+  ports:
+    - name: console
+      port: 80
+      targetPort: {{ .Values.rustfs.consolePort }}
+    - name: api
+      port: {{ .Values.rustfs.port }}
+      targetPort: {{ .Values.rustfs.port }}
+  type: ClusterIP
+{{- end }}

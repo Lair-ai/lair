@@ -94,15 +94,15 @@ openWebUI:
     enabled: true
     size: 10Gi
     enablePersistentConfig: true
-  # S3 Storage Configuration (when MinIO is enabled)
-  # When minio.enabled is true, OpenWebUI will use MinIO for file storage
+  # S3 Storage Configuration (when RustFS is enabled)
+  # When rustfs.enabled is true, OpenWebUI will use RustFS for file storage
   s3:
-    enabled: false # Automatically set to true when MinIO is enabled
+    enabled: false # Automatically set to true when RustFS is enabled
     bucketName: "openwebui-storage" # S3 bucket for OpenWebUI files
-    region: "us-east-1" # MinIO default region
-    addressingStyle: "path" # path-style for MinIO compatibility
-    useAccelerateEndpoint: false # Disabled for MinIO
-    enableTagging: false # Disabled for MinIO
+    region: "us-east-1" # S3 default region
+    addressingStyle: "path" # path-style addressing
+    useAccelerateEndpoint: false # Disabled
+    enableTagging: false # Disabled
     keyPrefix: "" # Optional prefix for all S3 keys
   # SSO Configuration - disabled by default
   sso:
@@ -334,22 +334,24 @@ redis:
       memory: 256Mi
       cpu: 200m
 
-minio:
+rustfs:
   enabled: true
   image:
-    repository: quay.io/minio/minio
-    tag: RELEASE.2025-09-07T16-13-09Z
-  mcImage:
-    repository: quay.io/minio/mc
+    # RustFS (S3-compatible object storage, Apache-2.0, multi-arch amd64/arm64)
+    repository: rustfs/rustfs
+    tag: "1.0.0"
+  # RustFS CLI client (rc), first-party S3 client (used for bucket bootstrap)
+  rcImage:
+    repository: rustfs/rc
     tag: latest
-  # Root user credentials provide both administrative AND S3 API access
-  # These are used for all MinIO operations (console, API, bucket management)
-  rootUser: minioadmin
-  rootPassword: minioadmin
+  # Root credentials provide both administrative AND S3 API access
+  # These are used for all RustFS operations (console, API, bucket management)
+  rootUser: rustfsadmin
+  rootPassword: rustfsadmin
   storage:
     size: 10Gi
-  port: 9000 # API port
-  consolePort: 9001 # Web console port  
+  port: 9000 # S3 API port
+  consolePort: 9001 # Web console port
   resources:
     limits:
       memory: "1Gi"

@@ -1,0 +1,90 @@
+{{- if .Values.rustfs.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rustfs
+  namespace: {{ .Values.namespace }}
+spec:
+  revisionHistoryLimit: 2
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: rustfs
+  template:
+    metadata:
+      labels:
+        app: rustfs
+    spec:
+      # RustFS container runs as non-root user 'rustfs' (UID/GID 10001)
+      securityContext:
+        runAsUser: 10001
+        runAsGroup: 10001
+        fsGroup: 10001
+      containers:
+        - name: rustfs
+          image: "{{ .Values.rustfs.image.repository }}:{{ .Values.rustfs.image.tag }}"
+          args:
+            - /data
+          ports:
+            - containerPort: {{ .Values.rustfs.port }}
+              name: api
+            - containerPort: {{ .Values.rustfs.consolePort }}
+              name: console
+          env:
+            # RustFS root credentials for administrative AND S3 API access
+            - name: RUSTFS_ACCESS_KEY
+              value: "{{ .Values.rustfs.rootUser }}"
+            - name: RUSTFS_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: rustfs-secret
+                  key: RUSTFS_SECRET_KEY
+            # Listening addresses and console
+            - name: RUSTFS_ADDRESS
+              value: ":{{ .Values.rustfs.port }}"
+            - name: RUSTFS_CONSOLE_ADDRESS
+              value: ":{{ .Values.rustfs.consolePort }}"
+            - name: RUSTFS_CONSOLE_ENABLE
+              value: "true"
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: api
+            initialDelaySeconds: 15
+            periodSeconds: 20
+            timeoutSeconds: 5
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: api
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 5
+          volumeMounts:
+            - name: data
+              mountPath: /data
+          resources:
+            limits:
+              memory: "{{ .Values.rustfs.resources.limits.memory }}"
+              cpu: "{{ .Values.rustfs.resources.limits.cpu }}"
+            requests:
+              memory: "{{ .Values.rustfs.resources.requests.memory }}"
+              cpu: "{{ .Values.rustfs.resources.requests.cpu }}"
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: rustfs-pvc
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: rustfs-pvc
+  namespace: {{ .Values.namespace }}
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: {{ include "lair.storageClassName" . }}
+  resources:
+    requests:
+      storage: {{ .Values.rustfs.storage.size }}
+{{- end }}

@@ -271,14 +271,14 @@ load_configuration_from_file() {
   OPENWEBUI_DOMAIN_LAN_RAW=$(read_yaml_value "$config_file" ".domains.lan.openwebui" "ai.lair.local")
   N8N_DOMAIN_LAN_RAW=$(read_yaml_value "$config_file" ".domains.lan.n8n" "n8n.lair.local")
   COMFYUI_DOMAIN_LAN_RAW=$(read_yaml_value "$config_file" ".domains.lan.comfyui" "")
-  MINIO_DOMAIN_LAN_RAW=$(read_yaml_value "$config_file" ".domains.lan.minio" "")
+  RUSTFS_DOMAIN_LAN_RAW=$(read_yaml_value "$config_file" ".domains.lan.rustfs" "")
   OLLAMA_DOMAIN_LAN_RAW=$(read_yaml_value "$config_file" ".domains.lan.ollama" "")
   
   # Extract subdomain from raw domain and rebuild with current hostname
   OPENWEBUI_SUBDOMAIN_LAN=$(echo "$OPENWEBUI_DOMAIN_LAN_RAW" | cut -d'.' -f1)
   N8N_SUBDOMAIN_LAN=$(echo "$N8N_DOMAIN_LAN_RAW" | cut -d'.' -f1)
   COMFYUI_SUBDOMAIN_LAN=$(echo "$COMFYUI_DOMAIN_LAN_RAW" | cut -d'.' -f1)
-  MINIO_SUBDOMAIN_LAN=$(echo "$MINIO_DOMAIN_LAN_RAW" | cut -d'.' -f1)
+  RUSTFS_SUBDOMAIN_LAN=$(echo "$RUSTFS_DOMAIN_LAN_RAW" | cut -d'.' -f1)
   OLLAMA_SUBDOMAIN_LAN=$(echo "$OLLAMA_DOMAIN_LAN_RAW" | cut -d'.' -f1)
   
   # Build final LAN domains with current hostname
@@ -300,10 +300,10 @@ load_configuration_from_file() {
     COMFYUI_DOMAIN_LAN=""
   fi
   
-  if [ -n "$MINIO_DOMAIN_LAN_RAW" ]; then
-    MINIO_DOMAIN_LAN="$MINIO_SUBDOMAIN_LAN.$SYSTEM_HOSTNAME.local"
+  if [ -n "$RUSTFS_DOMAIN_LAN_RAW" ]; then
+    RUSTFS_DOMAIN_LAN="$RUSTFS_SUBDOMAIN_LAN.$SYSTEM_HOSTNAME.local"
   else
-    MINIO_DOMAIN_LAN=""
+    RUSTFS_DOMAIN_LAN=""
   fi
   
   # SECURITY: Force Ollama LAN domain to be empty for security reasons
@@ -313,7 +313,7 @@ load_configuration_from_file() {
   OPENWEBUI_DOMAIN_PUBLIC=$(read_yaml_value "$config_file" ".domains.public.openwebui" "ai.example.com")
   N8N_DOMAIN_PUBLIC=$(read_yaml_value "$config_file" ".domains.public.n8n" "n8n.example.com")
   COMFYUI_DOMAIN_PUBLIC=$(read_yaml_value "$config_file" ".domains.public.comfyui" "")
-  MINIO_DOMAIN_PUBLIC=$(read_yaml_value "$config_file" ".domains.public.minio" "")
+  RUSTFS_DOMAIN_PUBLIC=$(read_yaml_value "$config_file" ".domains.public.rustfs" "")
   # SECURITY: Force Ollama public domain to be empty for security reasons
   OLLAMA_DOMAIN_PUBLIC=""  # Always internal-only for security
   
@@ -321,7 +321,7 @@ load_configuration_from_file() {
   OPENWEBUI_DOMAIN=$(read_yaml_value "$config_file" ".domains.openwebui" "ai.example.com")
   N8N_DOMAIN=$(read_yaml_value "$config_file" ".domains.n8n" "n8n.example.com")
   COMFYUI_DOMAIN=$(read_yaml_value "$config_file" ".domains.comfyui" "comfyui.example.com")
-  MINIO_DOMAIN=$(read_yaml_value "$config_file" ".domains.minio" "")
+  RUSTFS_DOMAIN=$(read_yaml_value "$config_file" ".domains.rustfs" "")
   # SECURITY: Force Ollama legacy domain to be empty for security reasons
   OLLAMA_DOMAIN=""  # Always internal-only for security
   
@@ -330,14 +330,14 @@ load_configuration_from_file() {
     OPENWEBUI_DOMAIN=${OPENWEBUI_DOMAIN:-$OPENWEBUI_DOMAIN_PUBLIC}
     N8N_DOMAIN=${N8N_DOMAIN:-$N8N_DOMAIN_PUBLIC}
     COMFYUI_DOMAIN=${COMFYUI_DOMAIN:-$COMFYUI_DOMAIN_PUBLIC}
-    MINIO_DOMAIN=${MINIO_DOMAIN:-$MINIO_DOMAIN_PUBLIC}
+    RUSTFS_DOMAIN=${RUSTFS_DOMAIN:-$RUSTFS_DOMAIN_PUBLIC}
     # SECURITY: Ollama domain forced to empty for security
     OLLAMA_DOMAIN=""
   elif [[ "$ENABLE_LAN_ACCESS" == "true" ]]; then
     OPENWEBUI_DOMAIN=${OPENWEBUI_DOMAIN:-$OPENWEBUI_DOMAIN_LAN}
     N8N_DOMAIN=${N8N_DOMAIN:-$N8N_DOMAIN_LAN}
     COMFYUI_DOMAIN=${COMFYUI_DOMAIN:-$COMFYUI_DOMAIN_LAN}
-    MINIO_DOMAIN=${MINIO_DOMAIN:-$MINIO_DOMAIN_LAN}
+    RUSTFS_DOMAIN=${RUSTFS_DOMAIN:-$RUSTFS_DOMAIN_LAN}
     # SECURITY: Ollama domain can use LAN but only if explicitly set
     OLLAMA_DOMAIN=${OLLAMA_DOMAIN:-$OLLAMA_DOMAIN_LAN}
   fi
@@ -348,7 +348,7 @@ load_configuration_from_file() {
   N8N_STORAGE_GB=$(read_yaml_value "$config_file" ".storage.n8n_workflows" "10")
   PG_STORAGE_GB=$(read_yaml_value "$config_file" ".storage.postgresql" "5")
   REDIS_STORAGE_GB=$(read_yaml_value "$config_file" ".storage.redis" "5")
-  MINIO_STORAGE_GB=$(read_yaml_value "$config_file" ".storage.minio" "20")
+  RUSTFS_STORAGE_GB=$(read_yaml_value "$config_file" ".storage.rustfs" "20")
   COMFYUI_STORAGE_GB=$(read_yaml_value "$config_file" ".storage.comfyui" "15")
   
   # Convert to Gi format
@@ -357,13 +357,13 @@ load_configuration_from_file() {
   N8N_STORAGE_SIZE="${N8N_STORAGE_GB}Gi"
   PG_STORAGE_SIZE="${PG_STORAGE_GB}Gi"
   REDIS_STORAGE_SIZE="${REDIS_STORAGE_GB}Gi"
-  MINIO_STORAGE_SIZE="${MINIO_STORAGE_GB}Gi"
+  RUSTFS_STORAGE_SIZE="${RUSTFS_STORAGE_GB}Gi"
   COMFYUI_STORAGE_SIZE="${COMFYUI_STORAGE_GB}Gi"
   
   # Load component configuration
-  ENABLE_MINIO=$(read_yaml_value "$config_file" ".components.minio.enabled" "true")
-  MINIO_ROOT_USER=$(read_yaml_value "$config_file" ".components.minio.root_user" "minioadmin")
-  MINIO_ROOT_PASSWORD=$(read_yaml_value "$config_file" ".components.minio.root_password" "minioadmin")
+  ENABLE_RUSTFS=$(read_yaml_value "$config_file" ".components.rustfs.enabled" "true")
+  RUSTFS_ROOT_USER=$(read_yaml_value "$config_file" ".components.rustfs.root_user" "rustfsadmin")
+  RUSTFS_ROOT_PASSWORD=$(read_yaml_value "$config_file" ".components.rustfs.root_password" "rustfsadmin")
   
   ENABLE_COMFYUI=$(read_yaml_value "$config_file" ".components.comfyui.enabled" "true")
   COMFYUI_IMAGE=$(read_yaml_value "$config_file" ".components.comfyui.image" "")
@@ -492,10 +492,10 @@ load_configuration_from_file() {
   NEW_INSTALL=$(read_yaml_value "$config_file" ".deployment.new_install" "true")
   
   # Convert boolean strings for components
-  if [ "$ENABLE_MINIO" = "true" ] || [ "$ENABLE_MINIO" = "True" ]; then
-    ENABLE_MINIO="y"
+  if [ "$ENABLE_RUSTFS" = "true" ] || [ "$ENABLE_RUSTFS" = "True" ]; then
+    ENABLE_RUSTFS="y"
   else
-    ENABLE_MINIO="n"
+    ENABLE_RUSTFS="n"
   fi
   
   if [ "$ENABLE_COMFYUI" = "true" ] || [ "$ENABLE_COMFYUI" = "True" ]; then
@@ -548,8 +548,8 @@ validate_configuration_placeholders() {
     check_placeholder ".domains.public.openwebui" "OpenWebUI Public Domain"
     check_placeholder ".domains.public.n8n" "N8N Public Domain"
 
-    if [[ "$ENABLE_MINIO" == "y" || "$ENABLE_MINIO" == "Y" ]]; then
-      check_placeholder ".domains.public.minio" "MinIO Public Domain"
+    if [[ "$ENABLE_RUSTFS" == "y" || "$ENABLE_RUSTFS" == "Y" ]]; then
+      check_placeholder ".domains.public.rustfs" "RustFS Public Domain"
     fi
     if [[ "$ENABLE_COMFYUI" == "y" || "$ENABLE_COMFYUI" == "Y" ]]; then
       # Only validate if not empty (it's optional)
@@ -566,15 +566,15 @@ validate_configuration_placeholders() {
     check_placeholder ".domains.lan.openwebui" "OpenWebUI LAN Domain"
     check_placeholder ".domains.lan.n8n" "N8N LAN Domain"
 
-    if [[ "$ENABLE_MINIO" == "y" || "$ENABLE_MINIO" == "Y" ]]; then
-      check_placeholder ".domains.lan.minio" "MinIO LAN Domain"
+    if [[ "$ENABLE_RUSTFS" == "y" || "$ENABLE_RUSTFS" == "Y" ]]; then
+      check_placeholder ".domains.lan.rustfs" "RustFS LAN Domain"
     fi
   fi
 
-  # 4. MinIO Credentials Check (only if MinIO is active)
-  if [[ "$ENABLE_MINIO" == "y" || "$ENABLE_MINIO" == "Y" ]]; then
-    check_placeholder ".components.minio.root_user" "MinIO Root User"
-    check_placeholder ".components.minio.root_password" "MinIO Root Password"
+  # 4. RustFS Credentials Check (only if RustFS is active)
+  if [[ "$ENABLE_RUSTFS" == "y" || "$ENABLE_RUSTFS" == "Y" ]]; then
+    check_placeholder ".components.rustfs.root_user" "RustFS Root User"
+    check_placeholder ".components.rustfs.root_password" "RustFS Root Password"
   fi
 
   # 5. SMTP Check (only if SMTP is enabled)

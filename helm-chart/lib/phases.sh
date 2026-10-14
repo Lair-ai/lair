@@ -292,9 +292,9 @@ execute_infrastructure_setup_phase() {
     echo "   • ComfyUI: https://$COMFYUI_DOMAIN"
   fi
   
-  # Show MinIO and Ollama domains if enabled
-  if [[ "$MINIO_ENABLED" == true && "$ENABLE_MINIO" == "y" ]] && [ -n "$MINIO_DOMAIN" ] && [ "$MINIO_DOMAIN" != "" ]; then
-    echo "   • MinIO Storage: https://$MINIO_DOMAIN"
+  # Show RustFS and Ollama domains if enabled
+  if [[ "$RUSTFS_ENABLED" == true && "$ENABLE_RUSTFS" == "y" ]] && [ -n "$RUSTFS_DOMAIN" ] && [ "$RUSTFS_DOMAIN" != "" ]; then
+    echo "   • RustFS Storage: https://$RUSTFS_DOMAIN"
   fi
   if [ -n "$OLLAMA_DOMAIN" ] && [ "$OLLAMA_DOMAIN" != "" ]; then
     echo "   • Ollama API: https://$OLLAMA_DOMAIN"
@@ -373,8 +373,8 @@ execute_configuration_generation_phase() {
   if [ -z "$REDIS_STORAGE_GB" ] && [ -n "$REDIS_STORAGE_SIZE" ]; then
     REDIS_STORAGE_GB=$(echo "$REDIS_STORAGE_SIZE" | sed 's/Gi//')
   fi
-  if [ -z "$MINIO_STORAGE_GB" ] && [ -n "$MINIO_STORAGE_SIZE" ]; then
-    MINIO_STORAGE_GB=$(echo "$MINIO_STORAGE_SIZE" | sed 's/Gi//')
+  if [ -z "$RUSTFS_STORAGE_GB" ] && [ -n "$RUSTFS_STORAGE_SIZE" ]; then
+    RUSTFS_STORAGE_GB=$(echo "$RUSTFS_STORAGE_SIZE" | sed 's/Gi//')
   fi
   if [ -z "$COMFYUI_STORAGE_GB" ] && [ -n "$COMFYUI_STORAGE_SIZE" ]; then
     COMFYUI_STORAGE_GB=$(echo "$COMFYUI_STORAGE_SIZE" | sed 's/Gi//')
@@ -387,11 +387,11 @@ execute_configuration_generation_phase() {
   PG_STORAGE_GB=${PG_STORAGE_GB:-5}
   REDIS_STORAGE_GB=${REDIS_STORAGE_GB:-5}
   
-  # Only set MinIO storage if it's enabled
-  if [[ "$MINIO_ENABLED" == true && "$ENABLE_MINIO" == "y" ]]; then
-    MINIO_STORAGE_GB=${MINIO_STORAGE_GB:-20}
+  # Only set RustFS storage if it's enabled
+  if [[ "$RUSTFS_ENABLED" == true && "$ENABLE_RUSTFS" == "y" ]]; then
+    RUSTFS_STORAGE_GB=${RUSTFS_STORAGE_GB:-20}
   else
-    MINIO_STORAGE_GB=0
+    RUSTFS_STORAGE_GB=0
   fi
   
   # Only set ComfyUI storage if it's enabled
@@ -421,9 +421,9 @@ execute_configuration_generation_phase() {
   printf "%-20s %-12s %-12s %-12s %-12s %-12s\n" "PostgreSQL" "$(echo "scale=1; $CPU_POSTGRES_REQ/1000" | bc)" "$(echo "scale=1; $CPU_POSTGRES/1000" | bc)" "$(echo "scale=1; $MEM_POSTGRES_REQ/1024" | bc)G" "$(echo "scale=1; $MEM_POSTGRES/1024" | bc)G" "${PG_STORAGE_GB}G"
   printf "%-20s %-12s %-12s %-12s %-12s %-12s\n" "Redis" "$(echo "scale=1; $CPU_REDIS_REQ/1000" | bc)" "$(echo "scale=1; $CPU_REDIS/1000" | bc)" "$(echo "scale=1; $MEM_REDIS_REQ/1024" | bc)G" "$(echo "scale=1; $MEM_REDIS/1024" | bc)G" "${REDIS_STORAGE_GB}G"
   printf "%-20s %-12s %-12s %-12s %-12s %-12s\n" "Tika" "$(echo "scale=1; $CPU_TIKA_REQ/1000" | bc)" "$(echo "scale=1; $CPU_TIKA/1000" | bc)" "$(echo "scale=1; $MEM_TIKA_REQ/1024" | bc)G" "$(echo "scale=1; $MEM_TIKA/1024" | bc)G" "-"
-  # Only show MinIO if it's enabled
-  if [[ "$MINIO_ENABLED" == true && "$ENABLE_MINIO" == "y" ]]; then
-    printf "%-20s %-12s %-12s %-12s %-12s %-12s\n" "MinIO" "$(echo "scale=1; $CPU_MINIO_REQ/1000" | bc)" "$(echo "scale=1; $CPU_MINIO/1000" | bc)" "$(echo "scale=1; $MEM_MINIO_REQ/1024" | bc)G" "$(echo "scale=1; $MEM_MINIO/1024" | bc)G" "${MINIO_STORAGE_GB}G"
+  # Only show RustFS if it's enabled
+  if [[ "$RUSTFS_ENABLED" == true && "$ENABLE_RUSTFS" == "y" ]]; then
+    printf "%-20s %-12s %-12s %-12s %-12s %-12s\n" "RustFS" "$(echo "scale=1; $CPU_RUSTFS_REQ/1000" | bc)" "$(echo "scale=1; $CPU_RUSTFS/1000" | bc)" "$(echo "scale=1; $MEM_RUSTFS_REQ/1024" | bc)G" "$(echo "scale=1; $MEM_RUSTFS/1024" | bc)G" "${RUSTFS_STORAGE_GB}G"
   fi
   # Only show ComfyUI if it's enabled
   if [[ "$COMFYUI_ENABLED" == true && "$ENABLE_COMFYUI" == "y" ]]; then
@@ -456,8 +456,8 @@ execute_configuration_generation_phase() {
     if [[ "$COMFYUI_ENABLED" == true && "$ENABLE_COMFYUI" == "y" ]] && [ -n "$COMFYUI_DOMAIN_LAN" ] && [ "$COMFYUI_DOMAIN_LAN" != "" ]; then
       echo "      • ComfyUI: https://$COMFYUI_DOMAIN_LAN"
     fi
-    if [[ "$MINIO_ENABLED" == true && "$ENABLE_MINIO" == "y" ]] && [ -n "$MINIO_DOMAIN_LAN" ] && [ "$MINIO_DOMAIN_LAN" != "" ]; then
-      echo "      • MinIO Storage: https://$MINIO_DOMAIN_LAN"
+    if [[ "$RUSTFS_ENABLED" == true && "$ENABLE_RUSTFS" == "y" ]] && [ -n "$RUSTFS_DOMAIN_LAN" ] && [ "$RUSTFS_DOMAIN_LAN" != "" ]; then
+      echo "      • RustFS Storage: https://$RUSTFS_DOMAIN_LAN"
     fi
     if [ -n "$OLLAMA_DOMAIN_LAN" ] && [ "$OLLAMA_DOMAIN_LAN" != "" ]; then
       echo "      • Ollama API: https://$OLLAMA_DOMAIN_LAN"
@@ -475,8 +475,8 @@ execute_configuration_generation_phase() {
     if [[ "$COMFYUI_ENABLED" == true && "$ENABLE_COMFYUI" == "y" ]] && [ -n "$COMFYUI_DOMAIN_PUBLIC" ] && [ "$COMFYUI_DOMAIN_PUBLIC" != "" ]; then
       echo "      • ComfyUI: https://$COMFYUI_DOMAIN_PUBLIC"
     fi
-    if [[ "$MINIO_ENABLED" == true && "$ENABLE_MINIO" == "y" ]] && [ -n "$MINIO_DOMAIN_PUBLIC" ] && [ "$MINIO_DOMAIN_PUBLIC" != "" ]; then
-      echo "      • MinIO Storage: https://$MINIO_DOMAIN_PUBLIC"
+    if [[ "$RUSTFS_ENABLED" == true && "$ENABLE_RUSTFS" == "y" ]] && [ -n "$RUSTFS_DOMAIN_PUBLIC" ] && [ "$RUSTFS_DOMAIN_PUBLIC" != "" ]; then
+      echo "      • RustFS Storage: https://$RUSTFS_DOMAIN_PUBLIC"
     fi
     if [ -n "$OLLAMA_DOMAIN_PUBLIC" ] && [ "$OLLAMA_DOMAIN_PUBLIC" != "" ]; then
       echo "      • Ollama API: https://$OLLAMA_DOMAIN_PUBLIC"
@@ -494,8 +494,8 @@ execute_configuration_generation_phase() {
     if [ -n "$COMFYUI_DOMAIN" ] && [ "$COMFYUI_DOMAIN" != "" ]; then
       echo "      • ComfyUI: https://$COMFYUI_DOMAIN"
     fi
-    if [[ "$MINIO_ENABLED" == true && "$ENABLE_MINIO" == "y" ]] && [ -n "$MINIO_DOMAIN" ] && [ "$MINIO_DOMAIN" != "" ]; then
-      echo "      • MinIO Storage: https://$MINIO_DOMAIN"
+    if [[ "$RUSTFS_ENABLED" == true && "$ENABLE_RUSTFS" == "y" ]] && [ -n "$RUSTFS_DOMAIN" ] && [ "$RUSTFS_DOMAIN" != "" ]; then
+      echo "      • RustFS Storage: https://$RUSTFS_DOMAIN"
     fi
     if [ -n "$OLLAMA_DOMAIN" ] && [ "$OLLAMA_DOMAIN" != "" ]; then
       echo "      • Ollama API: https://$OLLAMA_DOMAIN"
@@ -509,9 +509,9 @@ execute_configuration_generation_phase() {
   if ([[ "$ENABLE_LAN_ACCESS" != "true" ]] || [[ -z "$COMFYUI_DOMAIN_LAN" || "$COMFYUI_DOMAIN_LAN" = "" ]]) && ([[ "$ENABLE_PUBLIC_ACCESS" != "true" ]] || [[ -z "$COMFYUI_DOMAIN_PUBLIC" || "$COMFYUI_DOMAIN_PUBLIC" = "" ]]) && ([[ -z "$COMFYUI_DOMAIN" || "$COMFYUI_DOMAIN" = "" ]]); then
     echo "      • ComfyUI: lair-comfyui.lair.svc.cluster.local:80"
   fi
-  if [[ "$MINIO_ENABLED" == true && "$ENABLE_MINIO" == "y" ]] && ([[ "$ENABLE_LAN_ACCESS" != "true" ]] || [[ -z "$MINIO_DOMAIN_LAN" || "$MINIO_DOMAIN_LAN" = "" ]]) && ([[ "$ENABLE_PUBLIC_ACCESS" != "true" ]] || [[ -z "$MINIO_DOMAIN_PUBLIC" || "$MINIO_DOMAIN_PUBLIC" = "" ]]) && ([[ -z "$MINIO_DOMAIN" || "$MINIO_DOMAIN" = "" ]]); then
-    echo "      • MinIO Console: lair-minio.lair.svc.cluster.local:80"
-    echo "      • MinIO S3 API: lair-minio.lair.svc.cluster.local:9000"
+  if [[ "$RUSTFS_ENABLED" == true && "$ENABLE_RUSTFS" == "y" ]] && ([[ "$ENABLE_LAN_ACCESS" != "true" ]] || [[ -z "$RUSTFS_DOMAIN_LAN" || "$RUSTFS_DOMAIN_LAN" = "" ]]) && ([[ "$ENABLE_PUBLIC_ACCESS" != "true" ]] || [[ -z "$RUSTFS_DOMAIN_PUBLIC" || "$RUSTFS_DOMAIN_PUBLIC" = "" ]]) && ([[ -z "$RUSTFS_DOMAIN" || "$RUSTFS_DOMAIN" = "" ]]); then
+    echo "      • RustFS Console: lair-rustfs.lair.svc.cluster.local:80"
+    echo "      • RustFS S3 API: lair-rustfs.lair.svc.cluster.local:9000"
   fi
   if ([[ "$ENABLE_LAN_ACCESS" != "true" ]] || [[ -z "$OLLAMA_DOMAIN_LAN" || "$OLLAMA_DOMAIN_LAN" = "" ]]) && ([[ "$ENABLE_PUBLIC_ACCESS" != "true" ]] || [[ -z "$OLLAMA_DOMAIN_PUBLIC" || "$OLLAMA_DOMAIN_PUBLIC" = "" ]]) && ([[ -z "$OLLAMA_DOMAIN" || "$OLLAMA_DOMAIN" = "" ]]); then
     echo "      • Ollama API: lair-ollama.lair.svc.cluster.local:11434"

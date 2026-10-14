@@ -81,7 +81,7 @@ Detailed documentation for each system component.
   - [N8N](components/applications/n8n.md) - Workflow Automation
   - [Ollama](components/applications/ollama.md) - LLM Serving Platform
   - [ComfyUI](components/applications/comfyui.md) - AI Image Generation
-  - [MinIO](components/applications/minio.md) - Object Storage
+  - [RustFS](components/applications/rustfs.md) - Object Storage
   - [Tika](components/services-overview.md) - Document Processing
   - [PostgreSQL](components/services-overview.md) - Database
   - [Redis](components/services-overview.md) - Cache & Queue

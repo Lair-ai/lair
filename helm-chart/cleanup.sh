@@ -453,14 +453,14 @@ verify_cleanup() {
   fi
   
   # Check PVCs
-  REMAINING_PVCS=$($KUBECTL_CMD get pvc -A --no-headers 2>/dev/null | grep -E "(lair|comfyui|ollama|minio|n8n|postgres|redis)" | wc -l)
+  REMAINING_PVCS=$($KUBECTL_CMD get pvc -A --no-headers 2>/dev/null | grep -E "(lair|comfyui|ollama|rustfs|n8n|postgres|redis)" | wc -l)
   if [ "$REMAINING_PVCS" -gt 0 ]; then
     echo -e "${YELLOW}⚠ Found $REMAINING_PVCS remaining PVCs related to Lair${NC}"
     return 1
   fi
   
   # Check PVs
-  REMAINING_PVS=$($KUBECTL_CMD get pv --no-headers 2>/dev/null | grep -E "(lair|comfyui|ollama|minio|n8n|postgres|redis)" | wc -l)
+  REMAINING_PVS=$($KUBECTL_CMD get pv --no-headers 2>/dev/null | grep -E "(lair|comfyui|ollama|rustfs|n8n|postgres|redis)" | wc -l)
   if [ "$REMAINING_PVS" -gt 0 ]; then
     echo -e "${YELLOW}⚠ Found $REMAINING_PVS remaining PVs related to Lair${NC}"
     return 1
@@ -468,7 +468,7 @@ verify_cleanup() {
   
   # Check Longhorn volumes
   if $KUBECTL_CMD get namespace longhorn-system &>/dev/null; then
-    REMAINING_VOLUMES=$($KUBECTL_CMD get volumes.longhorn.io -n longhorn-system --no-headers 2>/dev/null | grep -E "(lair|comfyui|ollama|minio|n8n|postgres|redis)" | wc -l)
+    REMAINING_VOLUMES=$($KUBECTL_CMD get volumes.longhorn.io -n longhorn-system --no-headers 2>/dev/null | grep -E "(lair|comfyui|ollama|rustfs|n8n|postgres|redis)" | wc -l)
     if [ "$REMAINING_VOLUMES" -gt 0 ]; then
       echo -e "${YELLOW}⚠ Found $REMAINING_VOLUMES remaining Longhorn volumes related to Lair${NC}"
       return 1
@@ -725,7 +725,7 @@ INGRESS_CHECK_NAMESPACES=("${GLOBAL_CERT_NAMESPACES[@]}")
 for ingress_ns in "${INGRESS_CHECK_NAMESPACES[@]}"; do
   if $KUBECTL_CMD get namespace "$ingress_ns" &>/dev/null; then
     # Look for ingress rules that might be related to Lair services
-    LAIR_INGRESS=$($KUBECTL_CMD get ingress -n "$ingress_ns" --no-headers 2>/dev/null | grep -E "(lair|openwebui|chat|n8n|comfyui|minio)" | awk '{print $1}' || echo "")
+    LAIR_INGRESS=$($KUBECTL_CMD get ingress -n "$ingress_ns" --no-headers 2>/dev/null | grep -E "(lair|openwebui|chat|n8n|comfyui|rustfs)" | awk '{print $1}' || echo "")
     if [ -n "$LAIR_INGRESS" ]; then
       echo -e "${YELLOW}Found Lair-related ingress resources in namespace $ingress_ns:${NC}"
       for ingress in $LAIR_INGRESS; do
@@ -771,7 +771,7 @@ if $KUBECTL_CMD get namespace cert-manager &>/dev/null; then
       echo -e "${BLUE}Checking namespace $cert_ns for Lair certificates...${NC}"
       
       # Look for certificates that might be related to Lair (containing common domain patterns)
-      LAIR_CERTS=$($KUBECTL_CMD get certificates -n "$cert_ns" --no-headers 2>/dev/null | grep -E "(lair|openwebui|chat|n8n|comfyui|minio)" | awk '{print $1}' || echo "")
+      LAIR_CERTS=$($KUBECTL_CMD get certificates -n "$cert_ns" --no-headers 2>/dev/null | grep -E "(lair|openwebui|chat|n8n|comfyui|rustfs)" | awk '{print $1}' || echo "")
       if [ -n "$LAIR_CERTS" ]; then
         echo -e "${YELLOW}Found Lair-related certificates in namespace $cert_ns:${NC}"
         for cert in $LAIR_CERTS; do
@@ -781,7 +781,7 @@ if $KUBECTL_CMD get namespace cert-manager &>/dev/null; then
       fi
       
       # Look for TLS secrets that might be related to Lair
-      LAIR_TLS_SECRETS=$($KUBECTL_CMD get secrets -n "$cert_ns" --no-headers 2>/dev/null | grep -E "(lair|openwebui|chat|n8n|comfyui|minio).*tls" | awk '{print $1}' || echo "")
+      LAIR_TLS_SECRETS=$($KUBECTL_CMD get secrets -n "$cert_ns" --no-headers 2>/dev/null | grep -E "(lair|openwebui|chat|n8n|comfyui|rustfs).*tls" | awk '{print $1}' || echo "")
       if [ -n "$LAIR_TLS_SECRETS" ]; then
         echo -e "${YELLOW}Found Lair-related TLS secrets in namespace $cert_ns:${NC}"
         for secret in $LAIR_TLS_SECRETS; do
@@ -796,7 +796,7 @@ if $KUBECTL_CMD get namespace cert-manager &>/dev/null; then
         echo -e "${YELLOW}Found generic TLS secrets in namespace $cert_ns:${NC}"
         for secret in $INGRESS_TLS_SECRETS; do
           # Check if this secret is related to Lair domains
-          SECRET_DOMAINS=$($KUBECTL_CMD get secret "$secret" -n "$cert_ns" -o jsonpath='{.data.tls\.crt}' 2>/dev/null | base64 -d 2>/dev/null | openssl x509 -text -noout 2>/dev/null | grep -E "(lair|openwebui|chat|n8n|comfyui|minio)" || echo "")
+          SECRET_DOMAINS=$($KUBECTL_CMD get secret "$secret" -n "$cert_ns" -o jsonpath='{.data.tls\.crt}' 2>/dev/null | base64 -d 2>/dev/null | openssl x509 -text -noout 2>/dev/null | grep -E "(lair|openwebui|chat|n8n|comfyui|rustfs)" || echo "")
           if [ -n "$SECRET_DOMAINS" ]; then
             echo "Deleting Lair-related TLS secret: $secret (namespace: $cert_ns)"
             $KUBECTL_CMD delete secret "$secret" -n "$cert_ns" --force --grace-period=0 2>/dev/null || true
@@ -873,7 +873,7 @@ if [[ "$CLEAN_LOCAL" == "y" || "$CLEAN_LOCAL" == "Y" ]]; then
     if [ -d "$path" ]; then
       echo "Checking $path for Lair data..."
       # Look for directories that might contain Lair data
-      LAIR_DIRS=$(find "$path" -type d -name "*lair*" -o -name "*comfyui*" -o -name "*ollama*" -o -name "*minio*" -o -name "*n8n*" -o -name "*postgres*" -o -name "*redis*" 2>/dev/null || echo "")
+      LAIR_DIRS=$(find "$path" -type d -name "*lair*" -o -name "*comfyui*" -o -name "*ollama*" -o -name "*rustfs*" -o -name "*n8n*" -o -name "*postgres*" -o -name "*redis*" 2>/dev/null || echo "")
       if [ -n "$LAIR_DIRS" ]; then
         echo -e "${YELLOW}Found potential Lair data directories:${NC}"
         echo "$LAIR_DIRS"
@@ -896,11 +896,11 @@ if [[ "$CLEAN_LOCAL" == "y" || "$CLEAN_LOCAL" == "Y" ]]; then
     OTHER_APPS_COUNT=0
     if $KUBECTL_CMD get namespace longhorn-system &>/dev/null; then
       # Count non-Lair volumes in Longhorn
-      OTHER_APPS_COUNT=$($KUBECTL_CMD get volumes.longhorn.io -n longhorn-system --no-headers 2>/dev/null | grep -v -E "(lair|comfyui|ollama|minio|n8n|postgres|redis)" | wc -l || echo "0")
+      OTHER_APPS_COUNT=$($KUBECTL_CMD get volumes.longhorn.io -n longhorn-system --no-headers 2>/dev/null | grep -v -E "(lair|comfyui|ollama|rustfs|n8n|postgres|redis)" | wc -l || echo "0")
     fi
     
     # Look for Lair-specific directories in Longhorn
-    LAIR_LONGHORN_DIRS=$(find "$LONGHORN_PATH" -type d -name "*lair*" -o -name "*comfyui*" -o -name "*ollama*" -o -name "*minio*" -o -name "*n8n*" -o -name "*postgres*" -o -name "*redis*" 2>/dev/null || echo "")
+    LAIR_LONGHORN_DIRS=$(find "$LONGHORN_PATH" -type d -name "*lair*" -o -name "*comfyui*" -o -name "*ollama*" -o -name "*rustfs*" -o -name "*n8n*" -o -name "*postgres*" -o -name "*redis*" 2>/dev/null || echo "")
     
     if [ -n "$LAIR_LONGHORN_DIRS" ]; then
       echo -e "${YELLOW}Found potential Lair data in Longhorn storage:${NC}"
@@ -958,7 +958,7 @@ if [[ "$CLEAN_IMAGES" == "y" || "$CLEAN_IMAGES" == "Y" ]]; then
     
     # Remove images related to Lair components
     echo "Removing Lair-related images..."
-    LAIR_IMAGES=$(microk8s ctr --namespace k8s.io images ls 2>/dev/null | grep -E "(comfyui|ollama|open-webui|n8n|minio|postgres|redis|tika)" | awk '{print $1}' || echo "")
+    LAIR_IMAGES=$(microk8s ctr --namespace k8s.io images ls 2>/dev/null | grep -E "(comfyui|ollama|open-webui|n8n|rustfs|postgres|redis|tika)" | awk '{print $1}' || echo "")
     if [ -n "$LAIR_IMAGES" ]; then
       echo "$LAIR_IMAGES" | xargs -r microk8s ctr --namespace k8s.io images rm 2>/dev/null || true
     fi
@@ -989,7 +989,7 @@ if [[ "$CLEAN_IMAGES" == "y" || "$CLEAN_IMAGES" == "Y" ]]; then
         echo -e "${YELLOW}crictl cleanup failed, trying alternative methods...${NC}"
         
         # Try removing specific Lair-related images
-        LAIR_IMAGES=$(crictl images --format table 2>/dev/null | grep -E "(comfyui|ollama|open-webui|n8n|minio|postgres|redis|tika)" | awk '{print $3}' || echo "")
+        LAIR_IMAGES=$(crictl images --format table 2>/dev/null | grep -E "(comfyui|ollama|open-webui|n8n|rustfs|postgres|redis|tika)" | awk '{print $3}' || echo "")
         if [ -n "$LAIR_IMAGES" ]; then
           echo "Removing Lair-related images..."
           echo "$LAIR_IMAGES" | xargs -r crictl rmi 2>/dev/null || true
@@ -1007,7 +1007,7 @@ if [[ "$CLEAN_IMAGES" == "y" || "$CLEAN_IMAGES" == "Y" ]]; then
     elif command -v ctr &>/dev/null; then
       echo "Removing unused images with containerd..."
       # Try to remove Lair-specific images
-      LAIR_IMAGES=$(ctr --namespace k8s.io images ls 2>/dev/null | grep -E "(comfyui|ollama|open-webui|n8n|minio|postgres|redis|tika)" | awk '{print $1}' || echo "")
+      LAIR_IMAGES=$(ctr --namespace k8s.io images ls 2>/dev/null | grep -E "(comfyui|ollama|open-webui|n8n|rustfs|postgres|redis|tika)" | awk '{print $1}' || echo "")
       if [ -n "$LAIR_IMAGES" ]; then
         echo "$LAIR_IMAGES" | xargs -r ctr --namespace k8s.io images rm 2>/dev/null || true
         echo -e "${GREEN}Lair-related images removed with containerd.${NC}"

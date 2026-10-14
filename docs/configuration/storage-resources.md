@@ -53,7 +53,7 @@ Effective resource management is crucial for optimal Lair performance. The syste
 | **N8N + Workers** | 10% | 15% | Low | Workflow automation |
 | **PostgreSQL** | 5% | 5% | High | Database persistence |
 | **Redis** | 3% | 3% | Low | Cache and queues |
-| **MinIO** | 7% | 7% | High | Object storage (optional) |
+| **RustFS** | 7% | 7% | High | Object storage (optional) |
 
 ---
 
@@ -119,7 +119,7 @@ calculate_cpu_allocation() {
     N8N_CPU=$(echo "scale=0; $usable_cpu * 0.10" | bc -l)
     POSTGRES_CPU=$(echo "scale=0; $usable_cpu * 0.05" | bc -l)
     REDIS_CPU=$(echo "scale=0; $usable_cpu * 0.03" | bc -l)
-    MINIO_CPU=$(echo "scale=0; $usable_cpu * 0.07" | bc -l)
+    RUSTFS_CPU=$(echo "scale=0; $usable_cpu * 0.07" | bc -l)
 }
 ```
 
@@ -137,7 +137,7 @@ calculate_memory_allocation() {
     N8N_MEMORY=$(echo "scale=0; $usable_memory_gb * 0.10 * 1024" | bc -l)
     POSTGRES_MEMORY=$(echo "scale=0; $usable_memory_gb * 0.05 * 1024" | bc -l)
     REDIS_MEMORY=$(echo "scale=0; $usable_memory_gb * 0.03 * 1024" | bc -l)
-    MINIO_MEMORY=$(echo "scale=0; $usable_memory_gb * 0.07 * 1024" | bc -l)
+    RUSTFS_MEMORY=$(echo "scale=0; $usable_memory_gb * 0.07 * 1024" | bc -l)
 }
 ```
 
@@ -155,7 +155,7 @@ calculate_storage_allocation() {
     N8N_STORAGE=$(echo "scale=0; $usable_storage_gb * 0.05" | bc -l)  # Workflows
     POSTGRES_STORAGE=$(echo "scale=0; $usable_storage_gb * 0.05" | bc -l)  # Database
     REDIS_STORAGE=$(echo "scale=0; $usable_storage_gb * 0.03" | bc -l)  # Cache
-    MINIO_STORAGE=$(echo "scale=0; $usable_storage_gb * 0.07" | bc -l)  # Objects
+    RUSTFS_STORAGE=$(echo "scale=0; $usable_storage_gb * 0.07" | bc -l)  # Objects
 }
 ```
 

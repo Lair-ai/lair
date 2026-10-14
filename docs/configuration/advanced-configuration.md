@@ -88,7 +88,7 @@ access:
       openwebui: "ai.aiplatform.local"
       n8n: "n8n.aiplatform.local"
       comfyui: "images.aiplatform.local"
-      minio: "storage.aiplatform.local"
+      rustfs: "storage.aiplatform.local"
   
   public:
     enabled: true
@@ -96,7 +96,7 @@ access:
       openwebui: "ai.company.com"
       n8n: "n8n.company.com"
       comfyui: "images.company.com"
-      minio: "storage.company.com"
+      rustfs: "storage.company.com"
 
 # Component-specific configurations
 components:
@@ -151,7 +151,7 @@ components:
     gpu_enabled: true
     image: "mmartial/comfyui-nvidia-docker:ubuntu24_cuda12.8-20260605"
   
-  minio:
+  rustfs:
     enabled: true
     storage_size: "500Gi"
     rootUser: "admin"
@@ -211,7 +211,7 @@ components:
     storage_size: "10Gi"
   comfyui:
     enabled: false  # Disabled in dev
-  minio:
+  rustfs:
     storage_size: "20Gi"
 
 backup:
@@ -251,7 +251,7 @@ components:
   comfyui:
     enabled: true
     storage_size: "200Gi"
-  minio:
+  rustfs:
     storage_size: "1000Gi"
 
 storage:
@@ -597,7 +597,7 @@ ingress:
       paths:
         - path: /
           pathType: Prefix
-          service: minio
+          service: rustfs
   
   # TLS configuration
   tls:

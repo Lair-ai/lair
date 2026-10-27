@@ -48,12 +48,16 @@ package_exists() {
 }
 
 # Verify that a package belongs to the main or universe component of an APT repository.
-# Uses apt-cache policy to find repository lines ending with "Packages" and having
-# a suite/component field ending with "/main" or "/universe".
+# apt-cache policy formats repository and release information differently across
+# apt versions, so check both the repository line and its release metadata. Fall
+# back to the package index Filename when policy output has no component details.
 # Returns 0 if found, 1 otherwise.
 package_in_main_or_universe() {
   local pkg="$1"
-  apt-cache policy "$pkg" 2>/dev/null | awk '
+  local policy
+  policy="$(apt-cache policy "$pkg" 2>/dev/null || true)"
+
+  if awk '
     $NF == "Packages" {
       for (i = 1; i <= NF; i++) {
         if ($i ~ /\/(main|universe)$/) {
@@ -62,6 +66,14 @@ package_in_main_or_universe() {
         }
       }
     }
+    /(^|[, ])c=(main|universe)([, ]|$)/ { found = 1; exit }
+    END { if (found) exit 0; else exit 1 }
+  ' <<< "$policy"; then
+    return 0
+  fi
+
+  apt-cache show "$pkg" 2>/dev/null | awk '
+    /^Filename: (.*\/)?pool\/(main|universe)\// { found = 1; exit }
     END { if (found) exit 0; else exit 1 }
   '
 }

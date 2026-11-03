@@ -958,7 +958,7 @@ if [[ "$CLEAN_IMAGES" == "y" || "$CLEAN_IMAGES" == "Y" ]]; then
     
     # Remove images related to Lair components
     echo "Removing Lair-related images..."
-    LAIR_IMAGES=$(microk8s ctr --namespace k8s.io images ls 2>/dev/null | grep -E "(comfyui|ollama|open-webui|n8n|minio|postgres|redis|tika)" | awk '{print $1}' || echo "")
+    LAIR_IMAGES=$(microk8s ctr --namespace k8s.io images ls 2>/dev/null | grep -E "(comfyui|ollama|open-webui|n8n|minio|silo|postgres|redis|tika)" | awk '{print $1}' || echo "")
     if [ -n "$LAIR_IMAGES" ]; then
       echo "$LAIR_IMAGES" | xargs -r microk8s ctr --namespace k8s.io images rm 2>/dev/null || true
     fi
@@ -989,7 +989,7 @@ if [[ "$CLEAN_IMAGES" == "y" || "$CLEAN_IMAGES" == "Y" ]]; then
         echo -e "${YELLOW}crictl cleanup failed, trying alternative methods...${NC}"
         
         # Try removing specific Lair-related images
-        LAIR_IMAGES=$(crictl images --format table 2>/dev/null | grep -E "(comfyui|ollama|open-webui|n8n|minio|postgres|redis|tika)" | awk '{print $3}' || echo "")
+        LAIR_IMAGES=$(crictl images --format table 2>/dev/null | grep -E "(comfyui|ollama|open-webui|n8n|minio|silo|postgres|redis|tika)" | awk '{print $3}' || echo "")
         if [ -n "$LAIR_IMAGES" ]; then
           echo "Removing Lair-related images..."
           echo "$LAIR_IMAGES" | xargs -r crictl rmi 2>/dev/null || true
@@ -1007,7 +1007,7 @@ if [[ "$CLEAN_IMAGES" == "y" || "$CLEAN_IMAGES" == "Y" ]]; then
     elif command -v ctr &>/dev/null; then
       echo "Removing unused images with containerd..."
       # Try to remove Lair-specific images
-      LAIR_IMAGES=$(ctr --namespace k8s.io images ls 2>/dev/null | grep -E "(comfyui|ollama|open-webui|n8n|minio|postgres|redis|tika)" | awk '{print $1}' || echo "")
+      LAIR_IMAGES=$(ctr --namespace k8s.io images ls 2>/dev/null | grep -E "(comfyui|ollama|open-webui|n8n|minio|silo|postgres|redis|tika)" | awk '{print $1}' || echo "")
       if [ -n "$LAIR_IMAGES" ]; then
         echo "$LAIR_IMAGES" | xargs -r ctr --namespace k8s.io images rm 2>/dev/null || true
         echo -e "${GREEN}Lair-related images removed with containerd.${NC}"

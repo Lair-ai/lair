@@ -337,11 +337,11 @@ redis:
 minio:
   enabled: true
   image:
-    repository: quay.io/minio/minio
-    tag: RELEASE.2025-09-07T16-13-09Z
+    repository: pgsty/silo
+    tag: RELEASE.2026-09-16T00-00-00Z
   mcImage:
-    repository: quay.io/minio/mc
-    tag: latest
+    repository: pgsty/mc
+    tag: RELEASE.2026-09-16T00-00-00Z
   # Root user credentials provide both administrative AND S3 API access
   # These are used for all MinIO operations (console, API, bucket management)
   rootUser: minioadmin

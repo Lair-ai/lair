@@ -613,8 +613,8 @@ EOF
 minio:
   enabled: true
   image:
-    repository: quay.io/minio/minio
-    tag: RELEASE.2025-09-07T16-13-09Z
+    repository: pgsty/silo
+    tag: RELEASE.2026-09-16T00-00-00Z
   rootUser: $MINIO_ROOT_USER
   rootPassword: $MINIO_ROOT_PASSWORD
   storage:

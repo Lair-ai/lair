@@ -40,7 +40,7 @@ spec:
         {{- if .Values.minio.enabled }}
         # Init container to create MinIO bucket for OpenWebUI
         - name: minio-bucket-setup
-          image: "{{ .Values.minio.mcImage.repository | default "quay.io/minio/mc" }}:{{ .Values.minio.mcImage.tag | default "latest" }}"
+          image: "{{ .Values.minio.mcImage.repository | default "pgsty/mc" }}:{{ .Values.minio.mcImage.tag | default "latest" }}"
           env:
             - name: MINIO_ENDPOINT
               value: "http://{{ .Values.namespace }}-minio.{{ .Values.namespace }}.svc.cluster.local:{{ .Values.minio.port }}"
@@ -110,6 +110,11 @@ spec:
                 secretKeyRef:
                   name: {{ .Values.openWebUI.auth.secretName }}
                   key: WEBUI_SECRET_KEY
+            # Cache optimization for models
+            - name: DEFAULT_MODEL_METADATA
+              value: '{"capabilities":{"file_context":false,"citations":false}}'
+            - name: ENABLE_MEMORY_SYSTEM_CONTEXT
+              value: "false"
             # RAG Configuration - Persistent
             - name: CONTENT_EXTRACTION_ENGINE
               value: "{{ .Values.openWebUI.rag.contentExtractionEngine | default "tika" }}"

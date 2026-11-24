@@ -175,6 +175,46 @@ handle_upgrade_conflicts() {
   return 0
 }
 
+# Post-deploy sanity check: warn when pods are stuck Pending because no node
+# can satisfy their CPU/memory requests (the classic over-allocation symptom).
+# This is a non-blocking warning: it never fails the deployment.
+check_pending_pods_sanity() {
+  local namespace=${1:-lair}
+
+  echo ""
+  echo "🔎 Post-deploy sanity check (pending pods due to resource constraints)..."
+  # Give the scheduler a moment to place/reject pods
+  sleep 15
+
+  local pending
+  # Columns: 1=NAME 2=READY 3=STATUS 4=RESTARTS 5=AGE
+  pending=$($KUBECTL_CMD get pods -n "$namespace" --no-headers 2>/dev/null | awk '$3=="Pending"{print $1}')
+  if [ -z "$pending" ]; then
+    echo -e "${GREEN}✅ No pending pods detected in namespace '$namespace'${NC}"
+    return 0
+  fi
+
+  echo -e "${YELLOW}⚠️  Pending pods detected in namespace '$namespace':${NC}"
+  local problem=0 pod reason
+  for pod in $pending; do
+    reason=$($KUBECTL_CMD describe pod "$pod" -n "$namespace" 2>/dev/null | grep -Ei "Insufficient (cpu|memory)" | head -3)
+    if [ -n "$reason" ]; then
+      problem=1
+      echo "   • $pod:"
+      echo "$reason" | sed 's/^/       /'
+    fi
+  done
+
+  if [ "$problem" -eq 1 ]; then
+    echo -e "${YELLOW}⚠️  These pods cannot fit on any node with their requested CPU/memory.${NC}"
+    echo "   Remedy: use larger nodes (sizing is per-node, adding nodes does not help a single pod),"
+    echo "   or re-run the setup to regenerate lower requests."
+  else
+    echo -e "${BLUE}ℹ️  Pending pods are not caused by resource constraints; check: $KUBECTL_CMD describe pod -n $namespace${NC}"
+  fi
+  return 0
+}
+
 # Proper implementation of run_helm_with_fallback
 run_helm_with_fallback() { 
   local cmd=$1
@@ -203,6 +243,7 @@ run_helm_with_fallback() {
   # Execute the command
   if $helm_cmd; then
     echo -e "${GREEN}✅ Helm deployment completed successfully${NC}"
+    check_pending_pods_sanity "$namespace"
     return 0
   else
     echo -e "${RED}❌ Helm deployment failed${NC}"
@@ -245,6 +286,7 @@ run_helm_with_fallback() {
         
         if $install_cmd; then
           echo -e "${GREEN}✅ Fresh installation completed successfully${NC}"
+          check_pending_pods_sanity "$namespace"
           return 0
         else
           echo -e "${RED}❌ Fresh installation also failed${NC}"

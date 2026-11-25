@@ -120,7 +120,7 @@ spec:
     spec:
       containers:
       - name: minio
-        image: quay.io/minio/minio:RELEASE.2025-09-07T16-13-09Z
+        image: pgsty/silo:RELEASE.2026-09-16T00-00-00Z
         args:
         - server
         - /data

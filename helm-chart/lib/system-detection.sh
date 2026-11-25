@@ -347,6 +347,8 @@ detect_system_resources() {
       # Get total allocatable resources
       ALLOCATABLE_CPU=0
       ALLOCATABLE_MEMORY_KI=0
+      MIN_NODE_CPU=""
+      MIN_NODE_MEMORY_KI=""
       
       # Use a loop to process each node and handle units correctly
       for node in $($KUBECTL_CMD get nodes -o name); do
@@ -360,6 +362,10 @@ detect_system_resources() {
           node_cpu_decimal=${node_cpu}
         fi
         ALLOCATABLE_CPU=$(echo "${ALLOCATABLE_CPU} + ${node_cpu_decimal}" | bc)
+        # Track the smallest node (per-node sizing reference)
+        if [ -z "$MIN_NODE_CPU" ] || [ "$(echo "${node_cpu_decimal} < ${MIN_NODE_CPU}" | bc)" -eq 1 ]; then
+          MIN_NODE_CPU=${node_cpu_decimal}
+        fi
         
         # Get allocatable memory for this node
         node_memory=$($KUBECTL_CMD get ${node} -o jsonpath='{.status.allocatable.memory}')
@@ -377,11 +383,27 @@ detect_system_resources() {
         esac
         
         ALLOCATABLE_MEMORY_KI=$((ALLOCATABLE_MEMORY_KI + node_memory_ki))
+        # Track the smallest node (per-node sizing reference)
+        if [ -z "$MIN_NODE_MEMORY_KI" ] || [ "$node_memory_ki" -lt "$MIN_NODE_MEMORY_KI" ]; then
+          MIN_NODE_MEMORY_KI=${node_memory_ki}
+        fi
       done
       
       # Store total allocatable values
       TOTAL_ALLOCATABLE_CPU=${ALLOCATABLE_CPU}
       TOTAL_ALLOCATABLE_MEMORY_KI=${ALLOCATABLE_MEMORY_KI}
+
+      # Store smallest-node values (per-node sizing reference).
+      # Fall back to the cluster totals if a node could not be read.
+      if [ -z "$MIN_NODE_CPU" ]; then
+        MIN_NODE_CPU=${ALLOCATABLE_CPU}
+      fi
+      if [ -z "$MIN_NODE_MEMORY_KI" ]; then
+        MIN_NODE_MEMORY_KI=${ALLOCATABLE_MEMORY_KI}
+      fi
+      MIN_NODE_MEMORY_MB=$((MIN_NODE_MEMORY_KI / 1024))
+      export MIN_NODE_CPU MIN_NODE_MEMORY_MB
+      echo -e "${BLUE}Smallest node (per-node reference): ${MIN_NODE_CPU} CPU, $(echo "scale=1; $MIN_NODE_MEMORY_MB/1024" | bc) GB RAM${NC}"
       
       # Get resources already used by all running pods (simplified version)
       echo -e "${BLUE}Calculating resources currently used by running pods...${NC}"
@@ -427,11 +449,17 @@ detect_system_resources() {
       echo -e "${GREEN}Total allocatable resources in cluster: ${ALLOCATABLE_CPU} CPU, ${ALLOC_MEMORY_GB} GB RAM${NC}"
       echo -e "${GREEN}Actually available resources: ${AVAILABLE_CPU} CPU, ${AVAIL_MEMORY_GB} GB RAM${NC}"
       
-      # Use 80% of available resources for the application
-      K8S_CPU=$(echo "scale=1; $TOTAL_CPU * 0.8" | bc) 
-      K8S_MEMORY_MB=$(echo "scale=0; $TOTAL_MEMORY_MB * 0.8" | bc | awk '{print int($1)}')
+      # Use 80% of the SMALLEST node's resources for the application.
+      # Pods are scheduled one per node, so per-node capacity is the binding
+      # constraint. Sizing from the cluster total (sum over all nodes) used to
+      # over-allocate each node, leaving pods in Pending state.
+      K8S_CPU=$(echo "scale=1; $MIN_NODE_CPU * 0.8" | bc)
+      K8S_MEMORY_MB=$(echo "scale=0; $MIN_NODE_MEMORY_MB * 0.8" | bc | awk '{print int($1)}')
       K8S_MEMORY_GB=$(echo "scale=1; $K8S_MEMORY_MB/1024" | bc)
-      echo -e "${BLUE}Available resources for application (80% of cluster available): $K8S_CPU CPU, $K8S_MEMORY_GB GB RAM${NC}"
+      echo -e "${BLUE}Available resources for application (80% of the smallest node: ${MIN_NODE_CPU} CPU, $(echo "scale=1; $MIN_NODE_MEMORY_MB/1024" | bc) GB RAM): $K8S_CPU CPU, $K8S_MEMORY_GB GB RAM${NC}"
+      if [ "$NODES_COUNT" -gt 1 ] 2>/dev/null; then
+        echo -e "${YELLOW}Note: cluster total (${ALLOCATABLE_CPU} CPU, ${ALLOC_MEMORY_GB} GB RAM) shown for information only; sizing uses the smallest node so every pod fits on any node.${NC}"
+      fi
     fi
   fi
   

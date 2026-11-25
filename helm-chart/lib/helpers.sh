@@ -336,6 +336,58 @@ prompt_and_calculate_resource_allocations() {
   [[ $CPU_N8N_WORKER_REQ -lt $MIN_CPU_REQ ]] && CPU_N8N_WORKER_REQ=$MIN_CPU_REQ
   [[ $MEM_N8N_WORKER_REQ -lt $MIN_MEM_REQ ]] && MEM_N8N_WORKER_REQ=$MIN_MEM_REQ
 
+  # ── Defensive per-node cap ─────────────────────────────────────────────
+  # A single pod must fit on the smallest cluster node: cap each component's
+  # request at 50% and limit at 100% of that node's allocatable CPU/RAM.
+  # This guards against detection paths or configs that produce per-pod
+  # values larger than a single node (e.g. a cluster-wide budget multiplied
+  # by the node count), which leaves pods in Pending state.
+  if [ -n "${MIN_NODE_CPU:-}" ] && [ -n "${MIN_NODE_MEMORY_MB:-}" ] \
+     && [ "$(echo "${MIN_NODE_CPU} > 0" | bc)" -eq 1 ] \
+     && [ "$MIN_NODE_MEMORY_MB" -gt 0 ] 2>/dev/null; then
+    CPU_REQ_CAP=$(echo "$MIN_NODE_CPU * 500" | bc | awk '{print int($1)}')
+    CPU_LIMIT_CAP=$(echo "$MIN_NODE_CPU * 1000" | bc | awk '{print int($1)}')
+    MEM_REQ_CAP=$((MIN_NODE_MEMORY_MB / 2))
+    MEM_LIMIT_CAP=$MIN_NODE_MEMORY_MB
+
+    _apply_node_cap() {
+      # $1=component name, then the CPU/MEM request/limit variable names
+      local name=$1 old
+      local cpu_req_var=$2 cpu_limit_var=$3 mem_req_var=$4 mem_limit_var=$5
+      local cpu_req=$cpu_req_var cpu_limit=$cpu_limit_var mem_req=$mem_req_var mem_limit=$mem_limit_var
+      local capped=0
+      old=$(eval echo \$$cpu_req)
+      [[ $old -gt $CPU_REQ_CAP ]] && { eval "$cpu_req=$CPU_REQ_CAP"; capped=1; }
+      old=$(eval echo \$$cpu_limit)
+      [[ $old -gt $CPU_LIMIT_CAP ]] && { eval "$cpu_limit=$CPU_LIMIT_CAP"; capped=1; }
+      old=$(eval echo \$$mem_req)
+      [[ $old -gt $MEM_REQ_CAP ]] && { eval "$mem_req=$MEM_REQ_CAP"; capped=1; }
+      old=$(eval echo \$$mem_limit)
+      [[ $old -gt $MEM_LIMIT_CAP ]] && { eval "$mem_limit=$MEM_LIMIT_CAP"; capped=1; }
+      if [[ $capped -eq 1 ]]; then
+        echo "   ⚠️  ${name}: values capped to fit the smallest node (request ≤ ${CPU_REQ_CAP}m CPU / ${MEM_REQ_CAP}Mi, limit ≤ ${CPU_LIMIT_CAP}m CPU / ${MEM_LIMIT_CAP}Mi)"
+      fi
+    }
+
+    echo ""
+    echo "🛡️  Applying per-node cap (smallest node: ${MIN_NODE_CPU} CPU, $(echo "scale=1; $MIN_NODE_MEMORY_MB/1024" | bc) GB RAM)..."
+    _apply_node_cap "OpenWebUI"  CPU_OPENWEBUI_REQ  CPU_OPENWEBUI  MEM_OPENWEBUI_REQ  MEM_OPENWEBUI
+    _apply_node_cap "Ollama"     CPU_OLLAMA_REQ     CPU_OLLAMA     MEM_OLLAMA_REQ     MEM_OLLAMA
+    _apply_node_cap "N8N"        CPU_N8N_REQ        CPU_N8N        MEM_N8N_REQ        MEM_N8N
+    _apply_node_cap "N8N Worker" CPU_N8N_WORKER_REQ CPU_N8N_WORKER MEM_N8N_WORKER_REQ MEM_N8N_WORKER
+    _apply_node_cap "PostgreSQL" CPU_POSTGRES_REQ   CPU_POSTGRES   MEM_POSTGRES_REQ   MEM_POSTGRES
+    _apply_node_cap "Redis"      CPU_REDIS_REQ      CPU_REDIS      MEM_REDIS_REQ      MEM_REDIS
+    _apply_node_cap "MinIO"      CPU_MINIO_REQ      CPU_MINIO      MEM_MINIO_REQ      MEM_MINIO
+    _apply_node_cap "ComfyUI"    CPU_COMFYUI_REQ    CPU_COMFYUI    MEM_COMFYUI_REQ    MEM_COMFYUI
+
+    # If capping dropped a value below its component minimum, the smallest
+    # node is too small for a full deployment. The cap still wins (a pod
+    # that cannot be scheduled is worse than one that runs below optimum).
+    if [[ $CPU_OLLAMA_REQ -lt $MIN_CPU_OLLAMA ]]; then
+      echo "   ⚠️  Warning: capped Ollama request (${CPU_OLLAMA_REQ}m) is below the recommended minimum (${MIN_CPU_OLLAMA}m). The smallest node (${MIN_NODE_CPU} CPU) is likely too small for the full Lair stack — pods will schedule, but performance may be limited."
+    fi
+  fi
+
   echo ""
   echo "✅ Resource calculation completed with intelligent overcommit strategy:"
   echo "   📊 Requests: Distributed based on component percentages (guaranteed resources)"

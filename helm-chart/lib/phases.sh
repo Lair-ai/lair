@@ -317,6 +317,18 @@ execute_infrastructure_setup_phase() {
   # Start building config file with basic infrastructure
   echo "# values-${CONFIG_NAME}.yaml" > $CONFIG_FILE
   chmod 600 "$CONFIG_FILE"
+
+  # Longhorn kubelet root depends on the target cluster: local MicroK8s hosts
+  # use the snap path (the local directory exists); otherwise fall back to the
+  # helm client in use (microk8s helm3 => snap path, standard => /var/lib/kubelet).
+  if [ -d "/var/snap/microk8s/common/var/lib/kubelet" ]; then
+    KUBELET_ROOT_DIR="/var/snap/microk8s/common/var/lib/kubelet"
+  else
+    case "${HELM_CMD:-helm}" in
+      *microk8s*) KUBELET_ROOT_DIR="/var/snap/microk8s/common/var/lib/kubelet" ;;
+      *)          KUBELET_ROOT_DIR="/var/lib/kubelet" ;;
+    esac
+  fi
   cat <<-EOF >> $CONFIG_FILE
 namespace: $NAMESPACE
 
@@ -326,7 +338,7 @@ global:
   platform: "$PLATFORM_TYPE"
 
 longhorn:
-  kubeletRootDir: "/var/snap/microk8s/common/var/lib/kubelet"
+  kubeletRootDir: "$KUBELET_ROOT_DIR"
   numberOfReplicas: $LONGHORN_REPLICAS_COUNT  # Auto-calculated based on cluster nodes ($NODES_COUNT nodes detected)
 
 EOF

@@ -15,7 +15,10 @@ createStorageClass: true
 createNamespace: true
 
 longhorn:
-  kubeletRootDir: "/var/snap/microk8s/common/var/lib/kubelet"
+  # Standard kubelet path. For a local MicroK8s cluster the generated
+  # configuration overrides this with the snap path
+  # (/var/snap/microk8s/common/var/lib/kubelet).
+  kubeletRootDir: "/var/lib/kubelet"
   numberOfReplicas: 1 # Number of replicas for data redundancy (automatically calculated based on cluster nodes)
 
 certManager:

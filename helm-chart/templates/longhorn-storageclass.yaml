@@ -22,7 +22,7 @@ parameters:
   unmapMarkSnapChainRemoved: "ignored" # Ignore snapshot chain removal
   fromBackup: ""                       # Preset for backup, empty for standard use
   dataEngine: "v1"                     # Data management engine
-  kubeletRootDir: {{ .Values.longhorn.kubeletRootDir | default "/var/snap/microk8s/common/var/lib/kubelet" | quote }} # Correct path for microk8s
+  kubeletRootDir: {{ .Values.longhorn.kubeletRootDir | default "/var/lib/kubelet" | quote }} # Standard path; MicroK8s target overrides via values
 provisioner: driver.longhorn.io        # Longhorn provisioner
 reclaimPolicy: Delete                  # Delete volume on PVC release
 volumeBindingMode: Immediate           # Immediate volume binding to PVC
@@ -46,7 +46,7 @@ parameters:
   fsType: "ext4"
   nfsOptions: "vers=4.1"
   fromBackup: ""
-  kubeletRootDir: {{ .Values.longhorn.kubeletRootDir | default "/var/snap/microk8s/common/var/lib/kubelet" | quote }} # Percorso corretto per microk8s
+  kubeletRootDir: {{ .Values.longhorn.kubeletRootDir | default "/var/lib/kubelet" | quote }} # Percorso standard; su MicroK8s la config generata lo sovrascrive
 provisioner: driver.longhorn.io
 reclaimPolicy: Delete
 volumeBindingMode: Immediate 
